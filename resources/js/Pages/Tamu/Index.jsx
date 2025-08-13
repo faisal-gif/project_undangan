@@ -78,6 +78,12 @@ function Index({ tamus, filters }) {
                                 >
                                     Tambah Tamu
                                 </Link>
+                                <button
+                                    onClick={() => router.reload({ only: ['tamus'] })}
+                                    className="btn btn-primary"
+                                >
+                                    Refresh
+                                </button>
                             </div>
                             <form
                                 onSubmit={handleSearch}
