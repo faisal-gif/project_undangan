@@ -5,8 +5,10 @@ import React from "react";
 function Edit({ tamu }) {
     const { data, setData, put, processing, errors } = useForm({
         nama: tamu.nama || "",
+        lembaga: tamu.lembaga || "",
         alamat: tamu.alamat || "",
-        status: tamu.status || "Hadir",
+        pic: tamu.pc || "",
+        status: tamu.status || "not_attend",
     });
 
     const handleSubmit = (e) => {
@@ -25,28 +27,77 @@ function Edit({ tamu }) {
                                 Edit Tamu
                             </h1>
                             <form onSubmit={handleSubmit}>
+                                <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div className="flex flex-col w-full">
+                                        <label
+                                            htmlFor="nama"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Nama
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="nama"
+                                            value={data.nama}
+                                            onChange={(e) =>
+                                                setData("nama", e.target.value)
+                                            }
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        {errors.nama && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.nama}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <label
+                                            htmlFor="lembaga"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Lembaga
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="lembaga"
+                                            value={data.lembaga}
+                                            onChange={(e) =>
+                                                setData("lembaga", e.target.value)
+                                            }
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        {errors.lembaga && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.lembaga}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                </div>
+
                                 <div className="mb-4">
                                     <label
-                                        htmlFor="nama"
+                                        htmlFor="pic"
                                         className="block text-sm font-medium text-gray-700"
                                     >
-                                        Nama
+                                        PIC
                                     </label>
                                     <input
                                         type="text"
-                                        id="nama"
-                                        value={data.nama}
+                                        id="pic"
+                                        value={data.pic}
                                         onChange={(e) =>
-                                            setData("nama", e.target.value)
+                                            setData("pic", e.target.value)
                                         }
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        className="mt-2 input input-bordered w-full max-w-xs"
                                     />
-                                    {errors.nama && (
+                                    {errors.pic && (
                                         <p className="text-red-500 text-xs mt-1">
-                                            {errors.nama}
+                                            {errors.pic}
                                         </p>
                                     )}
                                 </div>
+
                                 <div className="mb-4">
                                     <label
                                         htmlFor="alamat"
@@ -60,7 +111,7 @@ function Edit({ tamu }) {
                                         onChange={(e) =>
                                             setData("alamat", e.target.value)
                                         }
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        className="mt-1 textarea textarea-bordered w-full"
                                     ></textarea>
                                     {errors.alamat && (
                                         <p className="text-red-500 text-xs mt-1">
@@ -68,35 +119,8 @@ function Edit({ tamu }) {
                                         </p>
                                     )}
                                 </div>
-                                <div className="mb-4">
-                                    <label
-                                        htmlFor="status"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        Status
-                                    </label>
-                                    <select
-                                        id="status"
-                                        value={data.status}
-                                        onChange={(e) =>
-                                            setData("status", e.target.value)
-                                        }
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    >
-                                        <option value="Hadir">Hadir</option>
-                                        <option value="Tidak Hadir">
-                                            Tidak Hadir
-                                        </option>
-                                        <option value="Menunggu Konfirmasi">
-                                            Menunggu Konfirmasi
-                                        </option>
-                                    </select>
-                                    {errors.status && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.status}
-                                        </p>
-                                    )}
-                                </div>
+
+
                                 <div className="flex items-center justify-end">
                                     <button
                                         type="submit"

@@ -53,7 +53,8 @@ class TamuController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'status' => 'required|string|in:Hadir,Tidak Hadir,Menunggu Konfirmasi',
+            'lembaga' => 'required|string|max:255',
+            'pic' => 'required|string|max:255',
         ]);
 
         Tamu::create($request->all());
@@ -84,13 +85,20 @@ class TamuController extends Controller
      */
     public function update(Request $request, Tamu $tamu)
     {
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'status' => 'required|string|in:Hadir,Tidak Hadir,Menunggu Konfirmasi',
+            'lembaga' => 'required|string|max:255',
+            'pic' => 'required|string|max:255',
         ]);
 
-        $tamu->update($request->all());
+        $tamu->update([
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'lembaga' => $request->lembaga,
+            'pc' => $request->pic,
+        ]);
 
         return redirect()->route('tamu.index')->with('success', 'Tamu berhasil diperbarui.');
     }
