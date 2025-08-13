@@ -13,7 +13,7 @@ export default function AuthenticatedLayout({ header, children }) {
     return (
         <div className="drawer lg:drawer-open bg-base-300">
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col">
+            <div className="drawer-content overflow-x-auto">
 
                 <div className="navbar bg-gradient-to-br from-blue-50 to-green-50 shadow-sm ">
                     <div className="hidden md:flex-none">
@@ -60,7 +60,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         </Dropdown>
                     </div>
                 </div>
-                <main>{children}</main>
+                <main className=''>{children}</main>
             </div>
             <div className="drawer-side">
                 <label htmlFor="my-drawer-3" aria-label="close sidebar" className="drawer-overlay"></label>

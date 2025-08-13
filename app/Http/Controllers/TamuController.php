@@ -13,6 +13,24 @@ use Illuminate\Validation\ValidationException;
 
 class TamuController extends Controller
 {
+
+    public function generateQrCode($id)
+    {
+        $tamu = Tamu::find($id);
+
+        // Generate QR Code (misalnya berdasarkan ID atau kode unik)
+        $qrCodeContent = $tamu->id; // atau $request->ticket_code
+        $qrImage = QrCode::format('png')->size(300)->generate($qrCodeContent);
+
+        // Simpan QR code ke storage
+        $path = "qrcodes/{$tamu->id}.png";
+        Storage::disk('public')->put($path, $qrImage);
+
+        // Simpan path QR di database
+        $tamu->qrcode = $path;
+        $tamu->save();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -30,6 +48,8 @@ class TamuController extends Controller
                 $tamu->nama_utama = !empty($tamu->nama) ? $tamu->nama : $tamu->lembaga;
                 return $tamu;
             });
+
+
 
         return Inertia::render('Tamu/Index', [
             'tamus' => $tamus,
@@ -57,12 +77,14 @@ class TamuController extends Controller
             'pic' => 'nullable|string|max:255',
         ]);
 
-        Tamu::create([
+        $tamu = Tamu::create([
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
             'pc' => $request->pic,
         ]);
+
+        $this->generateQrCode($tamu->id);
 
         return redirect()->route('tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
@@ -146,22 +168,7 @@ class TamuController extends Controller
         return $pdf->download('undangan-' . $slugNama . '.pdf');
     }
 
-    public function generateQrCode($id)
-    {
-        $tamu = Tamu::find($id);
 
-        // Generate QR Code (misalnya berdasarkan ID atau kode unik)
-        $qrCodeContent = $tamu->id; // atau $request->ticket_code
-        $qrImage = QrCode::format('png')->size(300)->generate($qrCodeContent);
-
-        // Simpan QR code ke storage
-        $path = "qrcodes/{$tamu->id}.png";
-        Storage::disk('public')->put($path, $qrImage);
-
-        // Simpan path QR di database
-        $tamu->qrcode = $path;
-        $tamu->save();
-    }
 
     public function loopQr()
     {
