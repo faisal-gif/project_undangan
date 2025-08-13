@@ -51,13 +51,18 @@ class TamuController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'alamat' => 'required|string|max:255',
-            'lembaga' => 'required|string|max:255',
-            'pic' => 'required|string|max:255',
+            'nama' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string|max:255',
+            'lembaga' => 'nullable|string|max:255',
+            'pic' => 'nullable|string|max:255',
         ]);
 
-        Tamu::create($request->all());
+        Tamu::create([
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'lembaga' => $request->lembaga,
+            'pc' => $request->pic,
+        ]);
 
         return redirect()->route('tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
@@ -87,10 +92,10 @@ class TamuController extends Controller
     {
 
         $request->validate([
-            'nama' => 'required|string|max:255',
-            'alamat' => 'required|string|max:255',
-            'lembaga' => 'required|string|max:255',
-            'pic' => 'required|string|max:255',
+            'nama' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string|max:255',
+            'lembaga' => 'nullable|string|max:255',
+            'pic' => 'nullable|string|max:255',
         ]);
 
         $tamu->update([

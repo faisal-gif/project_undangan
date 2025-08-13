@@ -72,18 +72,21 @@ function Index({ tamus, filters }) {
                                 <h1 className="text-2xl font-bold">
                                     Daftar Tamu
                                 </h1>
-                                <Link
-                                    href={route("tamu.create")}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                                >
-                                    Tambah Tamu
-                                </Link>
-                                <button
-                                    onClick={() => router.reload({ only: ['tamus'] })}
-                                    className="btn btn-primary"
-                                >
-                                    Refresh
-                                </button>
+                                <div className="flex flex-row gap-4">
+                                    <Link
+                                        href={route("tamu.create")}
+                                        className="btn btn-neutral btn-sm"
+                                    >
+                                        Tambah Tamu
+                                    </Link>
+                                    <button
+                                        onClick={() => router.reload({ only: ['tamus'] })}
+                                        className="btn btn-primary btn-sm"
+                                    >
+                                        Refresh
+                                    </button>
+                                </div>
+
                             </div>
                             <form
                                 onSubmit={handleSearch}
@@ -115,7 +118,7 @@ function Index({ tamus, filters }) {
                                                 Nama
                                             </th>
                                             <th className="py-2 px-4 border-b">
-                                                Alamat
+                                                Lembaga
                                             </th>
                                             <th className="py-2 px-4 border-b">
                                                 PIC
@@ -135,10 +138,10 @@ function Index({ tamus, filters }) {
                                                     {tamu.id}
                                                 </td>
                                                 <td className="py-2 px-4 border-b">
-                                                    {tamu.nama_utama}
+                                                    {tamu.nama}
                                                 </td>
                                                 <td className="py-2 px-4 border-b">
-                                                    {tamu.alamat}
+                                                    {tamu.lembaga}
                                                 </td>
                                                 <td className="py-2 px-4 border-b">
                                                     {tamu.pc}
