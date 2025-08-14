@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pdf/{id}', [TamuController::class, 'generatePdf'])->name('pdf');
     Route::get('/qrScanner', [TamuController::class, 'qrScanner'])->name('qrScanner');
     Route::post('/qr/validate', [TamuController::class, 'qrValidate'])->name('qrValidate');
+    Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

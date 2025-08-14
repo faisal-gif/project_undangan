@@ -4,15 +4,33 @@ import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react'
 import Swal from 'sweetalert2';
 
-function Index() {
+function Index({ tamus }) {
     const [isScanning, setIsScanning] = useState(false);
 
-    const handleScan =  async (data) => {
+
+    const handleScan = async (data) => {
         setIsScanning(false); // sembunyikan scanner
+
+        // Ambil data tamu dari endpoint /tamu/data/{id}
+        let nama = '', lembaga = '';
+        try {
+            const response = await fetch(route('tamu.data', data));
+            const result = await response.json();
+            nama = result.nama || '';
+            lembaga = result.lembaga || '';
+        } catch (error) {
+            await Swal.fire({
+                icon: "error",
+                title: "Gagal mengambil data tamu",
+                text: error.message || "Terjadi kesalahan.",
+            });
+            return;
+        }
 
         // Munculkan modal untuk input nomor HP
         const { value: phone } = await Swal.fire({
-            title: "Masukkan Nomor HP",
+            html: `${nama || '-'}<br/> ${lembaga || '-'}`,
+            title: "Selamat Datang",
             input: "tel",
             inputLabel: "Nomor HP",
             inputPlaceholder: "08xxxxxxxxxx",
@@ -58,11 +76,23 @@ function Index() {
             }
         });
     };
+
+    const getStatusBadge = (status) => {
+        if (status === "attend") {
+            return <span className="badge badge-success">Attend</span>;
+        }
+        if (status === "not_attend") {
+            return <span className="badge badge-warning text-xs">Not Attend</span>;
+        }
+        return <span className="badge">{status}</span>;
+    };
+
+
     return (
         <AuthenticatedLayout>
             <Head title="Qr Scanner" />
             <div className="container mx-auto px-4 py-8">
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-3xl mx-auto space-y-4">
                     {/* Ticket Card */}
                     <div className="card bg-base-100 shadow-2xl border">
                         <div className="card-body">
@@ -83,6 +113,49 @@ function Index() {
                             </div>
                         )}
 
+                    </div>
+
+                    <div className='card bg-base-100 shadow-2xl border'>
+                        <div className="overflow-x-auto">
+
+                            <table className="table table-zebra">
+                                <thead>
+                                    <tr>
+                                        <th className="py-2 px-4 border-b">
+                                            ID
+                                        </th>
+                                        <th className="py-2 px-4 border-b">
+                                            Nama
+                                        </th>
+                                        <th className="py-2 px-4 border-b">
+                                            Lembaga
+                                        </th>
+                                        <th className="py-2 px-4 border-b">
+                                            Status
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tamus.map((tamu) => (
+                                        <tr key={tamu.id}>
+                                            <td className="py-2 px-4 border-b text-center">
+                                                {tamu.id}
+                                            </td>
+                                            <td className="py-2 px-4 border-b">
+                                                {tamu.nama}
+                                            </td>
+                                            <td className="py-2 px-4 border-b">
+                                                {tamu.lembaga}
+                                            </td>
+                                            <td className="py-2 border-b w-40 ">
+                                                {getStatusBadge(tamu.status)}
+                                            </td>
+
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

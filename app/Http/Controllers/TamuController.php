@@ -140,9 +140,20 @@ class TamuController extends Controller
         return redirect()->route('tamu.index')->with('success', 'Tamu berhasil dihapus.');
     }
 
+    public function getTamu($id)
+    {
+        $tamu = Tamu::find($id);
+
+        return json_decode($tamu);
+    }
+
     public function qrScanner()
     {
-        return Inertia::render('QrScanner/Index');
+        $tamus = Tamu::orderBy('status', 'asc')->get();
+       
+        return Inertia::render('QrScanner/Index',[
+            'tamus' => $tamus,
+        ]);
     }
     public function bubble()
     {
