@@ -1,64 +1,89 @@
-
 import { Html5Qrcode } from 'html5-qrcode';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react';
+import { Camera } from 'lucide-react'; // icon kamera
 
 function QrCode({ onScanSuccess }) {
-    useEffect(() => {
+  const [cameras, setCameras] = useState([]);
+  const [selectedCameraIndex, setSelectedCameraIndex] = useState(0);
+  const scannerRef = useRef(null);
+  const [isScanning, setIsScanning] = useState(false);
 
-        const scannerId = "qr-reader";
-        const qrCodeScanner = new Html5Qrcode(scannerId);
-        let isScanning = false;
+  useEffect(() => {
+    Html5Qrcode.getCameras()
+      .then(devices => {
+        if (devices && devices.length) {
+          setCameras(devices);
+          setSelectedCameraIndex(0); // default kamera pertama
+          startScanner(devices[0].id);
+        }
+      })
+      .catch(err => {
+        console.error('Camera access error:', err);
+      });
 
-        Html5Qrcode.getCameras().then(cameras => {
-            if (cameras && cameras.length) {
-                const cameraId = cameras[1].id;
-                qrCodeScanner.start(
-                    cameraId,
-                    {
-                        fps: 10,
-                        qrbox: 250,
-                    },
-                    (decodedText) => {
-                        if (!isScanning) return; // sudah dihentikan
-                        isScanning = false;
+    return () => stopScanner();
+  }, []);
 
-                        qrCodeScanner.stop()
-                            .then(() => {
-                                onScanSuccess(decodedText);
-                            })
-                            .catch((err) => {
-                                console.warn("Stop error:", err);
-                                onScanSuccess(decodedText); // tetap lanjut
-                            });
-                    },
-                    (errorMessage) => {
-                        // bisa di-log kalau perlu
-                    }
-                ).then(() => {
-                    isScanning = true;
-                }).catch(err => {
-                    console.error("Start camera failed:", err);
-                });
-            } else {
-                console.error("No cameras found.");
-            }
-        }).catch(err => {
-            console.error("Camera access error:", err);
-        });
+  const startScanner = cameraId => {
+    const scannerId = 'qr-reader';
 
-        return () => {
-            if (isScanning) {
-                qrCodeScanner.stop().catch(() => { });
-            }
-        };
+    // Hentikan scanner sebelumnya jika ada
+    if (scannerRef.current) {
+      scannerRef.current.stop().catch(() => {});
+    }
 
-    }, []);
+    const scanner = new Html5Qrcode(scannerId);
 
-    return (
-        <div>
-            <div id="qr-reader" className="w-full max-w-md mx-auto border border-gray-300 rounded-md"></div>
-        </div>
-    )
+    scanner
+      .start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        decodedText => {
+          setIsScanning(false);
+          scanner.stop().then(() => onScanSuccess(decodedText));
+        },
+        () => {}
+      )
+      .then(() => {
+        scannerRef.current = scanner;
+        setIsScanning(true);
+      })
+      .catch(err => {
+        console.error('Start camera failed:', err);
+      });
+  };
+
+  const stopScanner = () => {
+    if (scannerRef.current) {
+      scannerRef.current.stop().then(() => setIsScanning(false));
+    }
+  };
+
+  const switchCamera = () => {
+    if (cameras.length > 1) {
+      const nextIndex = (selectedCameraIndex + 1) % cameras.length;
+      setSelectedCameraIndex(nextIndex);
+      startScanner(cameras[nextIndex].id);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-md mx-auto relative">
+      {/* Scanner area */}
+      <div id="qr-reader" className="border border-gray-300 rounded-md overflow-hidden"></div>
+
+      {/* Tombol ganti kamera (floating button) */}
+      {cameras.length > 1 && isScanning && (
+        <button
+          onClick={switchCamera}
+          className="absolute top-2 right-2 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition"
+          title="Ganti Kamera"
+        >
+          <Camera size={20} />
+        </button>
+      )}
+    </div>
+  );
 }
 
-export default QrCode
+export default QrCode;
