@@ -11,7 +11,7 @@ function QrCode({ onScanSuccess }) {
 
         Html5Qrcode.getCameras().then(cameras => {
             if (cameras && cameras.length) {
-                const cameraId = cameras[0].id;
+                const cameraId = cameras[1].id;
                 qrCodeScanner.start(
                     cameraId,
                     {
