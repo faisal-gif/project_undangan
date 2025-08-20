@@ -53,10 +53,10 @@ function Index({ tamus, filters }) {
 
     const getStatusBadge = (status) => {
         if (status === "attend") {
-            return <span className="badge badge-success">Attend</span>;
+            return <span className="badge badge-success p-4">Attend</span>;
         }
         if (status === "not_attend") {
-            return <span className="badge badge-warning text-xs">Not Attend</span>;
+            return <span className="badge badge-warning text-xs p-4">Not Attend</span>;
         }
         return <span className="badge">{status}</span>;
     };
