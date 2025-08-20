@@ -147,12 +147,17 @@ class TamuController extends Controller
         return json_decode($tamu);
     }
 
-    public function qrScanner()
+    public function qrScanner(Request $request)
     {
-        $tamus = Tamu::orderBy('status', 'asc')->get();
-       
-        return Inertia::render('QrScanner/Index',[
+        $tamus = Tamu::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where('nama', 'like', "%{$search}%")
+                    ->orWhere('lembaga', 'like', "%{$search}%");
+            })->get();
+
+        return Inertia::render('QrScanner/Index', [
             'tamus' => $tamus,
+            'filters' => $request->only(['search'])
         ]);
     }
     public function bubble()
@@ -224,5 +229,37 @@ class TamuController extends Controller
         // Tambahkan logika validasi tiket, cek status, dll
 
         return back()->with('success', 'Tiket valid: ' . $tamu->id);
+    }
+
+    public function attendance(Request $request)
+    {
+
+        $tamu = Tamu::find($request->tamu_id);
+        $tamu->status = 'attend';
+        $tamu->telepon = $request->telephone;
+        $tamu->save();
+        return back()->with('success', 'Tiket valid: ' . $tamu->id);
+    }
+
+    public function storeAttendance(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string|max:255',
+            'tamu_id' => 'required|exists:tamus,id',
+        ]);
+
+        $tamu = Tamu::find($request->tamu_id);
+
+        if ($tamu->status === 'attend') {
+            throw ValidationException::withMessages([
+                'message' => 'Undangan sudah digunakan.'
+            ]);
+        }
+
+        $tamu->status = 'attend';
+        $tamu->telepon = $request->phone_number;
+        $tamu->save();
+
+        return back()->with('success', 'Kehadiran berhasil dicatat: ' . $tamu->id);
     }
 }
