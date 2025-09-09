@@ -1,6 +1,7 @@
 import QrCode from '@/Components/QrCode'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Head, Link, router } from '@inertiajs/react';
+import { Eye } from 'lucide-react';
 import React, { useState } from 'react'
 import Swal from 'sweetalert2';
 
@@ -125,10 +126,10 @@ function Index({ tamus, filters }) {
             <Head title="Qr Scanner" />
             <div className="container mx-auto px-4 py-8">
 
-                <div className="max-w-3xl mx-auto space-y-4">
+                <div className="max-w-7xl mx-auto space-y-4">
 
                     {/* Ticket Card */}
-                    <div className="card bg-base-100 shadow-2xl border">
+                    {/* <div className="card bg-base-100 shadow-2xl border">
                         <div className="card-body">
                             <h2 className="card-title">Qr Scanner</h2>
                         </div>
@@ -147,102 +148,99 @@ function Index({ tamus, filters }) {
                             </div>
                         )}
 
-                    </div>
+                    </div> */}
 
-                    <form
-                        onSubmit={handleSearch}
-                        className="flex items-center mb-4"
-                    >
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="border rounded-l-md px-4 py-2 w-full"
-                            placeholder="Cari nama tamu..."
-                        />
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
-                        >
-                            Cari
-                        </button>
-                    </form>
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="p-6 bg-white border-b border-gray-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h1 className="text-2xl font-bold">
+                                    Daftar Pendaftar
+                                </h1>
+                                <div className="flex flex-row gap-4">
+                                    
+                                    <button
+                                        onClick={() => router.reload({ only: ['tamus'] })}
+                                        className="btn btn-primary btn-sm"
+                                    >
+                                        Refresh
+                                    </button>
+                                </div>
 
-                    <div className='card bg-base-100 shadow-2xl border'>
-                        <div className="overflow-x-auto">
+                            </div>
+                            <form
+                                onSubmit={handleSearch}
+                                className="flex items-center mb-4"
+                            >
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="border rounded-l-md px-4 py-2 w-full"
+                                    placeholder="Cari Pendaftar..."
+                                />
+                                <button
+                                    type="submit"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
+                                >
+                                    Cari
+                                </button>
+                            </form>
+                            <div className="overflow-x-auto">
 
-                            <table className="table table-zebra">
-                                <thead>
-                                    <tr>
-                                        <th className="py-2 px-4 border-b">
-                                            ID
-                                        </th>
-                                        <th className="py-2 px-4 border-b">
-                                            Nama
-                                        </th>
-                                        <th className="py-2 px-4 border-b">
-                                            Lembaga
-                                        </th>
-                                        <th className="py-2 px-4 border-b">
-                                            Status
-                                        </th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {tamus.map((tamu) => (
-                                        <tr key={tamu.id}>
-                                            <td className="py-2 px-4 border-b text-center">
-                                                {tamu.id}
-                                            </td>
-                                            <td className="py-2 px-4 border-b">
-                                                {tamu.nama}
-                                            </td>
-                                            <td className="py-2 px-4 border-b">
-                                                {tamu.lembaga}
-                                            </td>
-                                            <td className="py-2 border-b w-40 ">
-                                                {getStatusBadge(tamu.status)}
-                                            </td>
-                                            <td>
-                                                <button className="btn btn-neutral btn-sm" onClick={() => {
-                                                    setTelephone(""); // reset biar selalu kosong     
-                                                    document.getElementById('modal_phone' + tamu.id).showModal();
-                                                }
-                                                }>Attend</button>
-                                                <dialog id={'modal_phone' + tamu.id} className="modal">
-                                                    <div className="modal-box">
-                                                        <form method="dialog">
-                                                            {/* if there is a button in form, it will close the modal */}
-                                                            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                                                        </form>
-                                                        <h3 className="font-bold text-lg">Selamat Datang</h3>
-                                                        <p className="py-4">Dimohon Untuk Menginputkan Nomor HP</p>
-                                                        <form onSubmit={(e) => handleAttendance(e, tamu.id)}>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="08xxxxxxxxxx"
-                                                                onChange={(e) => setTelephone(e.target.value)}
-                                                                pattern="^08[0-9]{8,11}$"
-                                                                title="Nomor HP harus diawali 08 dan terdiri dari 10–13 digit"
-                                                                required
-                                                                className="input input-bordered input-md w-full max-w-xs" />
-
-                                                            <div className="modal-action">
-                                                                <button type='submit' className='btn btn-primary mr-2'>Kirim</button>
-
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </dialog>
-                                            </td>
-
+                                <table className="table table-zebra">
+                                    <thead>
+                                        <tr>
+                                            <th className="py-2 px-4 border-b">ID</th>
+                                            <th className="py-2 px-4 border-b">Nama</th>
+                                            <th className="py-2 px-4 border-b">Alamat</th>
+                                            <th className="py-2 px-4 border-b">No Hp</th>
+                                            <th className="py-2 px-4 border-b">Tempat, Tanggal Lahir</th>
+                                            <th className="py-2 px-4 border-b">Status</th>
+                                            <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {tamus.data.map((tamu) => (
+                                            <tr key={tamu.id}>
+                                                <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.nama}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.alamat}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.telepon}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.tempat_tanggal_lahir}</td>
+                                                <td className="py-2 border-b w-40">
+                                                    {getStatusBadge(tamu.status)}
+                                                </td>
+                                                <td className="py-2 px-4 border-b ">
+                                                    <Link
+                                                        href={route("tamu.show", tamu.id)}
+                                                        className="btn btn-xs btn-neutral"
+                                                        
+                                                    >
+                                                        <Eye size={20}/>
+                                                    </Link>
+                                                    
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="mt-8  join">
+                                {tamus.links.map((l, index) => (
+                                    <Link
+                                        key={index + 1}
+                                        href={l.url ? l.url : "#"}
+                                        className={`join-item btn btn-sm ${l.active ? "btn-active" : ""}`}
+                                        dangerouslySetInnerHTML={{
+                                            __html: l.label,
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
+
+
                 </div>
             </div>
 

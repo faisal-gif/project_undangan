@@ -39,17 +39,11 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('lembaga', 'like', "%{$search}%")
-                    ->orWhere('pc', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('no_kartu_identitas', 'like', "%{$search}%");
             })
             ->paginate(10)
-            ->withQueryString()
-            ->through(function ($tamu) {
-                $tamu->nama_utama = !empty($tamu->nama) ? $tamu->nama : $tamu->lembaga;
-                return $tamu;
-            });
-
-
+            ->withQueryString();
 
         return Inertia::render('Tamu/Index', [
             'tamus' => $tamus,
@@ -94,7 +88,9 @@ class TamuController extends Controller
      */
     public function show(Tamu $tamu)
     {
-        //
+        return Inertia::render('Tamu/Show',[
+            'participant' => $tamu,
+        ]);
     }
 
     /**
@@ -152,8 +148,11 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('lembaga', 'like', "%{$search}%");
-            })->get();
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('no_kartu_identitas', 'like', "%{$search}%");
+            })
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('QrScanner/Index', [
             'tamus' => $tamus,

@@ -74,7 +74,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     <li className='mb-3 pt-10'>
                         <h2 className="menu-title">Menu</h2>
                         <ul>
-                            <li><Link href={route('qrScanner')}>QR Scanner</Link></li>
+                            <li><Link href={route('qrScanner')}>Pengambilan Racepack</Link></li>
                             <li><Link href={route('tamu.index')}>Undangan</Link></li>
                         </ul>
                     </li>

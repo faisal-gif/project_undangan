@@ -70,14 +70,15 @@ function Index({ tamus, filters }) {
                         <div className="p-6 bg-white border-b border-gray-200">
                             <div className="flex justify-between items-center mb-4">
                                 <h1 className="text-2xl font-bold">
-                                    Daftar Tamu
+                                    Daftar Pendaftar
                                 </h1>
                                 <div className="flex flex-row gap-4">
                                     <Link
                                         href={route("tamu.create")}
                                         className="btn btn-neutral btn-sm"
+                                        disabled
                                     >
-                                        Tambah Tamu
+                                        Tambah Pendaftar
                                     </Link>
                                     <button
                                         onClick={() => router.reload({ only: ['tamus'] })}
@@ -97,7 +98,7 @@ function Index({ tamus, filters }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="border rounded-l-md px-4 py-2 w-full"
-                                    placeholder="Cari nama tamu..."
+                                    placeholder="Cari Pendaftar..."
                                 />
                                 <button
                                     type="submit"
@@ -111,58 +112,38 @@ function Index({ tamus, filters }) {
                                 <table className="table table-zebra">
                                     <thead>
                                         <tr>
-                                            <th className="py-2 px-4 border-b">
-                                                ID
-                                            </th>
-                                            <th className="py-2 px-4 border-b">
-                                                Nama
-                                            </th>
-                                            <th className="py-2 px-4 border-b">
-                                                Lembaga
-                                            </th>
-                                            <th className="py-2 px-4 border-b">
-                                                PIC
-                                            </th>
-                                            <th className="py-2 px-4 border-b">
-                                                Status
-                                            </th>
-                                            <th className="py-2 px-4 border-b">
-                                                Aksi
-                                            </th>
+                                            <th className="py-2 px-4 border-b">ID</th>
+                                            <th className="py-2 px-4 border-b">Nama</th>
+                                            <th className="py-2 px-4 border-b">Alamat</th>
+                                            <th className="py-2 px-4 border-b">No Hp</th>
+                                            <th className="py-2 px-4 border-b">Tempat, Tanggal Lahir</th>
+                                            <th className="py-2 px-4 border-b">Status</th>
+                                            <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {tamus.data.map((tamu) => (
                                             <tr key={tamu.id}>
-                                                <td className="py-2 px-4 border-b text-center">
-                                                    {tamu.id}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    {tamu.nama}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    {tamu.lembaga}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    {tamu.pc}
-                                                </td>
-                                                <td className="py-2 border-b w-40 ">
+                                                <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.nama}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.alamat}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.telepon}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.tempat_tanggal_lahir}</td>
+                                                <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
-
                                                 <td className="py-2 px-4 border-b text-center flex flex-row gap-2">
                                                     <Link
-                                                        href={route(
-                                                            "tamu.edit",
-                                                            tamu.id,
-                                                        )}
+                                                        href={route("tamu.edit", tamu.id)}
                                                         className="btn btn-xs btn-neutral"
+                                                        disabled
                                                     >
                                                         Edit
                                                     </Link>
                                                     <button
                                                         onClick={() => handleDownloadPdf(tamu.id)}
-                                                        className={`btn btn-xs btn-neutral ${loadingPdfId === tamu.id ? "btn-disabled" : ""}`}
+                                                        className={`btn btn-xs btn-neutral ${loadingPdfId === tamu.id ? "btn-disabled" : ""
+                                                            }`}
                                                         disabled={loadingPdfId === tamu.id}
                                                     >
                                                         {loadingPdfId === tamu.id ? "Loading..." : "PDF"}

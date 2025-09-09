@@ -14,12 +14,26 @@ return new class extends Migration
         Schema::create('tamus', function (Blueprint $table) {
             $table->id();
             $table->string('nama')->nullable();
-            $table->string('lembaga')->nullable();
             $table->text('alamat')->nullable();
             $table->string('telepon')->nullable();
+            $table->string('email')->nullable();
+            $table->string('tempat_tanggal_lahir')->nullable();
+            $table->string('kartu_identitas')->nullable();
+            $table->string('no_kartu_identitas')->nullable();
+            $table->string('golongan_darah')->nullable();
+            $table->string('jenis_kelamin')->nullable();
+            $table->string('nomor_kontak_darurat')->nullable();
+            $table->string('nama_kontak_darurat')->nullable();
+            $table->string('hubungan_kontak_darurat')->nullable();
+            $table->string('nama_komunitas')->nullable();
+            $table->string('penyakit')->nullable();
+            $table->string('term')->nullable();
+            $table->string('bukti_pembayaran')->nullable();
+            $table->string('atas_nama')->nullable();
+            $table->string('ukuran_jersey')->nullable();
+            $table->string('apakah_penyandang_disabilitas')->nullable();
             $table->string('qrcode')->nullable();
-            $table->string('pc')->nullable();
-            $table->enum('status', ['attend', 'not_attend'])->default('not_attend');
+            $table->enum('status', ['ambil', 'belum'])->default('belum');
             $table->timestamps();
         });
     }
