@@ -91,6 +91,10 @@ class TamuController extends Controller
      */
     public function show(Tamu $tamu)
     {
+        $tamu->qrcode = $tamu->qrcode
+            ? asset($tamu->qrcode)
+            : null;
+
         return Inertia::render('Tamu/Show', [
             'participant' => $tamu,
         ]);

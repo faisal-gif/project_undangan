@@ -131,15 +131,15 @@ const Show = ({participant}) => {
                    
 
                     {/* QR Code */}
-                    <div className="bg-white p-5 rounded-lg shadow text-center">
+                    <div className="card bg-white p-5 rounded-lg shadow text-center">
                         <h2 className="flex items-center justify-center text-lg font-semibold mb-4">
                             <QrCode className="w-5 h-5 mr-2 text-blue-500" />
                             QR Code
                         </h2>
                         <div className="flex items-center justify-center p-4 border rounded bg-gray-50">
-                            <QrCode className="w-16 h-16 text-blue-500" />
+                          <img src={participant.qrcode} className="h-full w-full" />
                         </div>
-                        <p className="text-sm text-gray-500 mt-2">{participant.qrcode}</p>
+                      
                     </div>
                 </div>
             </div>
