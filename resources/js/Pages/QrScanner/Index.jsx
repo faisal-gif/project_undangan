@@ -157,7 +157,7 @@ function Index({ tamus, filters }) {
                                     Daftar Pendaftar
                                 </h1>
                                 <div className="flex flex-row gap-4">
-                                    
+
                                     <button
                                         onClick={() => router.reload({ only: ['tamus'] })}
                                         className="btn btn-primary btn-sm"
@@ -192,10 +192,10 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
-                                            <th className="py-2 px-4 border-b">Alamat</th>
-                                            <th className="py-2 px-4 border-b">No Hp</th>
-                                            <th className="py-2 px-4 border-b">Tempat, Tanggal Lahir</th>
-                                            <th className="py-2 px-4 border-b">Status</th>
+                                            <th className="py-2 px-4 border-b">Email</th>
+                                            <th className="py-2 px-4 border-b">Kartu Identitas</th>
+                                            <th className="py-2 px-4 border-b">No Kartu Identitas</th>
+                                            <th className="py-2 px-4 border-b">Status Racepack</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
@@ -204,9 +204,9 @@ function Index({ tamus, filters }) {
                                             <tr key={tamu.id}>
                                                 <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.alamat}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.telepon}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.tempat_tanggal_lahir}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.email}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.kartu_identitas}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.no_kartu_identitas}</td>
                                                 <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
@@ -214,11 +214,11 @@ function Index({ tamus, filters }) {
                                                     <Link
                                                         href={route("tamu.show", tamu.id)}
                                                         className="btn btn-xs btn-neutral"
-                                                        
+
                                                     >
-                                                        <Eye size={20}/>
+                                                        <Eye size={20} />
                                                     </Link>
-                                                    
+
                                                 </td>
                                             </tr>
                                         ))}

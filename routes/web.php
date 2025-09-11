@@ -26,8 +26,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
+Route::get('/sendEmail/{id}',[TamuController::class, 'sendEmail'])->name('sendEmail');
 Route::get('/loop', [TamuController::class, 'loopQr'])->name('loop');
+Route::get('/loopSendEmail', [TamuController::class, 'loopSendEmail'])->name('loopEmail');
 Route::get('undangan/{id}', [TamuController::class, 'generatePdf'])->name('tickets.undangan');
 Route::get('/bubble', [TamuController::class, 'bubble'])->name('bubble');
 

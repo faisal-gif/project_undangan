@@ -1,54 +1,17 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Eye, Send } from "lucide-react";
 import React, { useState } from "react";
 
 function Index({ tamus, filters }) {
+    const { flash } = usePage().props
     const [search, setSearch] = useState(filters.search || "");
     const [loadingPdfId, setLoadingPdfId] = useState(null);
-
+    const [selectedLogs, setSelectedLogs] = useState(null);
 
     const handleSearch = (e) => {
         e.preventDefault();
         router.get(route("tamu.index", { search }));
-    };
-
-    const handleDownloadPdf = async (id) => {
-        try {
-            setLoadingPdfId(id);
-
-            const res = await fetch(route("pdf", id), {
-                method: "GET",
-            });
-
-            const blob = await res.blob();
-
-            // Ambil filename dari Content-Disposition
-            const disposition = res.headers.get("Content-Disposition");
-            let filename = `tamu-${id}.pdf`; // default kalau header tidak ada
-
-            if (disposition && disposition.includes("filename=")) {
-                filename = decodeURIComponent(
-                    disposition
-                        .split("filename=")[1]
-                        .replace(/['"]/g, "") // hapus tanda kutip
-                        .trim()
-                );
-            }
-
-            // Buat URL dan trigger download
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error("Gagal download PDF:", error);
-        } finally {
-            setLoadingPdfId(null);
-        }
     };
 
     const getStatusBadge = (status) => {
@@ -64,6 +27,23 @@ function Index({ tamus, filters }) {
     return (
         <AuthenticatedLayout>
             <Head title="Tamu" />
+            <div>
+                {flash.success && (
+                    <div className="toast toast-top toast-end ">
+                        <div className="alert alert-success">
+                            <span>{flash.success}</span>
+                        </div>
+                    </div>
+                )}
+
+                {flash.error && (
+                    <div className="toast">
+                        <div className="toast toast-top toast-end">
+                            <span>{flash.error}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -73,6 +53,12 @@ function Index({ tamus, filters }) {
                                     Daftar Pendaftar
                                 </h1>
                                 <div className="flex flex-row gap-4">
+                                    <Link
+                                        href={route("loopEmail")}
+                                        className="btn btn-neutral btn-sm"
+                                    >
+                                        Kirim Email Batch
+                                    </Link>
                                     <Link
                                         href={route("tamu.create")}
                                         className="btn btn-neutral btn-sm"
@@ -114,43 +100,77 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
-                                            <th className="py-2 px-4 border-b">Alamat</th>
-                                            <th className="py-2 px-4 border-b">No Hp</th>
-                                            <th className="py-2 px-4 border-b">Tempat, Tanggal Lahir</th>
-                                            <th className="py-2 px-4 border-b">Status</th>
+                                            <th className="py-2 px-4 border-b">Email</th>
+                                            <th className="py-2 px-4 border-b">Status Pengirim Email</th>
+                                            <th className="py-2 px-4 border-b">Kartu Identitas</th>
+                                            <th className="py-2 px-4 border-b">No Kartu Identitas</th>
+                                            <th className="py-2 px-4 border-b">Status Racepack</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tamus.data.map((tamu) => (
-                                            <tr key={tamu.id}>
+                                        {tamus.data.map((tamu) => {
+                                            const latestLog = tamu.email_logs.length > 0
+                                                ? tamu.email_logs[0] // asumsi sudah urut dari backend (DESC)
+                                                : null;
+                                            return (<tr key={tamu.id}>
                                                 <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.alamat}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.telepon}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.tempat_tanggal_lahir}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.email}</td>
+                                                <td className="py-2 px-4 border-b">
+                                                   {latestLog ? (
+                                                            <div>
+                                                                <span
+                                                                    className={
+                                                                        latestLog.status === "success"
+                                                                            ? "text-green-600 font-semibold"
+                                                                            : "text-red-600 font-semibold"
+                                                                    }
+                                                                >
+                                                                    {latestLog.status}
+                                                                </span>
+                                                                <br />
+                                                                <small>({new Date(latestLog.created_at).toLocaleString()})</small>
+                                                                {tamu.email_logs.length > 1 && (
+                                                                    <button
+                                                                        onClick={() => setSelectedLogs(tamu.email_logs)}
+                                                                        className="btn btn-xs btn-link text-blue-500"
+                                                                    >
+                                                                        Lihat semua
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-gray-500">Belum ada log</span>
+                                                        )}
+                                                </td>
+                                                <td className="py-2 px-4 border-b">{tamu.kartu_identitas}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.no_kartu_identitas}</td>
                                                 <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
-                                                <td className="py-2 px-4 border-b text-center flex flex-row gap-2">
-                                                    <Link
-                                                        href={route("tamu.edit", tamu.id)}
-                                                        className="btn btn-xs btn-neutral"
-                                                        disabled
-                                                    >
-                                                        Edit
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleDownloadPdf(tamu.id)}
-                                                        className={`btn btn-xs btn-neutral ${loadingPdfId === tamu.id ? "btn-disabled" : ""
-                                                            }`}
-                                                        disabled={loadingPdfId === tamu.id}
-                                                    >
-                                                        {loadingPdfId === tamu.id ? "Loading..." : "PDF"}
-                                                    </button>
+                                                <td className="py-2 px-4 border-b">
+                                                    <div className=" text-center flex flex-row gap-2">
+                                                        <Link
+                                                            href={route("sendEmail", tamu.id)}
+                                                            className="btn btn-xs btn-neutral"
+                                                        >
+                                                            <Send size={16} />
+                                                        </Link>
+                                                        <Link
+                                                            href={route("tamu.show", tamu.id)}
+                                                            className="btn btn-xs btn-neutral"
+
+                                                        >
+                                                            <Eye size={20} />
+                                                        </Link>
+
+                                                    </div>
+
                                                 </td>
-                                            </tr>
-                                        ))}
+                                            </tr>)
+
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
@@ -170,6 +190,39 @@ function Index({ tamus, filters }) {
                     </div>
                 </div>
             </div>
+
+             {/* Modal */}
+            {selectedLogs && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                        <h2 className="text-lg font-bold mb-4">Log Pengiriman Email</h2>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {selectedLogs.map((log) => (
+                                <div key={log.id} className="border-b pb-2">
+                                    <span
+                                        className={log.status === "success" ? "text-green-600" : "text-red-600"}
+                                    >
+                                        {log.status}
+                                    </span>
+                                    <br />
+                                    <small>{new Date(log.created_at).toLocaleString()}</small>
+                                    {log.error_message && (
+                                        <p className="text-xs text-gray-600 mt-1">{log.error_message}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-4 text-right">
+                            <button
+                                onClick={() => setSelectedLogs(null)}
+                                className="btn btn-sm btn-neutral"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

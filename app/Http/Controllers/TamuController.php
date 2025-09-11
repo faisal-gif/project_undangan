@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\GenerateTicketJob;
+use App\Jobs\SendTicketJob;
+use App\Mail\TicketMail;
+use App\Models\EmailLog;
 use App\Models\Tamu;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -40,6 +44,7 @@ class TamuController extends Controller
     public function index(Request $request)
     {
         $tamus = Tamu::query()
+            ->with('emailLogs')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -205,6 +210,50 @@ class TamuController extends Controller
 
 
         return 'Proses generate ticket sudah masuk ke queue.';
+    }
+
+    public function loopSendEmail()
+    {
+
+        Tamu::chunk(10, function ($tamus) {
+            foreach ($tamus as $tamu) {
+                dispatch(new SendTicketJob($tamu->id));
+            }
+        });
+
+
+        return redirect()->back()->with('success', 'Email Sedang Dikirim!');;
+    }
+
+    public function sendEmail($id)
+    {
+        $tamu = Tamu::find($id);
+
+        if ($tamu && $tamu->email) {
+            $qrcodePath = storage_path('app/public/' . str_replace('storage/', '', $tamu->qrcode));
+
+            try {
+                Mail::to($tamu->email)->send(new TicketMail($tamu, $qrcodePath));
+
+                // jika berhasil
+                EmailLog::create([
+                    'tamu_id' => $tamu->id,
+                    'email'   => $tamu->email,
+                    'status'  => 'success',
+                    'message' => 'Email berhasil dikirim',
+                ]);
+            } catch (\Exception $e) {
+                // jika gagal
+                EmailLog::create([
+                    'tamu_id' => $tamu->id,
+                    'email'   => $tamu->email,
+                    'status'  => 'failed',
+                    'message' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', "Email {$tamu->nama} Sedang Dikirim!");
     }
 
     public function qrValidate(Request $request)
