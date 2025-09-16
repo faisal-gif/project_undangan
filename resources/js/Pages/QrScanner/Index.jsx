@@ -14,71 +14,8 @@ function Index({ tamus, filters }) {
 
     const handleScan = async (data) => {
         setIsScanning(false); // sembunyikan scanner
+        console.log(data);
 
-        // Ambil data tamu dari endpoint /tamu/data/{id}
-        let nama = '', lembaga = '';
-        try {
-            const response = await fetch(route('tamu.data', data));
-            const result = await response.json();
-            nama = result.nama || '';
-            lembaga = result.lembaga || '';
-        } catch (error) {
-            await Swal.fire({
-                icon: "error",
-                title: "Gagal mengambil data tamu",
-                text: error.message || "Terjadi kesalahan.",
-            });
-            return;
-        }
-
-        // Munculkan modal untuk input nomor HP
-        const { value: phone } = await Swal.fire({
-            html: `${nama || '-'}<br/> ${lembaga || '-'}`,
-            title: "Selamat Datang",
-            input: "tel",
-            inputLabel: "Nomor HP",
-            inputPlaceholder: "08xxxxxxxxxx",
-            showCancelButton: true,
-            confirmButtonText: "Kirim",
-            cancelButtonText: "Batal",
-            inputValidator: (value) => {
-                if (!value) {
-                    return "Nomor HP wajib diisi!";
-                }
-                if (!/^08[0-9]{8,11}$/.test(value)) {
-                    return "Format nomor HP tidak valid!";
-                }
-            }
-        });
-
-        // Jika batal, hentikan proses
-        if (!phone) {
-            Swal.fire({
-                icon: "info",
-                title: "Dibatalkan",
-                text: "Scan dibatalkan oleh pengguna."
-            });
-            return;
-        }
-
-        router.post('/qr/validate', { qr_data: data, phone }, {
-            onSuccess: (params) => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'QR berhasil divalidasi.',
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-            },
-            onError: (errors) => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: errors.message || 'QR tidak valid atau sudah digunakan.',
-                });
-            }
-        });
     };
 
     const getStatusBadge = (status) => {
@@ -129,7 +66,7 @@ function Index({ tamus, filters }) {
                 <div className="max-w-7xl mx-auto space-y-4">
 
                     {/* Ticket Card */}
-                    {/* <div className="card bg-base-100 shadow-2xl border">
+                    <div className="card bg-base-100 shadow-2xl border">
                         <div className="card-body">
                             <h2 className="card-title">Qr Scanner</h2>
                         </div>
@@ -148,7 +85,7 @@ function Index({ tamus, filters }) {
                             </div>
                         )}
 
-                    </div> */}
+                    </div>
 
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
