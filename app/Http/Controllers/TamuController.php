@@ -301,6 +301,16 @@ class TamuController extends Controller
         return back()->with('success', 'Tiket valid: ' . $tamu->id);
     }
 
+    public function update_status(Request $request, $id)
+    {
+        $tamu = Tamu::find($id);
+        $tamu->status = $request->status;
+        $tamu->save();
+        return redirect()->route('qrScanner')->with('success', 'Racepack atas nama: ' . $tamu->nama . ' sudah diambil');
+    }
+
+
+
     public function storeAttendance(Request $request)
     {
         $request->validate([

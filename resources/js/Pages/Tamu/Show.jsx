@@ -1,6 +1,6 @@
 "use client";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import {
     User,
     MapPin,
@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 
 
-const Show = ({participant}) => {
+const Show = ({ participant }) => {
+
+    const handleUpdateStatus = () => {
+        router.put(route("participants.update-status", participant.id), {
+            status: "ambil",
+        });
+    };
 
     const getStatusText = (status) => {
         return status === "ambil" ? (
@@ -27,16 +33,24 @@ const Show = ({participant}) => {
                 <CheckCircle className="w-4 h-4 mr-1" /> Sudah Diambil
             </span>
         ) : (
-            <span className="flex items-center px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm font-medium">
-                <Clock className="w-4 h-4 mr-1" /> Belum Diambil
-            </span>
+            <div className="flex flex-col md:flex-row gap-4">
+                <span className="flex items-center px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm font-medium">
+                    <Clock className="w-4 h-4 mr-1" /> Belum Diambil
+                </span>
+                <button
+                    onClick={handleUpdateStatus}
+                    className="px-3 py-1 text-xs md:text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+                >
+                    Tandai Sudah Diambil
+                </button>
+            </div>
         );
     };
 
     return (
         <AuthenticatedLayout>
             <Head title="Tamu" />
-            <div className="max-w-6xl mx-auto py-8 space-y-8">
+            <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
                 {/* Header */}
                 <div className="flex items-center justify-between bg-white p-6 rounded-lg shadow">
                     <div>
@@ -125,10 +139,10 @@ const Show = ({participant}) => {
                         </h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <InfoBlock label="Atas Nama" value={participant.atas_nama} />
-                          <PaymentProof url={participant.bukti_pembayaran} />
+                            <PaymentProof url={participant.bukti_pembayaran} />
                         </div>
                     </div>
-                   
+
 
                     {/* QR Code */}
                     <div className="card bg-white p-5 rounded-lg shadow text-center">
@@ -137,9 +151,9 @@ const Show = ({participant}) => {
                             QR Code
                         </h2>
                         <div className="flex items-center justify-center p-4 border rounded bg-gray-50">
-                          <img src={participant.qrcode} className="h-full w-full" />
+                            <img src={participant.qrcode} className="h-full w-full" />
                         </div>
-                      
+
                     </div>
                 </div>
             </div>
@@ -168,30 +182,30 @@ const InfoBlock = ({ label, value }) => (
 
 
 const PaymentProof = ({ url }) => {
-  const extractFileId = (driveUrl) => {
-    const match = driveUrl.match(/[-\w]{25,}/);
-    return match ? match[0] : null;
-  };
+    const extractFileId = (driveUrl) => {
+        const match = driveUrl.match(/[-\w]{25,}/);
+        return match ? match[0] : null;
+    };
 
-  const fileId = extractFileId(url);
-  const previewUrl = fileId
-    ? `https://drive.google.com/file/d/${fileId}/preview`
-    : null;
+    const fileId = extractFileId(url);
+    const previewUrl = fileId
+        ? `https://drive.google.com/file/d/${fileId}/preview`
+        : null;
 
-  return (
-    <div>
-      <p className="text-sm text-gray-500 mb-2">Bukti Pembayaran</p>
-      {previewUrl ? (
-        <iframe
-          src={previewUrl}
-          className="w-full max-w-sm h-64 border rounded"
-          allow="autoplay"
-        />
-      ) : (
-        <p className="text-red-500">Link tidak valid</p>
-      )}
-    </div>
-  );
+    return (
+        <div>
+            <p className="text-sm text-gray-500 mb-2">Bukti Pembayaran</p>
+            {previewUrl ? (
+                <iframe
+                    src={previewUrl}
+                    className="w-full max-w-sm h-64 border rounded"
+                    allow="autoplay"
+                />
+            ) : (
+                <p className="text-red-500">Link tidak valid</p>
+            )}
+        </div>
+    );
 };
 
 

@@ -1,11 +1,12 @@
 import QrCode from '@/Components/QrCode'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
 import React, { useState } from 'react'
 import Swal from 'sweetalert2';
 
 function Index({ tamus, filters }) {
+      const { flash } = usePage().props
     const [isScanning, setIsScanning] = useState(false);
     const [search, setSearch] = useState(filters.search || "");
     const [telephone, setTelephone] = useState("");
@@ -28,11 +29,11 @@ function Index({ tamus, filters }) {
     };
 
     const getStatusBadge = (status) => {
-        if (status === "attend") {
-            return <span className="badge badge-success p-4">Attend</span>;
+        if (status === "ambil") {
+            return <span className="badge badge-success p-4">Sudah Ambil</span>;
         }
-        if (status === "not_attend") {
-            return <span className="badge badge-warning text-xs p-4">Not Attend</span>;
+        if (status === "belum") {
+            return <span className="badge badge-warning text-xs p-4">Belum</span>;
         }
         return <span className="badge">{status}</span>;
     };
@@ -70,6 +71,23 @@ function Index({ tamus, filters }) {
     return (
         <AuthenticatedLayout>
             <Head title="Qr Scanner" />
+            <div>
+                {flash.success && (
+                    <div className="toast toast-top toast-end ">
+                        <div className="alert alert-success">
+                            <span>{flash.success}</span>
+                        </div>
+                    </div>
+                )}
+
+                {flash.error && (
+                    <div className="toast">
+                        <div className="toast toast-top toast-end">
+                            <span>{flash.error}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
             <div className="container mx-auto px-4 py-8">
 
                 <div className="max-w-7xl mx-auto space-y-4">

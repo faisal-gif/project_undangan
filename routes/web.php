@@ -18,6 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('tamu', TamuController::class);
     Route::get('/pdf/{id}', [TamuController::class, 'generatePdf'])->name('pdf');
     Route::post('/attendance', [TamuController::class, 'attendance'])->name('attendance');
+    Route::put('/participants/update-status/{id}', [TamuController::class, 'update_status'])->name('participants.update-status');
     Route::get('/qrScanner', [TamuController::class, 'qrScanner'])->name('qrScanner');
     Route::post('/qr/validate', [TamuController::class, 'qrValidate'])->name('qrValidate');
     Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');
