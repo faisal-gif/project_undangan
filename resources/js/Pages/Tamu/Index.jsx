@@ -118,31 +118,31 @@ function Index({ tamus, filters }) {
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.email}</td>
                                                 <td className="py-2 px-4 border-b">
-                                                   {latestLog ? (
-                                                            <div>
-                                                                <span
-                                                                    className={
-                                                                        latestLog.status === "success"
-                                                                            ? "text-green-600 font-semibold"
-                                                                            : "text-red-600 font-semibold"
-                                                                    }
+                                                    {latestLog ? (
+                                                        <div>
+                                                            <span
+                                                                className={
+                                                                    latestLog.status === "success"
+                                                                        ? "text-green-600 font-semibold"
+                                                                        : "text-red-600 font-semibold"
+                                                                }
+                                                            >
+                                                                {latestLog.status}
+                                                            </span>
+                                                            <br />
+                                                            <small>({new Date(latestLog.created_at).toLocaleString()})</small>
+                                                            {tamu.email_logs.length > 1 && (
+                                                                <button
+                                                                    onClick={() => setSelectedLogs(tamu.email_logs)}
+                                                                    className="btn btn-xs btn-link text-blue-500"
                                                                 >
-                                                                    {latestLog.status}
-                                                                </span>
-                                                                <br />
-                                                                <small>({new Date(latestLog.created_at).toLocaleString()})</small>
-                                                                {tamu.email_logs.length > 1 && (
-                                                                    <button
-                                                                        onClick={() => setSelectedLogs(tamu.email_logs)}
-                                                                        className="btn btn-xs btn-link text-blue-500"
-                                                                    >
-                                                                        Lihat semua
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-gray-500">Belum ada log</span>
-                                                        )}
+                                                                    Lihat semua
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-500">Belum ada log</span>
+                                                    )}
                                                 </td>
                                                 <td className="py-2 px-4 border-b">{tamu.kartu_identitas}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.no_kartu_identitas}</td>
@@ -173,25 +173,26 @@ function Index({ tamus, filters }) {
                                         })}
                                     </tbody>
                                 </table>
+                                <div className="mt-8  join">
+                                    {tamus.links.map((l, index) => (
+                                        <Link
+                                            key={index + 1}
+                                            href={l.url ? l.url : "#"}
+                                            className={`join-item btn btn-sm ${l.active ? "btn-active" : ""}`}
+                                            dangerouslySetInnerHTML={{
+                                                __html: l.label,
+                                            }}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                            <div className="mt-8  join">
-                                {tamus.links.map((l, index) => (
-                                    <Link
-                                        key={index + 1}
-                                        href={l.url ? l.url : "#"}
-                                        className={`join-item btn btn-sm ${l.active ? "btn-active" : ""}`}
-                                        dangerouslySetInnerHTML={{
-                                            __html: l.label,
-                                        }}
-                                    />
-                                ))}
-                            </div>
+
                         </div>
                     </div>
                 </div>
             </div>
 
-             {/* Modal */}
+            {/* Modal */}
             {selectedLogs && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
