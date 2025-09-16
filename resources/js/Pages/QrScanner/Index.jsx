@@ -66,7 +66,7 @@ function Index({ tamus, filters }) {
                 <div className="max-w-7xl mx-auto space-y-4">
 
                     {/* Ticket Card */}
-                    <div className="card bg-base-100 shadow-2xl border">
+                    {/* <div className="card bg-base-100 shadow-2xl border">
                         <div className="card-body">
                             <h2 className="card-title">Qr Scanner</h2>
                         </div>
@@ -85,7 +85,7 @@ function Index({ tamus, filters }) {
                             </div>
                         )}
 
-                    </div>
+                    </div> */}
 
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
@@ -100,6 +100,15 @@ function Index({ tamus, filters }) {
                                         className="btn btn-primary btn-sm"
                                     >
                                         Refresh
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsScanning(true);
+                                            document.getElementById("qrModal").showModal();
+                                        }}
+                                        className="btn btn-warning btn-sm"
+                                    >
+                                        Mulai Scan
                                     </button>
                                 </div>
 
@@ -180,6 +189,21 @@ function Index({ tamus, filters }) {
 
                 </div>
             </div>
+
+            <dialog
+                id="qrModal"
+                className="modal"
+                onClose={() => setIsScanning(false)}
+            >
+                <div className="modal-box">
+                    {isScanning && <QrCode onScanSuccess={handleScan} />}
+                    <div className="modal-action">
+                        <form method="dialog">
+                            <button className="btn">Tutup</button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
 
         </AuthenticatedLayout>
     )
