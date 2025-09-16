@@ -14,8 +14,17 @@ function Index({ tamus, filters }) {
 
     const handleScan = async (data) => {
         setIsScanning(false); // sembunyikan scanner
-        console.log(data);
+        console.log("Hasil scan:", data);
 
+        try {
+            // validasi kalau data adalah URL
+            const url = new URL(data);
+            // redirect langsung
+            window.location.href = url.href;
+        } catch (err) {
+            // kalau bukan URL, tampilkan alert saja
+            alert(`QR berisi teks: ${data}`);
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -89,12 +98,11 @@ function Index({ tamus, filters }) {
 
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
                                 <h1 className="text-2xl font-bold">
                                     Daftar Pendaftar
                                 </h1>
-                                <div className="flex flex-row gap-4">
-
+                                <div className="flex flex-row gap-2 justify-end">
                                     <button
                                         onClick={() => router.reload({ only: ['tamus'] })}
                                         className="btn btn-primary btn-sm"
