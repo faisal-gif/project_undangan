@@ -30,7 +30,7 @@ function Pagination({ tamus }) {
       {/* Previous */}
       {tamus.prev_page_url && (
         <Link href={tamus.prev_page_url} className="join-item btn btn-sm">
-          « Previous
+          «
         </Link>
       )}
 
@@ -56,7 +56,7 @@ function Pagination({ tamus }) {
       {/* Next */}
       {tamus.next_page_url && (
         <Link href={tamus.next_page_url} className="join-item btn btn-sm">
-          Next »
+        »
         </Link>
       )}
     </div>
