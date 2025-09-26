@@ -174,16 +174,19 @@ function Index({ tamus, filters }) {
                                     </tbody>
                                 </table>
                                 <div className="mt-8 join">
-                                    {tamus.links
-                                        .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
-                                        .map((l, index) => (
-                                            <Link
-                                                key={index}
-                                                href={l.url ?? "#"}
-                                                className={`join-item btn btn-sm ${!l.url ? "btn-disabled" : ""}`}
-                                                dangerouslySetInnerHTML={{ __html: l.label }}
-                                            />
-                                        ))}
+                                    {
+
+
+                                        tamus.links
+                                            .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
+                                            .map((l, index) => (
+                                                <Link
+                                                    key={index}
+                                                    href={l.url ?? "#"}
+                                                    className={`join-item btn btn-sm ${!l.url ? "btn-disabled" : ""}`}
+                                                    dangerouslySetInnerHTML={{ __html: l.label }}
+                                                />
+                                            ))}
                                 </div>
                             </div>
 

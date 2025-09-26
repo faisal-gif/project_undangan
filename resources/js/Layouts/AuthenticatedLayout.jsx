@@ -67,7 +67,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 <ul className="menu bg-base-200 text-base-content min-h-full w-72 p-4">
                     <li>
                         <Link href="/">
-                            <ApplicationLogo className="h-10 w-auto mx-auto" />
+                            <ApplicationLogo className="h-14 w-full mx-auto" />
                         </Link>
                     </li>
                     {/* Sidebar content here */}
@@ -75,7 +75,11 @@ export default function AuthenticatedLayout({ header, children }) {
                         <h2 className="menu-title">Menu</h2>
                         <ul>
                             <li><Link href={route('qrScanner')}>Pengambilan Racepack</Link></li>
-                            <li><Link href={route('tamu.index')}>Undangan</Link></li>
+                            {user.role === 'admin' && (
+                                <li>
+                                    <Link href={route('tamu.index')}>Undangan</Link>
+                                </li>
+                            )}
                         </ul>
                     </li>
                 </ul>
