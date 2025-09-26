@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 import Swal from 'sweetalert2';
 
 function Index({ tamus, filters }) {
-      const { flash } = usePage().props
+    const { flash } = usePage().props
     const [isScanning, setIsScanning] = useState(false);
     const [search, setSearch] = useState(filters.search || "");
     const [telephone, setTelephone] = useState("");
@@ -197,17 +197,74 @@ function Index({ tamus, filters }) {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="mt-8  join">
-                                {tamus.links.map((l, index) => (
+                            <div className="mt-8 join">
+                                {/* Previous */}
+                                {tamus.prev_page_url && (
                                     <Link
-                                        key={index + 1}
-                                        href={l.url ? l.url : "#"}
-                                        className={`join-item btn btn-sm ${l.active ? "btn-active" : ""}`}
-                                        dangerouslySetInnerHTML={{
-                                            __html: l.label,
-                                        }}
-                                    />
-                                ))}
+                                        href={tamus.prev_page_url}
+                                        className="join-item btn btn-sm"
+                                    >
+                                        « Previous
+                                    </Link>
+                                )}
+
+                                {/* Page 1 */}
+                                <Link
+                                    href={`${tamus.path}?page=1`}
+                                    className={`join-item btn btn-sm ${tamus.current_page === 1 ? "btn-active" : ""}`}
+                                >
+                                    1
+                                </Link>
+
+                                {/* Page 2 */}
+                                {tamus.last_page >= 2 && (
+                                    <Link
+                                        href={`${tamus.path}?page=2`}
+                                        className={`join-item btn btn-sm ${tamus.current_page === 2 ? "btn-active" : ""}`}
+                                    >
+                                        2
+                                    </Link>
+                                )}
+
+                                {/* Page 3 */}
+                                {tamus.last_page >= 3 && (
+                                    <Link
+                                        href={`${tamus.path}?page=3`}
+                                        className={`join-item btn btn-sm ${tamus.current_page === 3 ? "btn-active" : ""}`}
+                                    >
+                                        3
+                                    </Link>
+                                )}
+
+                                {/* Page 4 */}
+                                {tamus.last_page >= 4 && (
+                                    <Link
+                                        href={`${tamus.path}?page=4`}
+                                        className={`join-item btn btn-sm ${tamus.current_page === 4 ? "btn-active" : ""}`}
+                                    >
+                                        4
+                                    </Link>
+                                )}
+
+                                {/* Last Page */}
+                                {tamus.last_page > 4 && (
+                                    <Link
+                                        href={`${tamus.path}?page=${tamus.last_page}`}
+                                        className={`join-item btn btn-sm ${tamus.current_page === tamus.last_page ? "btn-active" : ""}`}
+                                    >
+                                        Last
+                                    </Link>
+                                )}
+
+                                {/* Next */}
+                                {tamus.next_page_url && (
+                                    <Link
+                                        href={tamus.next_page_url}
+                                        className="join-item btn btn-sm"
+                                    >
+                                        Next »
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>
