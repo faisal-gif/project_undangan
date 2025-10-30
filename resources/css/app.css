@@ -1,3 +1,241 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 🎨 Guest Theme Variables */
+@layer base {
+    :root {
+        /* Luxury Awards Theme - Red, Purple, Gold & White */
+        --background-guest: 0 72% 15%;
+        --foreground-guest: 0 0% 100%;
+
+        --card-guest: 0 0% 100%;
+        --card-foreground-guest: 0 72% 20%;
+
+        --popover-guest: 0 0% 100%;
+        --popover-foreground-guest: 0 72% 20%;
+
+        /* Gold Primary */
+        --primary-guest: 45 100% 51%;
+        --primary-foreground-guest: 0 72% 20%;
+
+        /* Red Secondary */
+        --secondary-guest: 0 72% 41%;
+        --secondary-foreground-guest: 0 0% 100%;
+
+        /* Deep Purple Accent */
+        --accent-guest: 283 58% 20%;
+        --accent-foreground-guest: 0 0% 100%;
+
+        --muted-guest: 0 40% 85%;
+        --muted-foreground-guest: 0 72% 35%;
+
+        --destructive-guest: 0 84.2% 60.2%;
+        --destructive-foreground-guest: 0 0% 100%;
+
+        --border-guest: 45 100% 51%;
+        --input-guest: 0 40% 90%;
+        --ring-guest: 45 100% 51%;
+
+        --radius-guest: 0.75rem;
+
+        /* Gradient Tokens */
+        --gradient-gold: linear-gradient(135deg, hsl(45 100% 51%), hsl(38 92% 58%), hsl(45 100% 51%));
+        --gradient-luxury: linear-gradient(135deg, hsl(0 72% 41%), hsl(283 58% 20%));
+        --gradient-burgundy: linear-gradient(180deg, hsl(0 72% 20%), hsl(0 72% 15%));
+        --gradient-purple: linear-gradient(135deg, hsl(283 58% 25%), hsl(283 58% 15%));
+        --gradient-radial-gold: radial-gradient(circle at center, hsl(45 100% 51% / 0.2), transparent 70%);
+        --gradient-radial-burgundy: radial-gradient(ellipse at top, hsl(0 72% 25% / 0.5), transparent 60%);
+
+        /* Shadow Tokens */
+        --shadow-gold: 0 10px 40px -10px hsl(45 100% 51% / 0.5);
+        --shadow-burgundy: 0 20px 60px -15px hsl(0 72% 41% / 0.6);
+        --shadow-purple: 0 15px 50px -10px hsl(283 58% 20% / 0.5);
+        --shadow-white: 0 8px 30px -8px hsl(0 0% 100% / 0.15);
+
+        /* Animation */
+        --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+}
+
+/* 🧰 Guest Utilities */
+@layer utilities {
+
+    /* Background Colors */
+    .bg-guest-background {
+        background-color: hsl(var(--background-guest));
+    }
+
+    .bg-guest-card {
+        background-color: hsl(var(--card-guest));
+    }
+
+    .bg-guest-popover {
+        background-color: hsl(var(--popover-guest));
+    }
+
+    .bg-guest-primary {
+        background-color: hsl(var(--primary-guest));
+    }
+
+    .bg-guest-accent {
+        background-color: hsl(var(--accent-guest));
+    }
+
+    .bg-guest-muted {
+        background-color: hsl(var(--muted-guest));
+    }
+
+    .bg-guest-destructive {
+        background-color: hsl(var(--destructive-guest));
+    }
+
+    /* Text Colors */
+    .text-guest-foreground {
+        color: hsl(var(--foreground-guest));
+    }
+
+    .text-guest-card-foreground {
+        color: hsl(var(--card-foreground-guest));
+    }
+
+    .text-guest-popover-foreground {
+        color: hsl(var(--popover-foreground-guest));
+    }
+
+    .text-guest-primary-foreground {
+        color: hsl(var(--primary-foreground-guest));
+    }
+
+    .text-guest-accent-foreground {
+        color: hsl(var(--accent-foreground-guest));
+    }
+
+    .text-guest-muted-foreground {
+        color: hsl(var(--muted-foreground-guest));
+    }
+
+    .text-guest-destructive-foreground {
+        color: hsl(var(--destructive-foreground-guest));
+    }
+
+    /* Background Gradients */
+    .bg-gradient-gold {
+        background: var(--gradient-gold);
+    }
+
+    .bg-gradient-burgundy {
+        background: var(--gradient-burgundy);
+    }
+
+    .bg-gradient-luxury {
+        background: var(--gradient-luxury);
+    }
+
+    .bg-gradient-purple {
+        background: var(--gradient-purple);
+    }
+
+    /* Text Gradients */
+    .text-gradient-gold {
+        background: var(--gradient-gold);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .text-gradient-luxury {
+        background: var(--gradient-luxury);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    /* Shadows */
+    .shadow-gold {
+        box-shadow: var(--shadow-gold);
+    }
+
+    .shadow-burgundy {
+        box-shadow: var(--shadow-burgundy);
+    }
+
+    .shadow-purple {
+        box-shadow: var(--shadow-purple);
+    }
+
+    .shadow-white {
+        box-shadow: var(--shadow-white);
+    }
+
+    /* Animations */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.8s ease-out forwards;
+    }
+
+    .animate-glow {
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    /* Patterns */
+    .bg-pattern-dots {
+        background-image: radial-gradient(circle, hsl(45 100% 51% / 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+}
+
+/* Animations Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px hsl(45 100% 51% / 0.4), 0 0 40px hsl(45 100% 51% / 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 40px hsl(45 100% 51% / 0.6), 0 0 60px hsl(45 100% 51% / 0.3);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}

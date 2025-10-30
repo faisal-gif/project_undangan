@@ -1,14 +1,14 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TamuController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
