@@ -5,21 +5,21 @@ const features = [
     icon: Crown,
     title: "Man of The Year",
     description:
-      "Honoring excellence with prestigious awards across multiple categories",
+      "Figur laki-laki berpengaruh dan inspiratif",
     gradient: "from-[hsl(45,100%,51%)] to-[hsl(0,72%,41%)]",
   },
   {
     icon: Users,
     title: "Woman of The Year",
     description:
-      "Celebrating innovators and visionaries who shape their fields",
+      "Figur perempuan berprestasi dan berdampak",
     gradient: "from-[hsl(0,72%,41%)] to-[hsl(283,58%,20%)]",
   },
   {
     icon: Star,
     title: "Positive News Maker",
     description:
-      "Building a tradition of recognizing outstanding achievements",
+      "Tokoh pembawa narasi optimis",
     gradient: "from-[hsl(283,58%,20%)] to-[hsl(0,72%,41%)]",
   },
 ];
