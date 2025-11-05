@@ -1,4 +1,5 @@
 
+import AtiLogo from "@/Components/AtiLogo";
 import { Link } from "@inertiajs/react";
 import { Trophy } from "lucide-react";
 
@@ -8,10 +9,10 @@ const GuestNavigation = () => {
             <div className="container mx-auto px-6 py-4">
                 <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="p-2 rounded-xl bg-gradient-gold shadow-gold group-hover:scale-110 transition-transform">
-                            <Trophy className="w-7 h-7 text-primary-foreground" />
+                        <div className="p-2 rounded-xl group-hover:scale-110 transition-transform">
+                            <AtiLogo className="w-12 h-10" />
                         </div>
-                        <span className="text-2xl font-display font-bold text-gradient-gold">
+                        <span className="hidden md:block text-2xl font-display font-bold text-gradient-gold">
                             Anugerah TIMES Indonesia
                         </span>
                     </Link>
