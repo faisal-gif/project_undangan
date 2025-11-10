@@ -2,29 +2,28 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm } from "@inertiajs/react";
 import React from "react";
 
-function Edit({ tamu }) {
-    const { data, setData, put, processing, errors } = useForm({
-        nama: tamu.nama || "",
-        lembaga: tamu.lembaga || "",
-        alamat: tamu.alamat || "",
-        pic: tamu.pc || "",
-        status: tamu.status || "not_attend",
+function Create() {
+    const { data, setData, post, processing, errors } = useForm({
+        nama: "",
+        lembaga: "",
+        alamat: "",
+        pic: "",
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route("tamu.update", tamu.id));
+        post(route("admin.tamu.store"));
     };
 
     return (
         <AuthenticatedLayout>
-            <Head title="Edit Tamu" />
+            <Head title="Tambah Tamu" />
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
                             <h1 className="text-2xl font-bold mb-4">
-                                Edit Tamu
+                                Tambah Tamu
                             </h1>
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -120,7 +119,6 @@ function Edit({ tamu }) {
                                     )}
                                 </div>
 
-
                                 <div className="flex items-center justify-end">
                                     <button
                                         type="submit"
@@ -139,4 +137,4 @@ function Edit({ tamu }) {
     );
 }
 
-export default Edit;
+export default Create;

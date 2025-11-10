@@ -11,7 +11,7 @@ function Index({ tamus, filters }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route("tamu.index", { search }));
+        router.get(route("admin.tamu.index", { search }));
     };
 
     const getStatusBadge = (status) => {
@@ -175,8 +175,6 @@ function Index({ tamus, filters }) {
                                 </table>
                                 <div className="mt-8 join">
                                     {
-
-
                                         tamus.links
                                             .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
                                             .map((l, index) => (

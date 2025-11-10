@@ -50,7 +50,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </button>
                             </Dropdown.Trigger>
                             <Dropdown.Content>
-                                <Dropdown.Link href={route('profile.edit')}>
+                                <Dropdown.Link href={route('admin.profile.edit')}>
                                     Profile
                                 </Dropdown.Link>
                                 <Dropdown.Link href={route('logout')} method="post" as="button">
@@ -74,11 +74,16 @@ export default function AuthenticatedLayout({ header, children }) {
                     <li className='mb-3 pt-10'>
                         <h2 className="menu-title">Menu</h2>
                         <ul>
-                            <li><Link href={route('qrScanner')}>Pengambilan Racepack</Link></li>
+                            <li><Link href={route('admin.qrScanner')}>Pengambilan Racepack</Link></li>
                             {user.role === 'admin' && (
-                                <li>
-                                    <Link href={route('tamu.index')}>Undangan</Link>
-                                </li>
+                                <>
+                                    <li>
+                                        <Link href={route('admin.tamu.index')}>Undangan</Link>
+                                    </li>
+                                    <li>
+                                        <Link href={route('admin.winners.index')}>Pemenang</Link>
+                                    </li>
+                                </>
                             )}
                         </ul>
                     </li>

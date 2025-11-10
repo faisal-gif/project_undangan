@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TamuController;
+use App\Http\Controllers\WinnersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,8 +15,9 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('tamu', TamuController::class);
+    Route::resource('winners', WinnersController::class);
     Route::get('/pdf/{id}', [TamuController::class, 'generatePdf'])->name('pdf');
     Route::post('/attendance', [TamuController::class, 'attendance'])->name('attendance');
     Route::put('/participants/update-status/{id}', [TamuController::class, 'update_status'])->name('participants.update-status');

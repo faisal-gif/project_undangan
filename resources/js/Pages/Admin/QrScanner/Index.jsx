@@ -46,7 +46,7 @@ function Index({ tamus, filters }) {
 
     const handleAttendance = (e, tamuId) => {
         e.preventDefault();
-        router.post(route("attendance"), { telephone, tamu_id: tamuId }, {
+        router.post(route("admin.attendance"), { telephone, tamu_id: tamuId }, {
             onSuccess: () => {
                 document.getElementById('modal_phone' + tamuId).close();
                 Swal.fire({

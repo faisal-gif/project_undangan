@@ -53,7 +53,7 @@ class TamuController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('Tamu/Index', [
+        return Inertia::render('Admin/Tamu/Index', [
             'tamus' => $tamus,
             'filters' => $request->only(['search'])
         ]);
@@ -64,7 +64,7 @@ class TamuController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Tamu/Create');
+        return Inertia::render('Admin/Tamu/Create');
     }
 
     /**
@@ -100,7 +100,7 @@ class TamuController extends Controller
             ? asset($tamu->qrcode)
             : null;
 
-        return Inertia::render('Tamu/Show', [
+        return Inertia::render('Admin/Tamu/Show', [
             'participant' => $tamu,
         ]);
     }
@@ -110,7 +110,7 @@ class TamuController extends Controller
      */
     public function edit(Tamu $tamu)
     {
-        return Inertia::render('Tamu/Edit', [
+        return Inertia::render('Admin/Tamu/Edit', [
             'tamu' => $tamu
         ]);
     }
@@ -166,14 +166,10 @@ class TamuController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('QrScanner/Index', [
+        return Inertia::render('Admin/QrScanner/Index', [
             'tamus' => $tamus,
             'filters' => $request->only(['search'])
         ]);
-    }
-    public function bubble()
-    {
-        return Inertia::render('Bubble');
     }
 
     public function generatePdf($id)
@@ -194,9 +190,6 @@ class TamuController extends Controller
         $slugNama = str_replace(['/', '\\'], '', Str::slug($data['nama'], '-'));
         return $pdf->download('undangan-' . $slugNama . '.pdf');
     }
-
-
-
 
 
     public function loopQr()

@@ -6,42 +6,10 @@ import { Head } from "@inertiajs/react";
 import CardWinners from "./Partials/CardWinners";
 import Card from "@/Components/Card";
 
-const winnersData = {
-  2024: [
-    { name: "Sarah Chen", category: "Innovation Excellence", achievement: "Revolutionary AI Healthcare Platform" },
-    { name: "Marcus Rodriguez", category: "Entrepreneurship", achievement: "Sustainable Energy Solutions" },
-    { name: "Dr. Amelia Foster", category: "Research & Development", achievement: "Breakthrough in Renewable Materials" },
-    { name: "James Patterson", category: "Lifetime Achievement", achievement: "40 Years of Industry Leadership" },
-  ],
-  2023: [
-    { name: "Elena Volkov", category: "Technology Pioneer", achievement: "Quantum Computing Advancement" },
-    { name: "David Okonkwo", category: "Social Impact", achievement: "Education Access Initiative" },
-    { name: "Lisa Wang", category: "Creative Excellence", achievement: "Award-Winning Design Studio" },
-    { name: "Robert Sterling", category: "Business Leadership", achievement: "Global Expansion Strategy" },
-  ],
-  2022: [
-    { name: "Priya Sharma", category: "Scientific Innovation", achievement: "Medical Research Breakthrough" },
-    { name: "Carlos Mendez", category: "Sustainability", achievement: "Green Technology Solutions" },
-    { name: "Sophie Martin", category: "Arts & Culture", achievement: "International Cultural Exchange" },
-    { name: "Thomas Anderson", category: "Digital Transformation", achievement: "Enterprise Software Revolution" },
-  ],
-  2021: [
-    { name: "Yuki Tanaka", category: "Innovation in AI", achievement: "Machine Learning Applications" },
-    { name: "Maria Santos", category: "Community Impact", achievement: "Urban Development Program" },
-    { name: "Alexander Kim", category: "Financial Services", achievement: "Fintech Innovation Leader" },
-    { name: "Rachel Cohen", category: "Healthcare Excellence", achievement: "Patient Care Revolution" },
-  ],
-  2020: [
-    { name: "Ahmed Hassan", category: "Technology Innovation", achievement: "Cloud Infrastructure Pioneer" },
-    { name: "Jennifer Liu", category: "Education Reform", achievement: "Digital Learning Platform" },
-    { name: "Miguel Torres", category: "Environmental Impact", achievement: "Ocean Conservation Project" },
-    { name: "Catherine Williams", category: "Industry Leadership", achievement: "Global Market Expansion" },
-  ],
-};
-
-const Winners = () => {
-  const [selectedYear, setSelectedYear] = useState(2024);
-  const years = Object.keys(winnersData).map(Number).sort((a, b) => b - a);
+const Winners = ({ winnersByYear }) => {
+  // Mengambil tahun pertama sebagai default (tahun terbesar/terbaru)
+  const sortedData = [...winnersByYear].sort((a, b) => b.year - a.year);
+  const [selectedYear, setSelectedYear] = useState(sortedData[0]?.year || 2020);
 
   const icons = [Trophy, Award, Medal, Crown];
   const gradients = [
@@ -51,6 +19,10 @@ const Winners = () => {
     "from-[hsl(0,100%,50%)] to-[hsl(0,100%,40%)]",
     "from-[hsl(120,100%,50%)] via-[hsl(60,100%,50%)] to-[hsl(120,100%,40%)]",
   ];
+
+  // Mendapatkan winners untuk tahun yang dipilih
+  const currentYearData = sortedData.find(item => item.year === selectedYear);
+  const currentWinners = currentYearData?.winners || [];
 
   return (
     <>
@@ -81,23 +53,23 @@ const Winners = () => {
 
             {/* Year Selector */}
             <div className="flex justify-center gap-4 mb-16 flex-row relative z-10">
-              {years.map((year) => (
+              {sortedData.map((item) => (
                 <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`px-8 py-2 rounded-lg text-xl bg-white border-amber-400 font-bold border-2 transition-all ${selectedYear === year
+                  key={item.year}
+                  onClick={() => setSelectedYear(item.year)}
+                  className={`px-8 py-2 rounded-lg text-xl bg-white border-amber-400 font-bold border-2 transition-all ${selectedYear === item.year
                     ? "bg-gradient-gold text-guest-primary-foreground shadow-gold border-amber-400 hover:opacity-90 hover:scale-105"
                     : "bg-card border-amber-400/50 text-card-foreground hover:bg-guest-card hover:border-amber-400 hover:shadow-white hover:scale-105"
                     }`}
                 >
-                  {year}
+                  {item.year}
                 </button>
               ))}
             </div>
 
             {/* Winners Grid */}
             <div className="grid md:grid-cols-4 gap-4 max-w-7xl mx-auto relative z-10">
-              {winnersData[selectedYear].map((winner, index) => {
+              {currentWinners.map((winner, index) => {
                 const Icon = icons[index % icons.length];
                 const gradient = gradients[index % gradients.length];
                 return (
@@ -109,7 +81,7 @@ const Winners = () => {
                     {/* Background Image */}
                     <div
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                      style={{ backgroundImage: `url('https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp')` }}
+                      style={{ backgroundImage: `url('/storage/${winner.foto}')` }}
                     />
 
                     {/* Dark Gradient Overlay */}
@@ -123,17 +95,15 @@ const Winners = () => {
                       </div>
 
                       <div className="mt-auto">
-
-
                         {/* Winner Name */}
                         <Card.Title className="text-xl font-display font-bold mb-2 text-white group-hover:text-gradient-gold transition-all">
-                          {winner.name}
+                          {winner.nama}
                         </Card.Title>
 
                         {/* Category Badge */}
                         <div className="inline-flex self-start px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-200/30 to-amber-400/20 border border-amber-400/50 mb-2 backdrop-blur-sm">
                           <span className="text-xs font-bold text-amber-400">
-                            {winner.category}
+                            {winner.kategori}
                           </span>
                         </div>
 
@@ -144,7 +114,6 @@ const Winners = () => {
                       </div>
                     </Card.Body>
                   </Card>
-
                 );
               })}
             </div>
