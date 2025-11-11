@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title inertia>{{ config('app.name', 'ATI') }}</title>
+    <title inertia>{{ config('ATI') }}</title>
 
-    <meta property="og:title" content="{{ $ogTitle ?? config('app.name', 'ATI') }}">
+    <meta property="og:title" content="{{ $ogTitle ?? config('ATI') }}">
     <meta property="og:description" content="{{ $ogDescription ?? 'ATI Anugrah TIMES Indonesia' }}">
     <meta property="og:image" content="{{ $ogImage ?? asset('logo-ati-kosongan.png') }}">
     <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
