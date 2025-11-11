@@ -13,8 +13,18 @@ function NewsCardAuto({
     category,
 }) {
 
+    function formatViews(num) {
+        if (num == null) return "0";
+
+        return num >= 1_000_000
+            ? (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M"
+            : num >= 1_000
+                ? (num / 1_000).toFixed(1).replace(/\.0$/, "") + "k"
+                : num.toString();
+    }
+
     return (
-        <a href={'https://timesindonesia.co.id'+url} target="_blank" rel="noopener noreferrer"className="block group h-full">
+        <a href={'https://timesindonesia.co.id' + url} target="_blank" rel="noopener noreferrer" className="block group h-full">
             <Card className="bg-white h-full transition-all duration-300 border-0 shadow-none overflow-hidden md:shadow-lg md:hover:shadow-2xl md:hover:-translate-y-1 flex flex-row md:flex-col">
 
                 {/* === BAGIAN GAMBAR === */}
@@ -60,7 +70,7 @@ function NewsCardAuto({
                         {/* Views (HANYA tampil di desktop) */}
                         <div className="hidden md:flex items-center space-x-1">
                             <Eye className="h-3 w-3" />
-                            <span>{views}</span>
+                            <span>{formatViews(views)}</span>
                         </div>
                     </div>
                 </div>
