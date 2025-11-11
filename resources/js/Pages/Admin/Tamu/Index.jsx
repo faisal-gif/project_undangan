@@ -53,14 +53,9 @@ function Index({ tamus, filters }) {
                                     Daftar Pendaftar
                                 </h1>
                                 <div className="flex flex-row gap-4">
+                                 
                                     <Link
-                                        href={route("loopEmail")}
-                                        className="btn btn-neutral btn-sm"
-                                    >
-                                        Kirim Email Batch
-                                    </Link>
-                                    <Link
-                                        href={route("tamu.create")}
+                                        href={route("admin.tamu.create")}
                                         className="btn btn-neutral btn-sm"
                                         disabled
                                     >
@@ -100,11 +95,7 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
-                                            <th className="py-2 px-4 border-b">Email</th>
-                                            <th className="py-2 px-4 border-b">Status Pengirim Email</th>
-                                            <th className="py-2 px-4 border-b">Kartu Identitas</th>
-                                            <th className="py-2 px-4 border-b">No Kartu Identitas</th>
-                                            <th className="py-2 px-4 border-b">Status Racepack</th>
+                                       
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
@@ -116,58 +107,8 @@ function Index({ tamus, filters }) {
                                             return (<tr key={tamu.id}>
                                                 <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.email}</td>
-                                                <td className="py-2 px-4 border-b">
-                                                    {latestLog ? (
-                                                        <div>
-                                                            <span
-                                                                className={
-                                                                    latestLog.status === "success"
-                                                                        ? "text-green-600 font-semibold"
-                                                                        : "text-red-600 font-semibold"
-                                                                }
-                                                            >
-                                                                {latestLog.status}
-                                                            </span>
-                                                            <br />
-                                                            <small>({new Date(latestLog.created_at).toLocaleString()})</small>
-                                                            {tamu.email_logs.length > 1 && (
-                                                                <button
-                                                                    onClick={() => setSelectedLogs(tamu.email_logs)}
-                                                                    className="btn btn-xs btn-link text-blue-500"
-                                                                >
-                                                                    Lihat semua
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-gray-500">Belum ada log</span>
-                                                    )}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">{tamu.kartu_identitas}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.no_kartu_identitas}</td>
-                                                <td className="py-2 border-b w-40">
-                                                    {getStatusBadge(tamu.status)}
-                                                </td>
-                                                <td className="py-2 px-4 border-b">
-                                                    <div className=" text-center flex flex-row gap-2">
-                                                        <Link
-                                                            href={route("sendEmail", tamu.id)}
-                                                            className="btn btn-xs btn-neutral"
-                                                        >
-                                                            <Send size={16} />
-                                                        </Link>
-                                                        <Link
-                                                            href={route("tamu.show", tamu.id)}
-                                                            className="btn btn-xs btn-neutral"
-
-                                                        >
-                                                            <Eye size={20} />
-                                                        </Link>
-
-                                                    </div>
-
-                                                </td>
+                                                <td className="py-2 px-4 border-b">{tamu.email}</td> 
+                                             
                                             </tr>)
 
                                         })}

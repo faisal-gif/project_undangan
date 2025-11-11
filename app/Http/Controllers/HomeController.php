@@ -4,13 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Winners;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Guest/Welcome/Index');
+
+        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=344&offset=0&limit=9');
+        $data = null;
+
+        if ($response->successful()) {
+            $data = $response->json();
+        } else {
+           $data = null;
+        }
+
+        return Inertia::render('Guest/Welcome/Index', ['apiData' =>$data['data']]);
     }
 
     public function winners()
