@@ -1,6 +1,5 @@
 import AtiLogo from "@/Components/AtiLogo";
 import CountUp from "@/Components/CountUp";
-import Particles from "@/Components/Particles";
 import { Link } from "@inertiajs/react";
 import { ArrowRight, Award, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";

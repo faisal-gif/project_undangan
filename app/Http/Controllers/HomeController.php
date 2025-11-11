@@ -18,10 +18,10 @@ class HomeController extends Controller
         if ($response->successful()) {
             $data = $response->json();
         } else {
-           $data = null;
+            $data = null;
         }
 
-        return Inertia::render('Guest/Welcome/Index', ['apiData' =>$data['data']]);
+        return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data']]);
     }
 
     public function winners()
@@ -42,5 +42,10 @@ class HomeController extends Controller
         return Inertia::render('Guest/Winners/Index', [
             'winnersByYear' => $groupedWinners
         ]);
+    }
+
+    public function widget()
+    {
+        return Inertia::render('Guest/Widget/Index');
     }
 }
