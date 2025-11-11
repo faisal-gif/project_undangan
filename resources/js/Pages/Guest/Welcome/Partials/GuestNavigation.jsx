@@ -22,14 +22,14 @@ const GuestNavigation = () => {
                             href="/"
                             className={`text-lg font-semibold transition-all text-guest-foreground hover:text-amber-400 relative group `}
                         >
-                            Home
+                            Beranda
                             <span className={`absolute bottom-0 left-0 h-0.5 text-guest-foreground bg-amtext-amber-400 transition-all`} />
                         </Link>
                         <Link
                             href="/winners"
                             className={`text-lg font-semibold transition-all text-guest-foreground hover:text-amber-400 relative group`}
                         >
-                            Winners
+                            Peraih
                             <span className={`absolute bottom-0 left-0 h-0.5 bg-amtext-amber-400 transition-all `} />
                         </Link>
                     </div>

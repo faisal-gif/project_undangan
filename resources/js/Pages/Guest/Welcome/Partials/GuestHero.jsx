@@ -125,7 +125,7 @@ const GuestHero = () => {
         <div className="flex gap-6 justify-center flex-row">
           {/* Button 1 */}
           <Link className="bg-gradient-gold text-primary-foreground hover:opacity-90 shadow-gold text-lg px-6 py-2 font-bold group border-2 border-amber-400/50 hover:scale-105 transition-all rounded-xl inline-flex items-center justify-center">
-            Pemenang
+            Peraih
             <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
           </Link>
 

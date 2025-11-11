@@ -48,4 +48,9 @@ class HomeController extends Controller
     {
         return Inertia::render('Guest/Widget/Index');
     }
+
+    public function undangan()
+    {
+        return Inertia::render('Guest/Undangan/Index');
+    }
 }
