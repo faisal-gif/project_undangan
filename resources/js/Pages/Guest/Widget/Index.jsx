@@ -32,6 +32,8 @@ function Index() {
     }, []);
     return (
         <div className="min-h-screen">
+            <a href="https://ati.timesindonesia.co.id/" target="_blank" rel="noopener noreferrer">
+
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-burgundy">
                 {/* Animated Background Effects */}
                 <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
@@ -140,6 +142,7 @@ function Index() {
                 {/* Bottom Fade */}
                 <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
             </section >
+            </a>
         </div>
     )
 }
