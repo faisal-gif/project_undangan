@@ -9,7 +9,7 @@ function GuestListNews({ news }) {
 
             <div className="text-center mb-12 animate-slide-up">
                 <h2 className="text-4xl md:text-5xl font-display font-bold pb-6 text-gradient-gold">
-                    Berita Mengenai ATI
+                    Berita Seputar ATI
                 </h2>
             </div>
 

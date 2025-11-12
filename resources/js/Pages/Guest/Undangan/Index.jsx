@@ -4,6 +4,9 @@ import { Award, Sparkles } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import AtiLogo from '@/Components/AtiLogo';
 import { Head } from '@inertiajs/react';
+import { AwardsCategorySection } from './Partials/AwardsCategorySection';
+import { AwardsEventSection } from './Partials/AwardsEventSection';
+import { AwardsScheduleSection } from './Partials/AwardsScheduleSection';
 
 function Index() {
     const [isInvitationOpen, setIsInvitationOpen] = useState(false);
@@ -40,7 +43,12 @@ function Index() {
 
 
     if (!isInvitationOpen) {
-        return <AwardHeroSection guestName={'faisal'} onOpenInvitation={() => setIsInvitationOpen(true)} />;
+        return (
+            <>
+                <Head title='Undanga ATI' />
+                <AwardHeroSection guestName={'faisal'} onOpenInvitation={() => setIsInvitationOpen(true)} />
+            </>
+        );
     }
     return (
         <div className="min-h-screen">
@@ -114,9 +122,9 @@ function Index() {
                 </div>
             </section>
 
-            {/* <AwardsCategorySection />
-      <AwardsEventSection />
-      <AwardsScheduleSection /> */}
+            <AwardsCategorySection />
+            <AwardsEventSection />
+            <AwardsScheduleSection />
 
             {/* Why We Celebrate Section */}
             <section className="py-16 md:py-24 px-4">
@@ -130,8 +138,8 @@ function Index() {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="text-center animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Award className="h-10 w-10 text-gold" />
+                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
+                                <Award className="h-10 w-10 text-amber-400" />
                             </div>
                             <h3 className="text-xl font-semibold mb-3">Mengakui Prestasi</h3>
                             <p className="text-muted-foreground">
@@ -140,8 +148,8 @@ function Index() {
                         </div>
 
                         <div className="text-center animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Sparkles className="h-10 w-10 text-gold" />
+                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
+                                <Sparkles className="h-10 w-10 text-amber-400" />
                             </div>
                             <h3 className="text-xl font-semibold mb-3">Menginspirasi</h3>
                             <p className="text-muted-foreground">
@@ -150,8 +158,8 @@ function Index() {
                         </div>
 
                         <div className="text-center animate-slide-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Award className="h-10 w-10 text-gold" />
+                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
+                                <Award className="h-10 w-10 text-amber-400" />
                             </div>
                             <h3 className="text-xl font-semibold mb-3">Membangun Budaya</h3>
                             <p className="text-muted-foreground">

@@ -65,7 +65,7 @@ const GuestHero = () => {
 
         <AtiLogo className="w-32 h-full mx-auto mb-6" />
 
-        <h1 className="text-4xl md:text-5xl font-display font-bold mb-8 text-gradient-gold leading-tight">
+        <h1 className="text-4xl md:text-5xl font-display font-bold mb-8 text-gradient-gold leading-tight font-serif">
           Anugerah
           <br />
           TIMES Indonesia
