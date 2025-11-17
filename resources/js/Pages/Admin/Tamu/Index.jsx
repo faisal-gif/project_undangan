@@ -1,13 +1,23 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { Eye, Send } from "lucide-react";
+import { Eye, Send, User } from "lucide-react";
 import React, { useState } from "react";
 
 function Index({ tamus, filters }) {
+
+
     const { flash } = usePage().props
     const [search, setSearch] = useState(filters.search || "");
     const [loadingPdfId, setLoadingPdfId] = useState(null);
-    const [selectedLogs, setSelectedLogs] = useState(null);
+
+    const slugify = (text) =>
+        text
+            .toLowerCase()
+            .replace(/ /g, "-")        // ubah spasi jadi -
+            .replace(/[^\w-]+/g, "")   // hapus karakter non-alfanumerik
+            .replace(/--+/g, "-")      // hilangkan double dash
+            .replace(/^-+|-+$/g, "");  // trim - di awal/akhir
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -53,11 +63,10 @@ function Index({ tamus, filters }) {
                                     Daftar Pendaftar
                                 </h1>
                                 <div className="flex flex-row gap-4">
-                                 
+
                                     <Link
                                         href={route("admin.tamu.create")}
                                         className="btn btn-neutral btn-sm"
-                                        disabled
                                     >
                                         Tambah Pendaftar
                                     </Link>
@@ -95,23 +104,24 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
-                                       
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tamus.data.map((tamu) => {
-                                            const latestLog = tamu.email_logs.length > 0
-                                                ? tamu.email_logs[0] // asumsi sudah urut dari backend (DESC)
-                                                : null;
-                                            return (<tr key={tamu.id}>
-                                                <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
+                                        {tamus.data.map((tamu) => (
+                                            <tr key={tamu.id}>
+                                                <td className="py-2 px-4 border-b">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.email}</td> 
-                                             
-                                            </tr>)
-
-                                        })}
+                                                <td>
+                                                    <Link
+                                                        href={route("undangan", [tamu.code, slugify(tamu.nama)])}
+                                                        className="btn btn-xs btn-neutral"
+                                                    >
+                                                        <User size={16} />
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                                 <div className="mt-8 join">
@@ -134,38 +144,7 @@ function Index({ tamus, filters }) {
                 </div>
             </div>
 
-            {/* Modal */}
-            {selectedLogs && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-lg font-bold mb-4">Log Pengiriman Email</h2>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {selectedLogs.map((log) => (
-                                <div key={log.id} className="border-b pb-2">
-                                    <span
-                                        className={log.status === "success" ? "text-green-600" : "text-red-600"}
-                                    >
-                                        {log.status}
-                                    </span>
-                                    <br />
-                                    <small>{new Date(log.created_at).toLocaleString()}</small>
-                                    {log.error_message && (
-                                        <p className="text-xs text-gray-600 mt-1">{log.error_message}</p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-4 text-right">
-                            <button
-                                onClick={() => setSelectedLogs(null)}
-                                className="btn btn-sm btn-neutral"
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
         </AuthenticatedLayout>
     );
 }

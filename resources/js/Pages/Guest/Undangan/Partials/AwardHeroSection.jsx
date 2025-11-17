@@ -1,3 +1,4 @@
+import AtiLogo from '@/Components/AtiLogo'
 import { Award } from 'lucide-react'
 import React from 'react'
 
@@ -13,7 +14,7 @@ function AwardHeroSection({ guestName, onOpenInvitation }) {
 
             <div className="relative z-10 text-center px-4 max-w-4xl">
                 <div className="mb-6 flex justify-center animate-scale-in">
-                    <Award className="h-16 w-16 text-gold animate-pulse" />
+                  <AtiLogo className="w-32 h-full mx-auto mb-6 animate-pulse" />
                 </div>
 
                 <p className="text-gold text-sm md:text-base mb-4 tracking-[0.3em] uppercase font-medium animate-fade-in" style={{ animationDelay: '0.2s', opacity: 0 }}>

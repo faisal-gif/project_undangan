@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tamu;
 use App\Models\Winners;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -49,8 +50,12 @@ class HomeController extends Controller
         return Inertia::render('Guest/Widget/Index');
     }
 
-    public function undangan()
+    public function undangan($code, $nama)
     {
-        return Inertia::render('Guest/Undangan/Index');
+        $tamu = Tamu::where('code', $code)->first();
+
+        return Inertia::render('Guest/Undangan/Index', [
+            'tamu' => $tamu,
+        ]);
     }
 }

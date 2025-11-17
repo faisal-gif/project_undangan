@@ -34,7 +34,7 @@ class TamuController extends Controller
         Storage::disk('public')->put($path, $qrImage);
 
         // Simpan path QR di database
-        $tamu->qrcode = $path;
+        $tamu->qr_code = $path;
         $tamu->save();
     }
 
@@ -44,7 +44,6 @@ class TamuController extends Controller
     public function index(Request $request)
     {
         $tamus = Tamu::query()
-            ->with('emailLogs')
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -79,16 +78,25 @@ class TamuController extends Controller
             'pic' => 'nullable|string|max:255',
         ]);
 
+        // generate unique random code and attach it to the new Tamu via creating event
+        $randomCode = strtoupper(Str::random(8));
+
+        while (Tamu::where('code', $randomCode)->exists()) {
+            $randomCode = strtoupper(Str::random(8));
+        }
+
+
         $tamu = Tamu::create([
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
-            'pc' => $request->pic,
+            'pic' => $request->pic,
+            'code' => $randomCode,
         ]);
 
         $this->generateQrCode($tamu->id);
 
-        return redirect()->route('tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
+        return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
 
     /**
@@ -132,10 +140,10 @@ class TamuController extends Controller
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
-            'pc' => $request->pic,
+            'pic' => $request->pic,
         ]);
 
-        return redirect()->route('tamu.index')->with('success', 'Tamu berhasil diperbarui.');
+        return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil diperbarui.');
     }
 
     /**

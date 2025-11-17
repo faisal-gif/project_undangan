@@ -11,7 +11,7 @@ use Inertia\Inertia;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
-Route::get('/undangan', [HomeController::class, 'undangan'])->name('undangan');
+Route::get('/undangan/{code}/{name}', [HomeController::class, 'undangan'])->name('undangan');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

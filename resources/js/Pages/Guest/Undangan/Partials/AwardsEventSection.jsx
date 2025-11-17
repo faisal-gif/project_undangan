@@ -23,7 +23,7 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Tanggal</p>
-                                    <p className="text-xl font-semibold">Sabtu, 20 Desember 2025</p>
+                                    <p className="text-xl font-semibold">Kamis, 27 Desember 2025</p>
                                 </div>
                             </div>
 
@@ -33,7 +33,7 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Waktu</p>
-                                    <p className="text-xl font-semibold">18:00 - 22:00 WIB</p>
+                                    <p className="text-xl font-semibold">18:00 - 22:30 WIB</p>
                                     <p className="text-sm text-muted-foreground mt-1">
                                         Registrasi: 17:30 WIB
                                     </p>
@@ -50,8 +50,8 @@ export const AwardsEventSection = () => {
                                     <p className="text-sm text-muted-foreground mb-1">Lokasi</p>
                                     <p className="text-xl font-semibold">Grand Ballroom</p>
                                     <p className="text-base text-muted-foreground mt-1">
-                                        Hotel Mulia Senayan<br />
-                                        Jl. Asia Afrika, Senayan, Jakarta Pusat
+                                        Grand Mercure Malang Mirama<br />
+                                        Jl. Raden Panji Suroso No.7, Purwodadi, Kec. Blimbing, Kota Malang, Jawa Timur 65126
                                     </p>
                                 </div>
                             </div>
@@ -71,7 +71,7 @@ export const AwardsEventSection = () => {
                     <div className="pt-6 border-t border-border animate-fade-in" style={{ animationDelay: '0.5s', opacity: 0 }}>
 
                         <a
-                            href="https://maps.google.com"
+                            href="https://maps.app.goo.gl/3sfP2FmW4SqXBiWw5"
                             target="_blank"
                             className="btn bg-amber-400 w-full"
                             rel="noopener noreferrer"

@@ -7,13 +7,14 @@ import { Head } from '@inertiajs/react';
 import { AwardsCategorySection } from './Partials/AwardsCategorySection';
 import { AwardsEventSection } from './Partials/AwardsEventSection';
 import { AwardsScheduleSection } from './Partials/AwardsScheduleSection';
+import { QRCodeSection } from './Partials/QRCodeSectionProps';
 
-function Index() {
+function Index({ tamu }) {
     const [isInvitationOpen, setIsInvitationOpen] = useState(false);
-    const [guestName, setGuestName] = useState("Tamu Undangan");
+ 
 
     const calculateTimeLeft = () => {
-        const targetDate = new Date("2025-11-27T23:59:59");
+        const targetDate = new Date("2025-11-27T18:00:00");
         const now = new Date();
         const difference = targetDate - now;
 
@@ -46,7 +47,7 @@ function Index() {
         return (
             <>
                 <Head title='Undanga ATI' />
-                <AwardHeroSection guestName={'faisal'} onOpenInvitation={() => setIsInvitationOpen(true)} />
+                <AwardHeroSection guestName={tamu.nama} onOpenInvitation={() => setIsInvitationOpen(true)} />
             </>
         );
     }
@@ -170,7 +171,7 @@ function Index() {
                 </div>
             </section>
 
-            {/* <QRCodeSection guestName={guestName} /> */}
+            <QRCodeSection guestId={tamu.code} guestName={tamu.nama} qr_code={tamu.qr_code} />
 
 
             {/* Footer */}
