@@ -135,7 +135,7 @@ function Index({ tamu }) {
             <footer className="py-12 px-4 text-center bg-[#4c0c0c] text-white">
                 <div className="container mx-auto">
                     <AtiLogo className="w-12 h-full mx-auto mb-6 animate-pulse" />
-                    <p className="font-serif text-2xl mb-2">Anugrah TIMES INDONESIA 2025</p>
+                    <p className="font-serif text-2xl mb-2">Anugerah TIMES INDONESIA 2025</p>
                     <p className="text-sm text-white/70">
                         Terima kasih atas kehadiran Anda dalam malam penghargaan ini
                     </p>
