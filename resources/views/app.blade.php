@@ -10,9 +10,13 @@
     <meta property="og:title" content="ATI Anugrah TIMES Indonesia">
     <meta property="og:description" content="{{ 'ATI Anugrah TIMES Indonesia' }}">
     <meta property="og:image" content="{{ asset('logo-ati-kosongan.png') }}">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:alt" content="TIMES Indonesia Logo">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="id_ID" />
+    <meta name="fb:app_id" content="902622399777757">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="copyright" content="TIMES Indonesia">
     <meta name="robots" content="index, follow">
