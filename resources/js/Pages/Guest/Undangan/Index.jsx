@@ -123,53 +123,10 @@ function Index({ tamu }) {
                 </div>
             </section>
 
-            <AwardsCategorySection />
             <AwardsEventSection />
             <AwardsScheduleSection />
 
             {/* Why We Celebrate Section */}
-            <section className="py-16 md:py-24 px-4">
-                <div className="container mx-auto max-w-4xl">
-                    <div className="text-center mb-12">
-                        <h2 className="font-serif text-4xl md:text-5xl mb-4">
-                            Mengapa Kami Merayakan
-                        </h2>
-                        <div className="w-24 h-1 bg-gold mx-auto" />
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div className="text-center animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Award className="h-10 w-10 text-amber-400" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Mengakui Prestasi</h3>
-                            <p className="text-muted-foreground">
-                                Memberikan apresiasi kepada individu dan tim yang telah mencapai hasil luar biasa
-                            </p>
-                        </div>
-
-                        <div className="text-center animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Sparkles className="h-10 w-10 text-amber-400" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Menginspirasi</h3>
-                            <p className="text-muted-foreground">
-                                Memotivasi semua orang untuk terus berinovasi dan memberikan yang terbaik
-                            </p>
-                        </div>
-
-                        <div className="text-center animate-slide-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-                            <div className="w-20 h-20 bg-amber-400/10 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-300 hover:scale-110 hover:bg-gold/20">
-                                <Award className="h-10 w-10 text-amber-400" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-3">Membangun Budaya</h3>
-                            <p className="text-muted-foreground">
-                                Memperkuat budaya positif dan kolaborasi dalam organisasi
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <QRCodeSection guestId={tamu.code} guestName={tamu.nama} qr_code={tamu.qr_code} />
 
