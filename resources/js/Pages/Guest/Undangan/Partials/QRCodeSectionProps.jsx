@@ -8,7 +8,7 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
   
 
   const qrData = JSON.stringify({
-    eventId: "ANUGRAH-TIMES-INDONESIA-2025",
+    eventId: "ANUGERAH-TIMES-INDONESIA-2025",
     guestName,
     guestId,
     eventDate: "2025-11-27",
@@ -42,7 +42,7 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
       ctx.fillText("E-Ticket", 200, 40);
 
       ctx.font = "16px Inter";
-      ctx.fillText("Anugrah Times Indonesia 2025", 200, 65);
+      ctx.fillText("Anugerah Times Indonesia 2025", 200, 65);
 
       ctx.font = "14px Inter";
       ctx.fillText(guestName, 200, 410);
@@ -78,7 +78,7 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
         <Card className="p-8 md:p-12 bg-white text-black/60 shadow-2xl max-w-md mx-auto">
           <div className="text-center mb-6">
             <h3 className="text-2xl font-bold mb-2">E-Ticket</h3>
-            <p className="text-sm text-muted-foreground">Anugrah Times Indonesia 2025</p>
+            <p className="text-sm text-muted-foreground">Anugerah Times Indonesia 2025</p>
           </div>
 
           <div className="bg-base-100/30 p-6 rounded-lg mb-6">

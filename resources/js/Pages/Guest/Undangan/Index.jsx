@@ -68,7 +68,7 @@ function Index({ tamu }) {
 
 
                     <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-                        <span className="block mb-3">Anugrah</span>
+                        <span className="block mb-3">Anugerah</span>
                         <span className="block text-amber-400">TIMES INDONESIA</span>
                     </h2>
 

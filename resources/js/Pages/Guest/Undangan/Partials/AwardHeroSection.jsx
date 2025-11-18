@@ -22,7 +22,7 @@ function AwardHeroSection({ guestName, onOpenInvitation }) {
                 </p>
 
                 <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-6 text-white leading-tight animate-slide-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-                    <span className="block mb-4">Anugrah</span>
+                    <span className="block mb-4">Anugerah</span>
                     <span className="block text-gold">TIMES Indonesia</span>
 
                 </h1>
