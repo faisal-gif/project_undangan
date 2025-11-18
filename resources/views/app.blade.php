@@ -9,7 +9,7 @@
 
     <meta property="og:title" content="{{ $ogTitle ?? config('app.name', 'ATI') }}">
     <meta property="og:description" content="{{ $ogDescription ?? 'ATI Anugrah TIMES Indonesia' }}">
-    <meta property="og:image" content="{{ asset('logo-ati-kosongan.png') }}">
+    <meta property="og:image" content="{{ asset('logo-ati-kosongan.jpg') }}">
     <meta property="og:image:width" content="500">
     <meta property="og:image:height" content="500">
     <meta property="og:image:alt" content="TIMES Indonesia Logo">
