@@ -76,11 +76,11 @@ const Winners = ({ winnersByYear }) => {
                 const gradient = gradients[index % gradients.length];
                 return (
                   <button
-                    key={index}
+                    key={winner.id || winner.nama || winner.foto}
                     onClick={() => setSelectedWinner(winner)}
                   >
                     <Card
-                      key={index}
+                       key={winner.id || winner.nama || winner.foto}
                       style={{ animationDelay: `${index * 100}ms` }}
                       className="relative overflow-hidden group  border-2 border-amber-400/30 hover:border-amber-400 transition-all hover:shadow-gold hover:scale-105 animate-slide-up h-[400px]"
                     >
