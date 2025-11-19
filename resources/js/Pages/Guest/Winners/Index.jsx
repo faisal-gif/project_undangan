@@ -52,14 +52,14 @@ const Winners = ({ winnersByYear }) => {
             </div>
 
             {/* Year Selector */}
-            <div className="flex justify-center gap-4 mb-16 flex-row relative z-10">
+            <div className="flex justify-start md:justify-center gap-4 mb-16 flex-row relative z-10 overflow-x-auto whitespace-nowrap p-4">
               {sortedData.map((item) => (
                 <button
                   key={item.year}
                   onClick={() => setSelectedYear(item.year)}
-                  className={`px-8 py-2 rounded-lg text-xl bg-white border-amber-400 font-bold border-2 transition-all ${selectedYear === item.year
-                    ? "bg-gradient-gold text-guest-primary-foreground shadow-gold border-amber-400 hover:opacity-90 hover:scale-105"
-                    : "bg-card border-amber-400/50 text-card-foreground hover:bg-guest-card hover:border-amber-400 hover:shadow-white hover:scale-105"
+                  className={`px-8 py-2 rounded-lg text-xl bg-white border-amber-400 font-bold border-2 transition-all flex-shrink-0 ${selectedYear === item.year
+                      ? "bg-gradient-gold text-guest-primary-foreground shadow-gold border-amber-400 hover:opacity-90 hover:scale-105"
+                      : "bg-card border-amber-400/50 text-card-foreground hover:bg-guest-card hover:border-amber-400 hover:shadow-white hover:scale-105"
                     }`}
                 >
                   {item.year}

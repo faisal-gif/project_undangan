@@ -158,7 +158,7 @@ const GuestHero = () => {
             <div className="text-4xl font-display font-bold text-white mb-2">
               <CountUp
                 from={0}
-                to={15}
+                to={7}
                 separator=","
                 direction="up"
                 duration={1}
