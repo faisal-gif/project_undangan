@@ -174,6 +174,7 @@ class TamuController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+
         return Inertia::render('Admin/QrScanner/Index', [
             'tamus' => $tamus,
             'filters' => $request->only(['search'])
@@ -257,19 +258,10 @@ class TamuController extends Controller
         return redirect()->back()->with('success', "Email {$tamu->nama} Sedang Dikirim!");
     }
 
-    public function qrValidate(Request $request)
+    public function qrValidate($id)
     {
-        $qrData = $request->qr_data;
-        $phone = $request->phone;
-
-        if (!$phone) {
-            throw ValidationException::withMessages([
-                'message' => 'Perlu Mengisikan Nomor HP'
-            ]);
-        }
-
         // Contoh: cari berdasarkan data dari QR
-        $tamu = Tamu::where('id', $qrData)->first();
+        $tamu = Tamu::where('id', $id)->first();
 
         if (!$tamu) {
             throw ValidationException::withMessages([
@@ -277,14 +269,13 @@ class TamuController extends Controller
             ]);
         }
 
-        if ($tamu->status === 'attend') {
+        if ($tamu->status === 'datang') {
             throw ValidationException::withMessages([
                 'message' => 'Undangan sudah digunakan.'
             ]);
         }
 
-        $tamu->status = 'attend';
-        $tamu->telepon = $phone;
+        $tamu->status = 'datang';
         $tamu->save();
 
         // Tambahkan logika validasi tiket, cek status, dll
@@ -292,14 +283,25 @@ class TamuController extends Controller
         return back()->with('success', 'Tiket valid: ' . $tamu->id);
     }
 
-    public function attendance(Request $request)
+    public function attendance($id)
     {
 
-        $tamu = Tamu::find($request->tamu_id);
-        $tamu->status = 'attend';
-        $tamu->telepon = $request->telephone;
+        // Contoh: cari berdasarkan data dari QR
+        $tamu = Tamu::where('id', $id)->first();
+
+        if (!$tamu) {
+         return back()->with('error', 'Undangan Tidak ditemukan');
+        }
+
+        if ($tamu->status === 'datang') {
+
+            return back()->with('error', 'Undangan Sudah Digunakan');
+        }
+
+        $tamu->status = 'datang';
         $tamu->save();
-        return back()->with('success', 'Tiket valid: ' . $tamu->id);
+
+        return back()->with('success', 'Undangan valid: ' . $tamu->id);
     }
 
     public function update_status(Request $request, $id)

@@ -25,8 +25,8 @@ function Index({ tamus, filters }) {
     };
 
     const getStatusBadge = (status) => {
-        if (status === "ambil") {
-            return <span className="badge badge-success p-4">Sudah Ambil</span>;
+        if (status === "datang") {
+            return <span className="badge badge-success p-4">Sudah Datang</span>;
         }
         if (status === "belum") {
             return <span className="badge badge-warning text-xs p-4">Belum</span>;
@@ -104,14 +104,24 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
+                                            <th className="py-2 px-4 border-b">Lembaga</th>
+                                            <th className="py-2 px-4 border-b">Jumlah Orang</th>
+                                            <th className="py-2 px-4 border-b">PIC</th>
+                                            <th className="py-2 px-4 border-b">Status</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {tamus.data.map((tamu) => (
                                             <tr key={tamu.id}>
-                                                <td className="py-2 px-4 border-b">{tamu.id}</td>
+                                                <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
+                                                <td className="py-2 px-4 border-b"><span className="badge badge-primary badge-outline p-3">{tamu.pic}</span></td>
+                                                <td className="py-2 border-b w-40">
+                                                    {getStatusBadge(tamu.status)}
+                                                </td>
                                                 <td>
                                                     <Link
                                                         href={route("undangan", [tamu.code, slugify(tamu.nama)])}

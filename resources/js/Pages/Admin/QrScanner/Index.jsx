@@ -10,28 +10,20 @@ function Index({ tamus, filters }) {
     const { flash } = usePage().props
     const [isScanning, setIsScanning] = useState(false);
     const [search, setSearch] = useState(filters.search || "");
-    const [telephone, setTelephone] = useState("");
-
-
 
     const handleScan = async (data) => {
-        setIsScanning(false); // sembunyikan scanner
-        console.log("Hasil scan:", data);
 
-        try {
-            // validasi kalau data adalah URL
-            const url = new URL(data);
-            // redirect langsung
-            window.location.href = url.href;
-        } catch (err) {
-            // kalau bukan URL, tampilkan alert saja
-            alert(`QR berisi teks: ${data}`);
-        }
+        if (!data) return;
+
+        setIsScanning(false);
+
+        const url = route('admin.attendance', data);
+        window.location.href = url;
     };
 
     const getStatusBadge = (status) => {
-        if (status === "ambil") {
-            return <span className="badge badge-success p-4">Sudah Ambil</span>;
+        if (status === "datang") {
+            return <span className="badge badge-success p-4">Sudah Datang</span>;
         }
         if (status === "belum") {
             return <span className="badge badge-warning text-xs p-4">Belum</span>;
@@ -43,31 +35,6 @@ function Index({ tamus, filters }) {
         e.preventDefault();
         router.get(route("qrScanner", { search }));
     };
-
-    const handleAttendance = (e, tamuId) => {
-        e.preventDefault();
-        router.post(route("admin.attendance"), { telephone, tamu_id: tamuId }, {
-            onSuccess: () => {
-                document.getElementById('modal_phone' + tamuId).close();
-                Swal.fire({
-                    icon: "success",
-                    title: "Berhasil",
-                    text: "Kehadiran berhasil dicatat.",
-                    timer: 2000,
-                    showConfirmButton: false,
-                });
-            },
-            onError: (errors) => {
-                document.getElementById('modal_phone' + tamuId).close();
-                Swal.fire({
-                    icon: "error",
-                    title: "Gagal",
-                    text: errors.message || "Terjadi kesalahan saat absensi.",
-                });
-            }
-        });
-    };
-
 
     return (
         <AuthenticatedLayout>
@@ -82,11 +49,11 @@ function Index({ tamus, filters }) {
                 )}
 
                 {flash.error && (
-                    <div className="toast">
                         <div className="toast toast-top toast-end">
+                             <div className="alert alert-error">
                             <span>{flash.error}</span>
+                            </div>
                         </div>
-                    </div>
                 )}
             </div>
             <div className="container mx-auto px-4 py-8">
@@ -165,10 +132,10 @@ function Index({ tamus, filters }) {
                                         <tr>
                                             <th className="py-2 px-4 border-b">ID</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
-                                            <th className="py-2 px-4 border-b">Email</th>
-                                            <th className="py-2 px-4 border-b">Kartu Identitas</th>
-                                            <th className="py-2 px-4 border-b">No Kartu Identitas</th>
-                                            <th className="py-2 px-4 border-b">Status Racepack</th>
+                                            <th className="py-2 px-4 border-b">Lembaga</th>
+                                            <th className="py-2 px-4 border-b">Jumlah Orang</th>
+                                            <th className="py-2 px-4 border-b">PIC</th>
+                                            <th className="py-2 px-4 border-b">Status</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
                                     </thead>
@@ -177,15 +144,15 @@ function Index({ tamus, filters }) {
                                             <tr key={tamu.id}>
                                                 <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.email}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.kartu_identitas}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.no_kartu_identitas}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
+                                                <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
+                                                <td className="py-2 px-4 border-b"><span className="badge badge-primary badge-outline p-3">{tamu.pic}</span></td>
                                                 <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
                                                 <td className="py-2 px-4 border-b ">
                                                     <Link
-                                                        href={route("tamu.show", tamu.id)}
+                                                        href={route("admin.tamu.show", tamu.id)}
                                                         className="btn btn-xs btn-neutral"
 
                                                     >
@@ -198,9 +165,7 @@ function Index({ tamus, filters }) {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="mt-4">
-                                <Pagination tamus={tamus} />
-                            </div>
+
                         </div>
                     </div>
 

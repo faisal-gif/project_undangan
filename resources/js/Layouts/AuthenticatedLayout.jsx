@@ -74,7 +74,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     <li className='mb-3 pt-10'>
                         <h2 className="menu-title">Menu</h2>
                         <ul>
-                            <li><Link href={route('admin.qrScanner')}>Pengambilan Racepack</Link></li>
+                            <li><Link href={route('admin.qrScanner')}>Buku Tamu</Link></li>
                             {user.role === 'admin' && (
                                 <>
                                     <li>
