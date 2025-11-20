@@ -53,7 +53,7 @@ function Index({ tamu }) {
     }
     return (
         <div className="min-h-screen">
-            <Head title='Undanga ATI' />
+            <Head title={`Undangan Kepada ${tamu.nama}`} />
             {/* Opening Section */}
             <section className="py-16 md:py-24 px-4 text-center bg-gradient-burgundy text-white">
                 {/* Animated Background Effects */}
