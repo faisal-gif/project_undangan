@@ -17,7 +17,7 @@ function AwardHeroSection({ guestName, onOpenInvitation }) {
                   <AtiLogo className="w-32 h-full mx-auto mb-6 animate-pulse" />
                 </div>
 
-                <p className="text-gold text-sm md:text-base mb-4 tracking-[0.3em] uppercase font-medium animate-fade-in" style={{ animationDelay: '0.2s', opacity: 0 }}>
+                <p className="text-amber-400 text-sm md:text-base mb-4 tracking-[0.3em] uppercase font-medium animate-fade-in" style={{ animationDelay: '0.2s', opacity: 0 }}>
                     Proudly Presents
                 </p>
 
