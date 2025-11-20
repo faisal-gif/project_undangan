@@ -1,7 +1,8 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { Eye, Send, User } from "lucide-react";
+import { Check, Copy, Edit2, Eye, Send, User } from "lucide-react";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 function Index({ tamus, filters }) {
 
@@ -9,6 +10,8 @@ function Index({ tamus, filters }) {
     const { flash } = usePage().props
     const [search, setSearch] = useState(filters.search || "");
     const [loadingPdfId, setLoadingPdfId] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
+
 
     const slugify = (text) =>
         text
@@ -33,6 +36,18 @@ function Index({ tamus, filters }) {
         }
         return <span className="badge">{status}</span>;
     };
+
+    const copyLink = (tamu) => {
+        const url = route("undangan", [tamu.code, slugify(tamu.nama)]);
+        navigator.clipboard.writeText(url);
+
+        setCopiedId(tamu.id); // tandai yang dicopy
+
+        setTimeout(() => {
+            setCopiedId(null); // setelah 2 detik kembali normal
+        }, 2000);
+    };
+
 
     return (
         <AuthenticatedLayout>
@@ -122,13 +137,30 @@ function Index({ tamus, filters }) {
                                                 <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
-                                                <td>
+                                                <td className="flex items-center gap-2">
+                                                    <Link href={route("admin.tamu.edit", tamu)}
+                                                        className="btn btn-xs btn-warning"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </Link>
+                                                    {/* Lihat Undangan */}
                                                     <Link
                                                         href={route("undangan", [tamu.code, slugify(tamu.nama)])}
                                                         className="btn btn-xs btn-neutral"
                                                     >
                                                         <User size={16} />
                                                     </Link>
+                                                    {/* Copy Link */}
+                                                    <button
+                                                        onClick={() => copyLink(tamu)}
+                                                        className="btn btn-xs btn-outline flex items-center gap-1"
+                                                    >
+                                                        {copiedId === tamu.id ? (
+                                                            <Check size={16} className="text-green-500" />
+                                                        ) : (
+                                                            <Copy size={16} />
+                                                        )}
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

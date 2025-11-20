@@ -7,8 +7,8 @@ function Edit({ tamu }) {
         nama: tamu.nama || "",
         lembaga: tamu.lembaga || "",
         alamat: tamu.alamat || "",
-        pic: tamu.pc || "",
-        status: tamu.status || "not_attend",
+        pic: tamu.pic || "",
+        status: tamu.status || "belum",
     });
 
     const handleSubmit = (e) => {

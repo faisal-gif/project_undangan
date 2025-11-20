@@ -54,8 +54,6 @@ class HomeController extends Controller
     {
         $tamu = Tamu::where('code', $code)->first();
 
-
-
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,
         ])->withViewData([
