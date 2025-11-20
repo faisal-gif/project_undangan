@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title inertia>{{ config('app.name', 'ATI') }}</title>
+    <title inertia>{{ config('app.name', 'Anugerah Times Indonesia') }}</title>
 
     <meta property="og:title" content="{{ $ogTitle ?? config('app.name', 'ATI') }}">
     <meta property="og:description" content="{{ $ogDescription ?? 'ATI Anugrah TIMES Indonesia' }}">

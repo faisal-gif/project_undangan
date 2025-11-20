@@ -54,8 +54,14 @@ class HomeController extends Controller
     {
         $tamu = Tamu::where('code', $code)->first();
 
+
+
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,
-        ]);
+        ])->withViewData([
+            'ogTitle' => 'kepada '.$tamu->nama,
+            'ogDescription' => 'Kami mengundang anda sekalian untuk menghadiri acara penganugrahan Anugerah Times Indonesia',
+            'ogUrl' => url()->current(),
+        ]);;
     }
 }
