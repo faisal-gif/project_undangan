@@ -7,7 +7,7 @@ function AwardHeroSection({ guestName, lembaga, jumlah_orang, onOpenInvitation }
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
             <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(/awards-hero.jpg)` }}
+                style={{ backgroundImage: `url(/bg-ati.jpg)` }}
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80" />
             </div>
