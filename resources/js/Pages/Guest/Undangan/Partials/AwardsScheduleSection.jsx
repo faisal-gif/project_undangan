@@ -3,13 +3,12 @@ import { Clock } from "lucide-react";
 
 
 const schedule = [
-  { time: "17:30", title: "Registrasi & Welcome Drink", description: "Check-in tamu undangan" },
-  { time: "18:00", title: "Pembukaan Acara", description: "Sambutan dari Master of Ceremony" },
-  { time: "18:15", title: "Sambutan Ketua", description: "Pidato pembukaan dari CEO" },
-  { time: "18:45", title: "Dinner", description: "Makan malam untuk seluruh tamu" },
-  { time: "19:30", title: "Pemberian Penghargaan", description: "Pengumuman dan penyerahan awards" },
-  { time: "21:00", title: "Hiburan & Entertainment", description: "Penampilan artis special guest" },
-  { time: "21:45", title: "Penutupan & Foto Bersama", description: "Sesi foto dan networking" }
+  { time: "18:00", title: "Registrasi & Welcome Drink", description: "Check-in tamu undangan" },
+  { time: "19:00", title: "Opening Ceremony & Penampilan Musik Pembuka", description: "Sambutan dari Master of Ceremony" },
+  { time: "19:15", title: "Sambutan Utama", description: "Pidato pembukaan dari CEO" },
+  { time: "19:30", title: "Interlude & Hiburan Spesial", description: "Hiburan spesial untuk para tamu" },
+  { time: "20.00", title: "Pemberian Anugerah TIMES Indonesia (ATI)", description: "Pengumuman dan penyerahan awards" },
+  { time: "21:00", title: "Penutup & Networking", description: "Sesi foto dan networking" },
 ];
 
 export const AwardsScheduleSection = () => {

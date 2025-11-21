@@ -115,10 +115,6 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
                 Unduh E-Ticket
               </button>
             
-           
-
-
-
             <div className="bg-amber-400/10 border border-amber-400/20 rounded-lg p-4">
               <div className="flex gap-3">
                 <QrCode className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
