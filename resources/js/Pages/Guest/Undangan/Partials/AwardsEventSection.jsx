@@ -23,7 +23,7 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Tanggal</p>
-                                    <p className="text-xl font-semibold">Kamis, 27 Desember 2025</p>
+                                    <p className="text-xl font-semibold">Kamis, 27 November 2025</p>
                                 </div>
                             </div>
 
