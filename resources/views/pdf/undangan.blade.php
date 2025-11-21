@@ -64,7 +64,7 @@
         .yth {
             position: absolute;
             bottom: 70mm;
-            left: 50%;
+            left: 40%;
             font-size: 12pt;
             width: 70mm;
         }
