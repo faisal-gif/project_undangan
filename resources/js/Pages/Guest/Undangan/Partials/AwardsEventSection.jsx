@@ -62,7 +62,7 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Dress Code</p>
-                                    <p className="text-xl font-semibold">Black Tie / Formal</p>
+                                    <p className="text-xl font-semibold">Batik / Formal</p>
                                 </div>
                             </div>
                         </div>

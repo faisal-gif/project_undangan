@@ -124,7 +124,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
                     <li>• Unduh dan simpan QR code ini</li>
                     <li>• Tunjukkan saat registrasi</li>
                     <li>• Datang 30 menit sebelum acara</li>
-                    <li>• Dress code: Black Tie</li>
+                    <li>• Dress code: Batik</li>
                   </ul>
                 </div>
               </div>
