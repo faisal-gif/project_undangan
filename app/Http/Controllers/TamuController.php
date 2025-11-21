@@ -299,7 +299,7 @@ class TamuController extends Controller
         $tamu->status = 'datang';
         $tamu->save();
 
-        return back()->with('success', 'Undangan valid: ' . $tamu->id);
+        return back()->with('success', 'Selamat datang ' . $tamu->nama);
     }
 
     public function update_status(Request $request, $id)

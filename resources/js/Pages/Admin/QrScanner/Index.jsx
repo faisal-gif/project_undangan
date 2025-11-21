@@ -2,7 +2,7 @@ import Pagination from '@/Components/Pagination';
 import QrCode from '@/Components/QrCode'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Check, Eye } from 'lucide-react';
 import React, { useState } from 'react'
 import Swal from 'sweetalert2';
 
@@ -152,11 +152,11 @@ function Index({ tamus, filters }) {
                                                 </td>
                                                 <td className="py-2 px-4 border-b ">
                                                     <Link
-                                                        href={route("admin.tamu.show", tamu.id)}
+                                                        href={route("admin.attendance", tamu.id)}
                                                         className="btn btn-xs btn-neutral"
 
                                                     >
-                                                        <Eye size={20} />
+                                                        <Check size={20} />
                                                     </Link>
 
                                                 </td>
