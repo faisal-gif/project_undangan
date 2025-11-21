@@ -8,6 +8,7 @@ function Edit({ tamu }) {
         lembaga: tamu.lembaga || "",
         alamat: tamu.alamat || "",
         pic: tamu.pic || "",
+        jumlah_orang: tamu.jumlah_orang || 0,
         status: tamu.status || "belum",
     });
 
@@ -75,28 +76,54 @@ function Edit({ tamu }) {
 
                                 </div>
 
-                                <div className="mb-4">
-                                    <label
-                                        htmlFor="pic"
-                                        className="block text-sm font-medium text-gray-700"
-                                    >
-                                        PIC
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="pic"
-                                        value={data.pic}
-                                        onChange={(e) =>
-                                            setData("pic", e.target.value)
-                                        }
-                                        className="mt-2 input input-bordered w-full max-w-xs"
-                                    />
-                                    {errors.pic && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.pic}
-                                        </p>
-                                    )}
+                                <div className="mb-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                    <div className="w-full col-span-2">
+                                        <label
+                                            htmlFor="pic"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            PIC
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="pic"
+                                            value={data.pic}
+                                            onChange={(e) =>
+                                                setData("pic", e.target.value)
+                                            }
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        {errors.pic && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.pic}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="w-full col-span-1">
+                                        <label
+                                            htmlFor="jumlah_orang"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Jumlah Orang
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="jumlah_orang"
+                                            value={data.jumlah_orang}
+                                            onChange={(e) =>
+                                                setData("jumlah_orang", e.target.value)
+                                            }
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        {errors.jumlah_orang && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {errors.jumlah_orang}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
+
 
                                 <div className="mb-4">
                                     <label

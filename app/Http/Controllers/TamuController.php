@@ -75,6 +75,7 @@ class TamuController extends Controller
             'nama' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:255',
             'lembaga' => 'nullable|string|max:255',
+            'jumlah_orang' => 'nullable|integer|min:1',
             'pic' => 'nullable|string|max:255',
         ]);
 
@@ -91,6 +92,7 @@ class TamuController extends Controller
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
             'pic' => $request->pic,
+            'jumlah_orang' => $request->jumlah_orang,
             'code' => $randomCode,
         ]);
 
@@ -133,6 +135,7 @@ class TamuController extends Controller
             'nama' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:255',
             'lembaga' => 'nullable|string|max:255',
+            'jumlah_orang' => 'nullable|integer|min:1',
             'pic' => 'nullable|string|max:255',
         ]);
 
@@ -140,6 +143,7 @@ class TamuController extends Controller
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
+            'jumlah_orang' => $request->jumlah_orang,
             'pic' => $request->pic,
         ]);
 
