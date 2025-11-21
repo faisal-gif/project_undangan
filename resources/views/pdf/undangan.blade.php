@@ -71,7 +71,7 @@
 
         .lembaga {
             position: absolute;
-            bottom: 73mm;
+            bottom: 75mm;
             left: 36%;
             font-size: 12pt;
             width: 70mm;
