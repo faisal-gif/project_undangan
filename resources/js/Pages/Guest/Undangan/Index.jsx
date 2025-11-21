@@ -47,7 +47,7 @@ function Index({ tamu }) {
         return (
             <>
                 <Head title={`Undangan Kepada ${tamu.nama}`} />
-                <AwardHeroSection guestName={tamu.nama} onOpenInvitation={() => setIsInvitationOpen(true)} />
+                <AwardHeroSection guestName={tamu.nama} lembaga={tamu.lembaga} onOpenInvitation={() => setIsInvitationOpen(true)} />
             </>
         );
     }
