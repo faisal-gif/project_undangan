@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 
 function Index({ tamus, filters }) {
-
+    const user = usePage().props.auth.user;
 
     const { flash } = usePage().props
     const [search, setSearch] = useState(filters.search || "");
@@ -50,7 +50,7 @@ function Index({ tamus, filters }) {
 
     const sendWhatsapp = (tamu) => {
         const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
-        const message = `Halo ${tamu.nama}, berikut link undangannya:\n${url}`;
+        const message = `Halo ${tamu.nama},\n\nDengan hormat, Melalui pesan ini, kami bermaksud menyampaikan undangan resmi kepada Bapak/Ibu. Besar harapan kami agar Bapak/Ibu berkenan membuka tautan undangan digital berikut untuk informasi lengkap acara:\n\n${url}\n\nAtas perhatian dan waktunya, kami ucapkan terima kasih.\n\nSalam hormat.\nTIMES Indonesia`;
 
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
@@ -86,29 +86,32 @@ function Index({ tamus, filters }) {
                                 <h1 className="text-2xl font-bold">
                                     Daftar Pendaftar
                                 </h1>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {user.role === 'admin' && (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
-                                    <Link
-                                        href={route("admin.tamu.create")}
-                                        className="btn btn-neutral btn-sm"
-                                    >
-                                        Tambah Pendaftar
-                                    </Link>
-                                    <button
-                                        onClick={() => router.reload({ only: ['tamus'] })}
-                                        className="btn btn-primary btn-sm"
-                                    >
-                                        Refresh
-                                    </button>
-                                    <Link
-                                        href={route("loop")}
-                                        className="btn btn-neutral btn-sm"
-                                    >
-                                        Generate Qr Code
-                                    </Link>
+                                        <Link
+                                            href={route("admin.tamu.create")}
+                                            className="btn btn-neutral btn-sm"
+                                        >
+                                            Tambah Pendaftar
+                                        </Link>
+                                        <button
+                                            onClick={() => router.reload({ only: ['tamus'] })}
+                                            className="btn btn-primary btn-sm"
+                                        >
+                                            Refresh
+                                        </button>
+                                        <Link
+                                            href={route("loop")}
+                                            className="btn btn-neutral btn-sm"
+                                        >
+                                            Generate Qr Code
+                                        </Link>
 
 
-                                </div>
+                                    </div>
+                                )}
+
 
                             </div>
                             <form
@@ -155,11 +158,14 @@ function Index({ tamus, filters }) {
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
                                                 <td className="flex items-center gap-2">
-                                                    <Link href={route("admin.tamu.edit", tamu)}
-                                                        className="btn btn-xs btn-warning"
-                                                    >
-                                                        <Edit2 size={16} />
-                                                    </Link>
+                                                    {user.role === 'admin' && (
+                                                        <Link href={route("admin.tamu.edit", tamu)}
+                                                            className="btn btn-xs btn-warning"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </Link>
+                                                    )}
+
                                                     {/* Lihat Undangan */}
                                                     <Link
                                                         href={route("undangan", [tamu.id, slugify(tamu.nama)])}

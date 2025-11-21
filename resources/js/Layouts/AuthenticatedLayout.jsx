@@ -75,15 +75,16 @@ export default function AuthenticatedLayout({ header, children }) {
                         <h2 className="menu-title">Menu</h2>
                         <ul>
                             <li><Link href={route('admin.qrScanner')}>Buku Tamu</Link></li>
+
+                         
+                                <li>
+                                    <Link href={route('admin.tamu.index')}>Undangan</Link>
+                                </li>
+
                             {user.role === 'admin' && (
-                                <>
-                                    <li>
-                                        <Link href={route('admin.tamu.index')}>Undangan</Link>
-                                    </li>
-                                    <li>
-                                        <Link href={route('admin.winners.index')}>Pemenang</Link>
-                                    </li>
-                                </>
+                                <li>
+                                    <Link href={route('admin.winners.index')}>Pemenang</Link>
+                                </li>
                             )}
                         </ul>
                     </li>
