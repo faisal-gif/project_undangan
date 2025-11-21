@@ -3,7 +3,7 @@ import QrCode from '@/Components/QrCode'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, Eye } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2';
 
 function Index({ tamus, filters }) {
@@ -36,26 +36,32 @@ function Index({ tamus, filters }) {
         router.get(route("qrScanner", { search }));
     };
 
+      useEffect(() => {
+        if (flash.success) {
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text: flash.success,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        if (flash.error) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: flash.error,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    }, [flash]);
+
     return (
         <AuthenticatedLayout>
             <Head title="Qr Scanner" />
-            <div>
-                {flash.success && (
-                    <div className="toast toast-top toast-end ">
-                        <div className="alert alert-success">
-                            <span>{flash.success}</span>
-                        </div>
-                    </div>
-                )}
-
-                {flash.error && (
-                        <div className="toast toast-top toast-end">
-                             <div className="alert alert-error">
-                            <span>{flash.error}</span>
-                            </div>
-                        </div>
-                )}
-            </div>
+          
             <div className="container mx-auto px-4 py-8">
 
                 <div className="max-w-7xl mx-auto space-y-4">
