@@ -79,7 +79,7 @@
 
         .image {
             position: absolute;
-            bottom: 40mm;
+            bottom: 60mm;
             left: 40%;
             width: 35mm;
             height: 40mm;
