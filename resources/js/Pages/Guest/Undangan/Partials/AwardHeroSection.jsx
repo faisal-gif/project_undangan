@@ -2,7 +2,7 @@ import AtiLogo from '@/Components/AtiLogo'
 import { Award } from 'lucide-react'
 import React from 'react'
 
-function AwardHeroSection({ guestName, lembaga,jumlah_orang, onOpenInvitation }) {
+function AwardHeroSection({ guestName, lembaga, jumlah_orang, onOpenInvitation }) {
     return (
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
             <div
@@ -39,9 +39,14 @@ function AwardHeroSection({ guestName, lembaga,jumlah_orang, onOpenInvitation })
                     </p>
                 </div>
 
-                 <p className="text-white font-medium text-sm md:text-lg my-4 animate-fade-in">
-                       Jumlah Max {jumlah_orang} Orang
-                    </p>
+                {
+                    jumlah_orang && (
+                        <p className="text-white font-medium text-sm md:text-lg my-4 animate-fade-in">
+                            Jumlah Max {jumlah_orang} Orang
+                        </p>
+                    )
+                }
+
 
                 <div>
                     <button
