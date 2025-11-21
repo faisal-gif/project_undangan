@@ -33,9 +33,9 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Waktu</p>
-                                    <p className="text-xl font-semibold">18:00 - 22:30 WIB</p>
+                                    <p className="text-xl font-semibold">18:00 - 21:00 WIB</p>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        Registrasi: 17:30 WIB
+                                        Registrasi: 18:00 WIB
                                     </p>
                                 </div>
                             </div>
