@@ -71,7 +71,7 @@
 
         .lembaga {
             position: absolute;
-            bottom: 90mm;
+            bottom: 73mm;
             left: 36%;
             font-size: 12pt;
             width: 70mm;
@@ -79,7 +79,7 @@
 
         .image {
             position: absolute;
-            bottom: 25mm;
+            bottom: 23mm;
             left: 40%;
             width: 35mm;
             height: 40mm;
@@ -95,7 +95,7 @@
     <!-- Halaman 1 -->
     <div class="page page1">
         <div class="yth">{{ $data['nama'] }}</div>
-          <div class="lembaga">({{ $data['lembaga'] }})</div>
+        <div class="lembaga">({{ $data['lembaga'] }})</div>
         <img class="image" src="{{ public_path('storage/' . $data['qrCode']) }}" alt="QR Code">
     </div>
     <div class="break"></div>
