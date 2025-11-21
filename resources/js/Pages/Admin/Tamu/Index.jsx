@@ -50,7 +50,7 @@ function Index({ tamus, filters }) {
 
     const sendWhatsapp = (tamu) => {
         const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
-        const message = `Halo ${tamu.nama},\n\nDengan hormat, Melalui pesan ini, kami bermaksud menyampaikan undangan resmi kepada Bapak/Ibu. Besar harapan kami agar Bapak/Ibu berkenan membuka tautan undangan digital berikut untuk informasi lengkap acara:\n\n${url}\n\nAtas perhatian dan waktunya, kami ucapkan terima kasih.\n\nSalam hormat.\nTIMES Indonesia`;
+        const message = `Kepada Yth. ${tamu.nama}\n\nDengan hormat, Melalui pesan ini, kami bermaksud menyampaikan undangan resmi kepada Bapak/Ibu. Besar harapan kami agar Bapak/Ibu berkenan membuka tautan undangan digital berikut untuk informasi lengkap acara:\n\n${url}\n\nAtas perhatian dan waktunya, kami ucapkan terima kasih.\n\nSalam hormat.\nTIMES Indonesia`;
 
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
