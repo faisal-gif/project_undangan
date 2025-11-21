@@ -280,7 +280,7 @@ class TamuController extends Controller
 
         // Tambahkan logika validasi tiket, cek status, dll
 
-        return back()->with('success', 'Tiket valid: ' . $tamu->id);
+        return back()->with('success', 'Selamat Datang: ' . $tamu->nama);
     }
 
     public function attendance($id)
