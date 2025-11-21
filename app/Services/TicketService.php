@@ -7,54 +7,34 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Typography\FontFactory;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
 
 class TicketService
 {
     /**
      * Create a new class instance.
      */
-   public function generateTicket(Tamu $tamu)
+    public function generateTicket(Tamu $tamu)
     {
-        $url = route('tamu.show', $tamu->id);
+        // generate unique random code and attach it to the new Tamu via creating event
+        // $randomCode = strtoupper(Str::random(8));
+
+        // while (Tamu::where('code', $randomCode)->exists()) {
+        //     $randomCode = strtoupper(Str::random(8));
+        // }
 
 
-        // generate QR code PNG
-        $qrCode = QrCode::format('png')
-            ->size(300)
-            ->encoding('UTF-8') // <— penting!
-            ->generate($url);
+        // Generate QR Code (misalnya berdasarkan ID atau kode unik)
+        $qrCodeContent = $tamu->id; // atau $request->ticket_code
+        $qrImage = QrCode::format('png')->size(300)->generate($qrCodeContent);
 
-        $qrPath = 'qrcodes/' . $tamu->id . '.png';
-        Storage::disk('public')->put($qrPath, $qrCode);
+        // Simpan QR code ke storage
+        $path = "qrcodes/{$tamu->id}.png";
+        Storage::disk('public')->put($path, $qrImage);
 
-
-        $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
-
-        // Baca template tiket
-        $template = $manager->read(public_path('ticket_template.png'));
-
-        // Baca QR Code (sudah digenerate pakai simple-qrcode dan disimpan)
-        $qrPath = storage_path('app/public/qrcodes/' . $tamu->id . '.png');
-        $qrImage = $manager->read($qrPath)->resize(500, 500);
-
-
-
-        // Tempel QR di posisi tertentu
-        $template->place($qrImage, 'center', 0, 550);
-
-        // Tambahkan teks nama peserta
-        $template->text($tamu->nama, 550, 1150, function (FontFactory $font) {
-            $font->filename(public_path('ARIAL.TTF'));
-            $font->size(40);
-            $font->color('#FFFFFF');
-            $font->align('center');
-        });
-
-        // Simpan hasil ke storage
-        $outputPath = storage_path('app/public/tickets/' . $tamu->id . '.png');
-        $template->save($outputPath);
-
-        $tamu->qrcode = 'storage/tickets/' . $tamu->id . '.png';
+        // Simpan path QR di database
+        $tamu->qr_code = $path;
+        // $tamu->code = $randomCode;
         $tamu->save();
 
 
