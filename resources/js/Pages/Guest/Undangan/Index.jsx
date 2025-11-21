@@ -73,7 +73,7 @@ function Index({ tamu }) {
                     </h2>
 
                     <p className="text-xl md:text-2xl text-white/80 mb-8 animate-fade-in" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        Sabtu, 27 November 2025
+                        Kamis, 27 November 2025
                     </p>
 
                     <div className="mb-12 animate-fade-in" style={{ animationDelay: '0.8s', opacity: 0 }}>
