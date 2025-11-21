@@ -94,8 +94,8 @@
 <body>
     <!-- Halaman 1 -->
     <div class="page page1">
-        <div class="yth">{{ $data['nama'] }}</div>
-        <div class="lembaga">({{ $data['lembaga'] }})</div>
+        <div class="yth">{{ $data['nama'] }}</div> 
+        <div class="lembaga">{{ $data['lembaga'] }}</div>
         <img class="image" src="{{ public_path('storage/' . $data['qrCode']) }}" alt="QR Code">
     </div>
     <div class="break"></div>
