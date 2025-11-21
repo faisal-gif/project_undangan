@@ -29,10 +29,10 @@ function Index({ tamus, filters }) {
 
     const getStatusBadge = (status) => {
         if (status === "datang") {
-            return <span className="badge badge-success p-4">Sudah Datang</span>;
+            return <span className="badge badge-success text-xs p-3">Datang</span>;
         }
         if (status === "belum") {
-            return <span className="badge badge-warning text-xs p-4">Belum</span>;
+            return <span className="badge badge-warning text-xs p-3">Belum</span>;
         }
         return <span className="badge">{status}</span>;
     };
@@ -77,7 +77,7 @@ function Index({ tamus, filters }) {
                                 <h1 className="text-2xl font-bold">
                                     Daftar Pendaftar
                                 </h1>
-                                <div className="flex flex-row gap-4">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
                                     <Link
                                         href={route("admin.tamu.create")}

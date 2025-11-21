@@ -46,8 +46,7 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('no_kartu_identitas', 'like', "%{$search}%");
+                    ->orWhere('lembaga', 'like', "%{$search}%");
             })
             ->paginate(10)
             ->withQueryString();
@@ -168,8 +167,7 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('no_kartu_identitas', 'like', "%{$search}%");
+                    ->orWhere('lembaga', 'like', "%{$search}%");
             })
             ->paginate(10)
             ->withQueryString();
@@ -290,7 +288,7 @@ class TamuController extends Controller
         $tamu = Tamu::where('id', $id)->first();
 
         if (!$tamu) {
-         return back()->with('error', 'Undangan Tidak ditemukan');
+            return back()->with('error', 'Undangan Tidak ditemukan');
         }
 
         if ($tamu->status === 'datang') {
