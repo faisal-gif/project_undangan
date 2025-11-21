@@ -58,7 +58,7 @@ class HomeController extends Controller
             'tamu' => $tamu,
         ])->withViewData([
             'ogTitle' => 'Kepada '.$tamu->nama,
-            'ogDescription' => 'Kami mengundang anda sekalian untuk menghadiri acara penganugrahan Anugerah Times Indonesia',
+            'ogDescription' => 'Kami menantikan kehadiran Anda di malam Anugerah TIMES Indonesia',
             'ogUrl' => url()->current(),
         ]);;
     }
