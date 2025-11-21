@@ -63,7 +63,7 @@
 
         .yth {
             position: absolute;
-            bottom: 50mm;
+            bottom: 60mm;
             left: 36%;
             font-size: 12pt;
             width: 70mm;
@@ -95,20 +95,21 @@
     <!-- Halaman 1 -->
     <div class="page page1">
         <div class="yth">{{ $data['nama'] }}</div>
+        <img class="image" src="{{ public_path('storage/' . $data['qrCode']) }}" alt="QR Code">
     </div>
     <div class="break"></div>
     <!-- Halaman 1 -->
     <div class="page page3"></div>
 
-    </div>
-
     <div class="break"></div>
     <!-- Halaman 2 -->
     <div class="page page2">
+    </div>
 
-        <div class="break"></div>
-        <!-- Halaman 2 -->
-        <div class="page page4"></div>
+
+    <div class="break"></div>
+    <!-- Halaman 2 -->
+    <div class="page page4"></div>
 </body>
 
 </html>
