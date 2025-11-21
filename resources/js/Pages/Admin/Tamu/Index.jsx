@@ -48,6 +48,15 @@ function Index({ tamus, filters }) {
         }, 2000);
     };
 
+    const sendWhatsapp = (tamu) => {
+        const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
+        const message = `Halo ${tamu.nama}, berikut link undangannya:\n${url}`;
+
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+    };
+
+
 
     return (
         <AuthenticatedLayout>
@@ -98,7 +107,7 @@ function Index({ tamus, filters }) {
                                         Generate Qr Code
                                     </Link>
 
-                                   
+
                                 </div>
 
                             </div>
@@ -160,22 +169,18 @@ function Index({ tamus, filters }) {
                                                     </Link>
                                                     {/* Copy Link */}
                                                     <button
-                                                        onClick={() => copyLink(tamu)}
-                                                        className="btn btn-xs btn-outline flex items-center gap-1"
+                                                        onClick={() => sendWhatsapp(tamu)}
+                                                        className="btn btn-xs btn-success flex items-center gap-1"
                                                     >
-                                                        {copiedId === tamu.id ? (
-                                                            <Check size={16} className="text-green-500" />
-                                                        ) : (
-                                                            <Copy size={16} />
-                                                        )}
+                                                        <Send size={16} />
                                                     </button>
 
-                                                     <a
-                                        href={route("tickets.undangan", tamu.id)}
-                                        className="btn btn-primary btn-xs"
-                                    >
-                                        pdf
-                                    </a>
+                                                    <a
+                                                        href={route("tickets.undangan", tamu.id)}
+                                                        className="btn btn-primary btn-xs"
+                                                    >
+                                                        pdf
+                                                    </a>
                                                 </td>
                                             </tr>
                                         ))}
