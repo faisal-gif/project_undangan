@@ -63,7 +63,7 @@
 
         .yth {
             position: absolute;
-            bottom: 60mm;
+            bottom: 70mm;
             left: 36%;
             font-size: 12pt;
             width: 70mm;
@@ -79,9 +79,9 @@
 
         .image {
             position: absolute;
-            bottom: 35mm;
+            bottom: 40mm;
             left: 40%;
-            width: 40mm;
+            width: 35mm;
             height: 40mm;
         }
 
