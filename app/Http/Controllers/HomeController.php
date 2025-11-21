@@ -50,9 +50,9 @@ class HomeController extends Controller
         return Inertia::render('Guest/Widget/Index');
     }
 
-    public function undangan($code, $nama)
+    public function undangan($id, $nama)
     {
-        $tamu = Tamu::where('code', $code)->first();
+        $tamu = Tamu::find($id);
 
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,

@@ -25,19 +25,19 @@
         }
 
         .page1 {
-            background-image: url('{{ public_path('templates/undangan_page_1.png') }}');
+            background-image: url('{{ public_path('templates/cover.jpg') }}');
         }
 
         .page2 {
-            background-image: url('{{ public_path('templates/undangan_page_2.png') }}');
+            background-image: url('{{ public_path('templates/page_1.jpg') }}');
         }
 
         .page3 {
-            background-image: url('{{ public_path('templates/undangan_page_3.png') }}');
+            background-image: url('{{ public_path('templates/page_2.jpg') }}');
         }
 
         .page4 {
-            background-image: url('{{ public_path('templates/undangan_page_4.png') }}');
+            background-image: url('{{ public_path('templates/page_last.jpg') }}');
         }
 
 
@@ -63,7 +63,7 @@
 
         .yth {
             position: absolute;
-            bottom: 100mm;
+            bottom: 50mm;
             left: 36%;
             font-size: 12pt;
             width: 70mm;
@@ -95,22 +95,20 @@
     <!-- Halaman 1 -->
     <div class="page page1">
         <div class="yth">{{ $data['nama'] }}</div>
-        <div class="lembaga">({{ $data['lembaga'] }})</div>
-        <img class="image" src="{{ public_path('storage/' . $data['qrCode']) }}" alt="QR Code">
     </div>
     <div class="break"></div>
     <!-- Halaman 1 -->
-    <div class="page page2">
-        <div class="kepada">{{ $data['nama'] }}</div>
+    <div class="page page3"></div>
+
     </div>
 
     <div class="break"></div>
     <!-- Halaman 2 -->
-    <div class="page page3"></div>
+    <div class="page page2">
 
-    <div class="break"></div>
-    <!-- Halaman 2 -->
-    <div class="page page4"></div>
+        <div class="break"></div>
+        <!-- Halaman 2 -->
+        <div class="page page4"></div>
 </body>
 
 </html>

@@ -38,7 +38,7 @@ function Index({ tamus, filters }) {
     };
 
     const copyLink = (tamu) => {
-        const url = route("undangan", [tamu.code, slugify(tamu.nama)]);
+        const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
         navigator.clipboard.writeText(url);
 
         setCopiedId(tamu.id); // tandai yang dicopy
@@ -91,6 +91,12 @@ function Index({ tamus, filters }) {
                                     >
                                         Refresh
                                     </button>
+                                      <Link
+                                        href={route("loop")}
+                                        className="btn btn-neutral btn-sm"
+                                    >
+                                       Generate Qr Code
+                                    </Link>
                                 </div>
 
                             </div>
@@ -145,7 +151,7 @@ function Index({ tamus, filters }) {
                                                     </Link>
                                                     {/* Lihat Undangan */}
                                                     <Link
-                                                        href={route("undangan", [tamu.code, slugify(tamu.nama)])}
+                                                        href={route("undangan", [tamu.id, slugify(tamu.nama)])}
                                                         className="btn btn-xs btn-neutral"
                                                     >
                                                         <User size={16} />

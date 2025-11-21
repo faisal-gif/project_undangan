@@ -128,7 +128,7 @@ function Index({ tamu }) {
 
             {/* Why We Celebrate Section */}
 
-            <QRCodeSection guestId={tamu.code} guestName={tamu.nama} qr_code={tamu.qr_code} />
+            <QRCodeSection guestId={tamu.id} guestCode={tamu.code}  guestName={tamu.nama} qr_code={tamu.qr_code} />
 
 
             {/* Footer */}

@@ -11,7 +11,7 @@ use Inertia\Inertia;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
-Route::get('/undangan/{code}/{name}', [HomeController::class, 'undangan'])->name('undangan');
+Route::get('/undangan/{id}/{name}', [HomeController::class, 'undangan'])->name('undangan');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -34,7 +34,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 Route::get('/sendEmail/{id}',[TamuController::class, 'sendEmail'])->name('sendEmail');
 Route::get('/loop', [TamuController::class, 'loopQr'])->name('loop');
 Route::get('/loopSendEmail', [TamuController::class, 'loopSendEmail'])->name('loopEmail');
-Route::get('undangan/{id}', [TamuController::class, 'generatePdf'])->name('tickets.undangan');
+Route::get('undanganDigital/{id}', [TamuController::class, 'generatePdf'])->name('tickets.undangan');
 Route::get('/bubble', [TamuController::class, 'bubble'])->name('bubble');
 
 require __DIR__ . '/auth.php';

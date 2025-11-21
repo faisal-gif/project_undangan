@@ -190,7 +190,7 @@ class TamuController extends Controller
         $data = [
             'nama' => !empty($tamu->nama) ? $tamu->nama : $tamu->lembaga,
             'lembaga' => !empty($tamu->lembaga) ? $tamu->lembaga : '',
-            'qrCode' => $tamu->qrcode,
+            'qrCode' => $tamu->qr_code,
         ];
 
         $pdf = Pdf::loadView('pdf.undangan', compact('data'))

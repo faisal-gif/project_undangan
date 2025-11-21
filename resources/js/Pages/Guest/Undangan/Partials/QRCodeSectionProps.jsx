@@ -4,13 +4,13 @@ import { Download, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import Card from "@/Components/Card";
 
-export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
-  
+export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
+
 
   const qrData = JSON.stringify({
     eventId: "ANUGERAH-TIMES-INDONESIA-2025",
     guestName,
-    guestId,
+    guestCode,
     eventDate: "2025-11-27",
     eventTime: "18:00",
     venue: "Grand Mercure Malang Mirama"
@@ -49,7 +49,7 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
 
       ctx.font = "12px Inter";
       ctx.fillStyle = "#64748b";
-      ctx.fillText(guestId, 200, 430);
+      ctx.fillText(guestCode, 200, 430);
       ctx.fillText("27 November 2025 - 18:00 WIB", 200, 450);
 
       const link = document.createElement("a");
@@ -94,7 +94,7 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
 
             <div className="text-center">
               <p className="text-lg font-semibold mb-1">{guestName}</p>
-              <p className="text-xs text-muted-foreground font-mono mb-3">{guestId}</p>
+              <p className="text-xs text-muted-foreground font-mono mb-3">{guestCode}</p>
               <div className="border-t pt-3">
                 <p className="text-sm text-muted-foreground">Kamis, 27 November 2025</p>
                 <p className="text-sm text-muted-foreground">18:00 WIB</p>
@@ -106,13 +106,25 @@ export const QRCodeSection = ({ guestName,guestId,qr_code }) => {
           </div>
 
           <div className="space-y-3">
-            <button
-              onClick={downloadQRCode}
-              className="w-full bg-amber-400 hover:bg-amber-500 text-primary font-semibold py-3 rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
-            >
-              <Download className="h-5 w-5" />
-              Unduh E-Ticket
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={downloadQRCode}
+                className="w-full bg-amber-400 hover:bg-amber-500 text-primary font-semibold py-3 rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <Download className="h-5 w-5" />
+                Unduh E-Ticket
+              </button>
+              <a
+                href={route("tickets.undangan", guestId)}
+                className="btn btn-primary flex items-center justify-center gap-2"
+              >
+                <Download className="h-5 w-5" />
+                Unduh Undangan
+              </a>
+            </div>
+
+
+
 
             <div className="bg-amber-400/10 border border-amber-400/20 rounded-lg p-4">
               <div className="flex gap-3">
