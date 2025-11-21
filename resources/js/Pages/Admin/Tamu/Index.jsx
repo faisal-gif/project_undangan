@@ -91,12 +91,14 @@ function Index({ tamus, filters }) {
                                     >
                                         Refresh
                                     </button>
-                                      <Link
+                                    <Link
                                         href={route("loop")}
                                         className="btn btn-neutral btn-sm"
                                     >
-                                       Generate Qr Code
+                                        Generate Qr Code
                                     </Link>
+
+                                   
                                 </div>
 
                             </div>
@@ -167,6 +169,13 @@ function Index({ tamus, filters }) {
                                                             <Copy size={16} />
                                                         )}
                                                     </button>
+
+                                                     <a
+                                        href={route("tickets.undangan", tamu.id)}
+                                        className="btn btn-primary btn-xs"
+                                    >
+                                        pdf
+                                    </a>
                                                 </td>
                                             </tr>
                                         ))}

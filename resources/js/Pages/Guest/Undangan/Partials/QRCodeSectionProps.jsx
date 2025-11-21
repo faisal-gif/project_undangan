@@ -106,7 +106,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
           </div>
 
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
+           
               <button
                 onClick={downloadQRCode}
                 className="w-full bg-amber-400 hover:bg-amber-500 text-primary font-semibold py-3 rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
@@ -114,15 +114,8 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
                 <Download className="h-5 w-5" />
                 Unduh E-Ticket
               </button>
-              <a
-                href={route("tickets.undangan", guestId)}
-                className="btn btn-primary flex items-center justify-center gap-2"
-              >
-                <Download className="h-5 w-5" />
-                Unduh Undangan
-              </a>
-            </div>
-
+            
+           
 
 
 
