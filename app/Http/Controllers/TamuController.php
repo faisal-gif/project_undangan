@@ -46,7 +46,8 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('lembaga', 'like', "%{$search}%");
+                    ->orWhere('lembaga', 'like', "%{$search}%")
+                    ->orWhere('pic', 'like', "%{$search}%");
             })
             ->paginate(10)
             ->withQueryString();
@@ -167,7 +168,8 @@ class TamuController extends Controller
         $tamus = Tamu::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%")
-                    ->orWhere('lembaga', 'like', "%{$search}%");
+                    ->orWhere('lembaga', 'like', "%{$search}%")
+                    ->orWhere('pic', 'like', "%{$search}%");
             })
             ->paginate(10)
             ->withQueryString();
