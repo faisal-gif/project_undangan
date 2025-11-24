@@ -13,9 +13,7 @@ Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
 Route::get('/undangan/{id}/{name}', [HomeController::class, 'undangan'])->name('undangan');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('tamu', TamuController::class);

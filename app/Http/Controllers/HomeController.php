@@ -10,6 +10,22 @@ use Inertia\Inertia;
 
 class HomeController extends Controller
 {
+    public function dashboard()
+    {
+        $totalTamu = Tamu::count();
+        $totalTamuDatang = Tamu::where('status','datang')->count();
+        $totalTamuBelumDatang = Tamu::where('status','belum')->count();
+        $totalWinners = Winners::count();
+
+
+        return Inertia::render('Dashboard', [
+            'totalTamu' => $totalTamu,
+            'totalTamuDatang' => $totalTamuDatang,
+            'totalTamuBelumDatang' => $totalTamuBelumDatang,
+            'totalWinners' => $totalWinners,
+        ]);
+    }
+
     public function index()
     {
 
