@@ -33,7 +33,7 @@ function Index({ tamus, filters }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route("qrScanner", { search }));
+        router.get(route("admin.qrScanner", { search }));
     };
 
       useEffect(() => {
