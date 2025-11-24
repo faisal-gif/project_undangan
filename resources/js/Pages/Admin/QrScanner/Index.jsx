@@ -36,7 +36,7 @@ function Index({ tamus, filters }) {
         router.get(route("admin.qrScanner", { search }));
     };
 
-      useEffect(() => {
+    useEffect(() => {
         if (flash.success) {
             Swal.fire({
                 icon: "success",
@@ -61,7 +61,7 @@ function Index({ tamus, filters }) {
     return (
         <AuthenticatedLayout>
             <Head title="Qr Scanner" />
-          
+
             <div className="container mx-auto px-4 py-8">
 
                 <div className="max-w-7xl mx-auto space-y-4">
@@ -170,6 +170,19 @@ function Index({ tamus, filters }) {
                                         ))}
                                     </tbody>
                                 </table>
+                                <div className="mt-8 join">
+                                    {
+                                        tamus.links
+                                            .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
+                                            .map((l, index) => (
+                                                <Link
+                                                    key={index}
+                                                    href={l.url ?? "#"}
+                                                    className={`join-item btn btn-sm ${!l.url ? "btn-disabled" : ""}`}
+                                                    dangerouslySetInnerHTML={{ __html: l.label }}
+                                                />
+                                            ))}
+                                </div>
                             </div>
 
                         </div>
