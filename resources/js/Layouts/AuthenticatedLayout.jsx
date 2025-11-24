@@ -70,14 +70,19 @@ export default function AuthenticatedLayout({ header, children }) {
                             <ApplicationLogo className="h-14 w-full mx-auto" />
                         </Link>
                     </li>
+
+
+
                     {/* Sidebar content here */}
                     <li className='mb-3 pt-10'>
-                        <h2 className="menu-title">Menu</h2>
                         <ul>
-                            <li><Link href={route('admin.qrScanner')}>Buku Tamu</Link></li>
                             <li>
                                 <Link href={route('dashboard')}>Dashboard</Link>
                             </li>
+                        </ul>
+                        <h2 className="menu-title">Menu</h2>
+                        <ul>
+                            <li><Link href={route('admin.qrScanner')}>Buku Tamu</Link></li>
 
                             <li>
                                 <Link href={route('admin.tamu.index')}>Undangan</Link>
