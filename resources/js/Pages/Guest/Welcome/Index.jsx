@@ -6,7 +6,7 @@ import React from 'react'
 import GuestListNews from './Partials/GuestListNews'
 
 function Index({ apiData }) {
-  console.log(apiData);
+
 
   return (
     <>
