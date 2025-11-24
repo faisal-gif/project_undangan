@@ -46,14 +46,14 @@ function Index({ tamu }) {
     if (!isInvitationOpen) {
         return (
             <>
-                <Head title={`Undangan Kepada ${tamu.nama}`} />
+                <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
                 <AwardHeroSection guestName={tamu.nama} jumlah_orang={tamu.jumlah_orang} lembaga={tamu.lembaga} onOpenInvitation={() => setIsInvitationOpen(true)} />
             </>
         );
     }
     return (
         <div className="min-h-screen">
-            <Head title={`Undangan Kepada ${tamu.nama}`} />
+            <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
             {/* Opening Section */}
             <section className="py-16 md:py-24 px-4 text-center bg-gradient-burgundy text-white">
                 {/* Animated Background Effects */}
