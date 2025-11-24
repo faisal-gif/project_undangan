@@ -46,10 +46,10 @@ const Winners = ({ winnersByYear }) => {
                 <Trophy className="w-16 h-16 text-guest-primary-foreground" />
               </div>
               <h1 className="text-6xl md:text-8xl font-display font-bold mb-6 text-gradient-gold">
-                Hall of Excellence
+                Para Peraih Anugerah
               </h1>
               <p className="text-xl text-guest-foreground max-w-2xl mx-auto">
-                Honoring remarkable individuals who have made extraordinary contributions
+                Kami memberi penghormatan kepada para individu istimewa yang telah menorehkan kontribusi luar biasa.
               </p>
             </div>
 
