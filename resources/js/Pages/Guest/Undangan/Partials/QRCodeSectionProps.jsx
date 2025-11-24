@@ -134,7 +134,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
 
         <div className="text-center mt-8 text-white/60 text-sm">
           <p>Jika ada pertanyaan, hubungi panitia:</p>
-          <p className="text-gold">redaksi@timesindonesia.co.id | +62 812-3456-7890</p>
+          <p className="text-gold">redaksi@timesindonesia.co.id | +62 857-3508-4947</p>
         </div>
       </div>
     </section>
