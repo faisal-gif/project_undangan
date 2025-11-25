@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/news', [HomeController::class, 'news'])->name('news');
 Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
 Route::get('/undangan/{id}/{name}', [HomeController::class, 'undangan'])->name('undangan');

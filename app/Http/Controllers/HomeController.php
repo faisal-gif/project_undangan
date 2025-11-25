@@ -13,8 +13,8 @@ class HomeController extends Controller
     public function dashboard()
     {
         $totalTamu = Tamu::count();
-        $totalTamuDatang = Tamu::where('status','datang')->count();
-        $totalTamuBelumDatang = Tamu::where('status','belum')->count();
+        $totalTamuDatang = Tamu::where('status', 'datang')->count();
+        $totalTamuBelumDatang = Tamu::where('status', 'belum')->count();
         $totalWinners = Winners::count();
 
 
@@ -41,6 +41,20 @@ class HomeController extends Controller
         return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data']]);
     }
 
+    public function news()
+    {
+        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=344&offset=0&limit=9');
+        $data = null;
+
+        if ($response->successful()) {
+            $data = $response->json();
+        } else {
+            $data = null;
+        }
+
+        return Inertia::render('Guest/News/Index', ['apiData' => $data['data']]);
+    }
+
     public function winners()
     {
         $winners = Winners::orderBy('tahun', 'desc')
@@ -61,6 +75,8 @@ class HomeController extends Controller
         ]);
     }
 
+
+
     public function widget()
     {
         return Inertia::render('Guest/Widget/Index');
@@ -73,7 +89,7 @@ class HomeController extends Controller
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,
         ])->withViewData([
-            'ogTitle' => 'Kepada '.$tamu->nama,
+            'ogTitle' => 'Kepada ' . $tamu->nama,
             'ogDescription' => 'Kami menantikan kehadiran Anda di malam Anugerah TIMES Indonesia',
             'ogUrl' => url()->current(),
         ]);;

@@ -36,8 +36,10 @@ const GuestFeatures = () => {
 
   return (
     <section className="py-32 px-6 relative bg-guest-background">
-      <div className="absolute inset-0 bg-pattern-dots opacity-30" />
-
+      {/* Animated Background Effects */}
+      <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
+      <div className="absolute inset-0 bg-pattern-dots" />
+      
       <div className="container mx-auto relative z-10">
         <div className="text-center mb-20 animate-slide-up">
           <h2 className="text-2xl md:text-5xl font-display font-bold mb-6 text-gradient-gold">

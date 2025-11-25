@@ -1,18 +1,14 @@
 import NewsCardAuto from '@/Components/NewsCardAuto'
 import React from 'react'
 
-function GuestListNews({ news }) {
+function ListNews({ news }) {
     return (
 
-        <section className=" pb-32 px-6 relative bg-guest-background">
-             <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
-      <div className="absolute inset-0 bg-pattern-dots" />
+        <section className=" pb-32 px-6 relative ">
+          
+            <div className="absolute inset-0 bg-pattern-dots" />
 
-            <div className="text-center mb-12 animate-slide-up">
-                <h2 className="text-4xl md:text-5xl font-display font-bold pb-6 text-gradient-gold">
-                    Berita Seputar ATI
-                </h2>
-            </div>
+         
 
             <div className="max-w-6xl  mx-auto relative z-10">
                 {news.length > 0 && (
@@ -39,4 +35,4 @@ function GuestListNews({ news }) {
     )
 }
 
-export default GuestListNews
+export default ListNews
