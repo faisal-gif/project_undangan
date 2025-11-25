@@ -180,13 +180,6 @@ function Index({ tamus, filters }) {
                                                     >
                                                         <Send size={16} />
                                                     </button>
-
-                                                    <a
-                                                        href={route("tickets.undangan", tamu.id)}
-                                                        className="btn btn-primary btn-xs"
-                                                    >
-                                                        pdf
-                                                    </a>
                                                 </td>
                                             </tr>
                                         ))}
