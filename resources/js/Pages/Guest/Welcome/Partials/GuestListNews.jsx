@@ -1,12 +1,14 @@
 import NewsCardAuto from '@/Components/NewsCardAuto'
+import { Link } from '@inertiajs/react'
+import { ArrowRight } from 'lucide-react'
 import React from 'react'
 
 function GuestListNews({ news }) {
     return (
 
         <section className=" pb-32 px-6 relative bg-guest-background">
-             <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
-      <div className="absolute inset-0 bg-pattern-dots" />
+            <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
+            <div className="absolute inset-0 bg-pattern-dots" />
 
             <div className="text-center mb-12 animate-slide-up">
                 <h2 className="text-4xl md:text-5xl font-display font-bold pb-6 text-gradient-gold">
@@ -33,7 +35,17 @@ function GuestListNews({ news }) {
                         ))}
                     </div>
                 )}
+
+             
+                    <Link href="/news" className="btn btn-outline rounded-sm w-52 mx-auto flex items-center gap-2 bg-amber-400/80 hover:bg-amber-400/20 text-white border-amber-600/40 hover:border-amber-500">
+                        Lihat Semua Berita
+                        <ArrowRight className="h-4 w-4" />
+                    </Link>
+             
             </div>
+
+
+
         </section>
 
     )
