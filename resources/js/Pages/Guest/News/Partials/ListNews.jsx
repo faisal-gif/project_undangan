@@ -1,14 +1,26 @@
 import NewsCardAuto from '@/Components/NewsCardAuto'
+import { Link, usePage } from '@inertiajs/react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import React from 'react'
 
 function ListNews({ news }) {
+
+    const { page, limit } = usePage().props;
+
+
+    const hasNext = news.length === limit;
+    const hasPrev = page > 1;
+
+
+
+
     return (
 
         <section className=" pb-32 px-6 relative ">
-          
+
             <div className="absolute inset-0 bg-pattern-dots" />
 
-         
+
 
             <div className="max-w-6xl  mx-auto relative z-10">
                 {news.length > 0 && (
@@ -29,7 +41,41 @@ function ListNews({ news }) {
                         ))}
                     </div>
                 )}
+
+
+                <div className='w-52 mx-auto'>
+                    {/* Pagination */}
+                    <div className="join grid grid-cols-2">
+                        {/* Prev */}
+                        {hasPrev ? (
+                            <Link href={`?page=${Number(page) - 1}`} className="join-item btn btn-outline rounded-sm bg-amber-400/80 hover:bg-amber-400/20 text-white border-amber-600/40 hover:border-amber-500">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                            </Link>
+                        ) : (
+                            <button className="join-item btn rounded-sm bg-slate-700/50 border-slate-600 text-slate-400 cursor-not-allowed">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                            </button>
+                        )}
+
+                        {/* Next */}
+                        {hasNext ? (
+                            <Link href={`?page=${Number(page) + 1}`} className="join-item btn rounded-sm  bg-amber-400/80 hover:bg-amber-400/20 text-white border-amber-600/40 hover:border-amber-500">
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        ) : (
+                            <button className="join-item btn rounded-sm  bg-slate-700/50 border-slate-600 text-slate-400 cursor-not-allowed">
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+
             </div>
+
+
+
+
         </section>
 
     )

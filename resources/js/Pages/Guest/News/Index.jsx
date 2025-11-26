@@ -4,7 +4,7 @@ import GuestNavigation from '../Welcome/Partials/GuestNavigation'
 import NewsHero from './Partials/NewsHero'
 import ListNews from './Partials/ListNews'
 
-function Index({apiData}) {
+function Index({ items }) {
   return (
     <>
       <Head>
@@ -14,7 +14,7 @@ function Index({apiData}) {
       <div className="min-h-screen  bg-gradient-burgundy">
         <GuestNavigation />
         <NewsHero />
-        <ListNews news={apiData} />
+        <ListNews news={items} />
       </div>
       
     </>

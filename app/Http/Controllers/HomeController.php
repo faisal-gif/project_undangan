@@ -41,19 +41,29 @@ class HomeController extends Controller
         return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data']]);
     }
 
-    public function news()
-    {
-        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=344&offset=0&limit=9');
-        $data = null;
+public function news(Request $request)
+{
+    $page = $request->get('page', 1); // default page 1
+    $limit = 9;
+    $offset = ($page - 1) * $limit;
 
-        if ($response->successful()) {
-            $data = $response->json();
-        } else {
-            $data = null;
-        }
+    $response = Http::get('https://api.tin.co.id/v1/all_news/', [
+        'key' => 'NyEIwDL51eeaoVhYGPaF',
+        'news_type' => 'focus',
+        'cat_id' => 344,
+        'offset' => $offset,
+        'limit' => $limit,
+    ]);
 
-        return Inertia::render('Guest/News/Index', ['apiData' => $data['data']]);
-    }
+    $data = $response->json();
+
+    return Inertia::render('Guest/News/Index', [
+        'items'      => $data['data'],       // isi berita
+        'page'       => $page,
+        'limit'      => $limit,
+    ]);
+}
+
 
     public function winners()
     {

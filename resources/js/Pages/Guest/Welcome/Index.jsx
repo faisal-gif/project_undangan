@@ -20,6 +20,7 @@ function Index({ apiData }) {
         <GuestFeatures />
         <GuestListNews news={apiData} />
       </div>
+      
     </>
   )
 }
