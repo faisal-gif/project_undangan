@@ -14,6 +14,8 @@ class HomeController extends Controller
     {
         $totalTamu = Tamu::count();
         $totalTamuDatang = Tamu::where('status', 'datang')->count();
+        $totalTamuUndangan = Tamu::sum('jumlah_orang');
+       
         $totalTamuBelumDatang = Tamu::where('status', 'belum')->count();
         $totalWinners = Winners::count();
 
@@ -22,6 +24,7 @@ class HomeController extends Controller
             'totalTamu' => $totalTamu,
             'totalTamuDatang' => $totalTamuDatang,
             'totalTamuBelumDatang' => $totalTamuBelumDatang,
+            'totalTamuUndangan' => $totalTamuUndangan,
             'totalWinners' => $totalWinners,
         ]);
     }
