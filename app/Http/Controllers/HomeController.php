@@ -29,7 +29,7 @@ class HomeController extends Controller
     public function index()
     {
 
-        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=344&offset=0&limit=9');
+        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=351&offset=0&limit=9');
         $data = null;
 
         if ($response->successful()) {
@@ -50,7 +50,7 @@ public function news(Request $request)
     $response = Http::get('https://api.tin.co.id/v1/all_news/', [
         'key' => 'NyEIwDL51eeaoVhYGPaF',
         'news_type' => 'focus',
-        'cat_id' => 344,
+        'cat_id' => 351,
         'offset' => $offset,
         'limit' => $limit,
     ]);
