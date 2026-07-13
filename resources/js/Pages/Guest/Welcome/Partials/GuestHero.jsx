@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const GuestHero = () => {
 
   const calculateTimeLeft = () => {
-    const targetDate = new Date("2025-11-27T18:00:00");
+    const targetDate = new Date("2026-11-11T18:00:00");
     const now = new Date();
     const difference = targetDate - now;
 
