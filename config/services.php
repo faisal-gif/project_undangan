@@ -22,6 +22,11 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    'tin_api' => [
+        'url' => env('TIN_API_URL', 'https://api.tin.co.id/v1/all_news/'),
+        'key' => env('TIN_API_KEY'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

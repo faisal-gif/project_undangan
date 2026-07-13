@@ -10,12 +10,23 @@ use Inertia\Inertia;
 
 class HomeController extends Controller
 {
+
+    protected $apiUrl;
+    protected $apiKey;
+
+    public function __construct()
+    {
+        // Inisialisasi nilai config satu kali di sini
+        $this->apiUrl = config('services.tin_api.url');
+        $this->apiKey = config('services.tin_api.key');
+    }
+
     public function dashboard()
     {
         $totalTamu = Tamu::count();
         $totalTamuDatang = Tamu::where('status', 'datang')->count();
         $totalTamuUndangan = Tamu::sum('jumlah_orang');
-       
+
         $totalTamuBelumDatang = Tamu::where('status', 'belum')->count();
         $totalWinners = Winners::count();
 
@@ -32,40 +43,44 @@ class HomeController extends Controller
     public function index()
     {
 
-        $response = Http::get('https://api.tin.co.id/v1/all_news/?key=NyEIwDL51eeaoVhYGPaF&news_type=focus&cat_id=351&offset=0&limit=9');
-        $data = null;
+        $response = Http::withHeaders([
+            'x-api-key' => $this->apiKey
+        ])->get($this->apiUrl, [
+            'news_type' => 'focus',
+            'cat_id'    => 351,
+            'offset'    => 0,
+            'limit'     => 9
+        ]);
 
-        if ($response->successful()) {
-            $data = $response->json();
-        } else {
-            $data = null;
-        }
+        $data = $response->successful() ? $response->json() : null;
 
         return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data']]);
     }
 
-public function news(Request $request)
-{
-    $page = $request->get('page', 1); // default page 1
-    $limit = 9;
-    $offset = ($page - 1) * $limit;
+    public function news(Request $request)
+    {
+        $page = $request->get('page', 1);
+        $limit = 9;
+        $offset = ($page - 1) * $limit;
 
-    $response = Http::get('https://api.tin.co.id/v1/all_news/', [
-        'key' => 'NyEIwDL51eeaoVhYGPaF',
-        'news_type' => 'focus',
-        'cat_id' => 351,
-        'offset' => $offset,
-        'limit' => $limit,
-    ]);
+        // Tidak perlu memanggil config() lagi, langsung gunakan $this
+        $response = Http::withHeaders([
+            'x-api-key' => $this->apiKey
+        ])->get($this->apiUrl, [
+            'news_type' => 'focus',
+            'cat_id'    => 351,
+            'offset'    => $offset,
+            'limit'     => $limit,
+        ]);
 
-    $data = $response->json();
+        $data = $response->successful() ? $response->json() : null;
 
-    return Inertia::render('Guest/News/Index', [
-        'items'      => $data['data'],       // isi berita
-        'page'       => $page,
-        'limit'      => $limit,
-    ]);
-}
+        return Inertia::render('Guest/News/Index', [
+            'items'      => $data['data'],       // isi berita
+            'page'       => $page,
+            'limit'      => $limit,
+        ]);
+    }
 
 
     public function winners()
