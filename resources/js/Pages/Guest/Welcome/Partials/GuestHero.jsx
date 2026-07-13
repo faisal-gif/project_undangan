@@ -96,8 +96,8 @@ const GuestHero = () => {
         <div className="my-8 flex justify-center text-white">
           <div className="grid grid-flow-col gap-5 text-center auto-cols-max">
             <div className="flex flex-col">
-              <span className="countdown font-mono text-5xl">
-                <span style={{ "--value": timeLeft.days }}></span>
+              <span className="font-mono text-5xl">
+                {timeLeft.days}
               </span>
               Hari
             </div>
@@ -183,7 +183,7 @@ const GuestHero = () => {
           </div>
         </div>
 
-        
+
 
 
       </div>
