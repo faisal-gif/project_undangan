@@ -94,6 +94,7 @@ const GuestHero = () => {
 
         {/* Hitung Mundur */}
         <div className="my-8 flex justify-center text-white">
+          <span className="font-semibold text-2xl">Coming Soon </span>
           <div className="grid grid-flow-col gap-5 text-center auto-cols-max">
             <div className="flex flex-col">
               <span className="countdown font-mono text-5xl">
