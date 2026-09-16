@@ -54,7 +54,7 @@ class HomeController extends Controller
 
         $data = $response->successful() ? $response->json() : null;
 
-        return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data']]);
+        return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data'] ?? []]);
     }
 
     public function news(Request $request)
@@ -76,7 +76,7 @@ class HomeController extends Controller
         $data = $response->successful() ? $response->json() : null;
 
         return Inertia::render('Guest/News/Index', [
-            'items'      => $data['data'],       // isi berita
+            'items'      => $data['data'] ?? [], // isi berita
             'page'       => $page,
             'limit'      => $limit,
         ]);

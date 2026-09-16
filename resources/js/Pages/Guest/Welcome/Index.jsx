@@ -7,20 +7,19 @@ import GuestListNews from './Partials/GuestListNews'
 
 function Index({ apiData }) {
 
-
   return (
     <>
       <Head>
         <title>Welcome</title>
         <meta name="description" content="Join us at Prestige Awards as we honor outstanding achievements and inspire future innovators across various industries." />
       </Head>
-      <div className="min-h-screen">
+      <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
         <GuestNavigation />
         <GuestHero />
         <GuestFeatures />
         <GuestListNews news={apiData} />
       </div>
-      
+
     </>
   )
 }

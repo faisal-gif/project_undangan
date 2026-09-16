@@ -1,196 +1,152 @@
-import AtiLogo from "@/Components/AtiLogo";
 import CountUp from "@/Components/CountUp";
 import { Link } from "@inertiajs/react";
-import { ArrowRight, Award, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const GuestHero = () => {
+const calculateTimeLeft = () => {
+  const targetDate = new Date("2026-11-27T18:00:00");
+  const difference = targetDate - new Date();
 
-  const calculateTimeLeft = () => {
-    const targetDate = new Date("2026-11-27T18:00:00");
-    const now = new Date();
-    const difference = targetDate - now;
+  if (difference <= 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
 
-    let timeLeft = {};
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / (1000 * 60)) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    } else {
-      timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
-    return timeLeft;
+  return {
+    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((difference / (1000 * 60)) % 60),
+    seconds: Math.floor((difference / 1000) % 60),
   };
+};
 
+const pad = (value) => String(value).padStart(2, "0");
+
+const stats = [
+  { to: 500, suffix: "+", label: "Pemenang" },
+  { to: 7, suffix: "", label: "Tahun" },
+  { to: 20, suffix: "+", label: "Kategori" },
+];
+
+const GuestHero = () => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-
+    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const units = [
+    { value: timeLeft.days, label: "Hari", padded: false },
+    { value: timeLeft.hours, label: "Jam", padded: true },
+    { value: timeLeft.minutes, label: "Menit", padded: true },
+    { value: timeLeft.seconds, label: "Detik", padded: true },
+  ];
 
   return (
-    <section className="relative min-h-screen pt-24 flex items-center justify-center overflow-hidden bg-gradient-burgundy">
-      {/* Animated Background Effects */}
-      <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
-      <div className="absolute inset-0 bg-pattern-dots" />
+    <header>
+      {/* The stage itself, not a simulation of one */}
+      <div className="relative isolate flex min-h-[92svh] items-end overflow-hidden">
+        <img
+          src="/bg-ati.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(18,6,10,0.88) 0%, rgba(18,6,10,0.55) 38%, rgba(18,6,10,0.92) 82%, #12060A 100%)",
+          }}
+        />
 
-      {/* Floating Orbs */}
-      <div className="absolute top-20 right-1/4 w-72 h-72 bg-gradient-radial-gold rounded-full blur-3xl animate-float" />
-      <div
-        className="absolute bottom-20 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float"
-        style={{ animationDelay: "1s" }}
-      />
-      <div
-        className="absolute top-1/2 right-1/3 w-64 h-64 bg-secondary/20 rounded-full blur-3xl animate-float"
-        style={{ animationDelay: "2s" }}
-      />
+        <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-32">
+          <h1 className="ati-reveal max-w-[16ch] font-heading text-[clamp(3rem,7.4vw,5.75rem)] font-bold leading-[0.88] tracking-[-0.045em] text-ati-cream">
+            Anugerah{" "}
+            <span className="text-ati-gold-light">TIMES Indonesia</span>
+          </h1>
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-6 py-8 animate-fade-in max-w-5xl">
-        <div className="inline-flex items-center gap-3 mb-8 px-6 py-2 rounded-full bg-white border-2 border-amber-500 shadow-gold animate-glow">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <span className="text-black font-semibold">
-            Sejak 2015
-          </span>
-          <Award className="w-5 h-5 text-amber-400" />
-        </div>
+          <div className="ati-reveal mt-10 grid gap-8 border-t border-ati-cream/20 pt-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:gap-12" style={{ animationDelay: "120ms" }}>
+            <p className="max-w-[58ch] text-lg leading-[1.6] text-ati-cream/85 md:text-xl">
+              Merayakan pencapaian luar biasa dan{" "}
+              <em className="font-heading not-italic font-semibold text-ati-gold-light">
+                memberikan penghargaan
+              </em>{" "}
+              kepada{" "}
+              <em className="font-heading not-italic font-semibold text-ati-gold-light">
+                insan inspiratif
+              </em>{" "}
+              yang membawa dampak positif bagi banyak orang.
+            </p>
 
-        <AtiLogo className="w-32 h-full mx-auto mb-6" />
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+              <Link
+                href="/winners"
+                className="group inline-flex items-baseline gap-3 bg-ati-gold px-6 py-3 text-base font-semibold text-ati-ink transition-colors hover:bg-ati-gold-light"
+              >
+                Peraih
+                <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+                  &rarr;
+                </span>
+              </Link>
 
-        <h1 className="text-4xl md:text-5xl font-display font-bold mb-8 text-gradient-gold leading-tight font-serif">
-          Anugerah
-          <br />
-          TIMES Indonesia
-        </h1>
-
-        <p className="text-xl md:text-3xl text-white max-w-3xl mx-auto mb-12 font-light leading-relaxed">
-          Merayakan pencapaian luar biasa dan{" "}
-          <br />
-          <span className="text-amber-400 font-semibold">
-            memberikan penghargaan
-          </span>{" "}
-          kepada
-          {" "}
-          <span className="text-amber-400 font-semibold">insan inspiratif</span>{" "}
-          yang membawa dampak positif bagi banyak orang.
-        </p>
-
-        <div className="my-4 flex justify-center gap-8">
-          <iframe
-            src="https://www.youtube.com/embed/dv9VYYepFLo?si=8fc7OHaK_XofVmIJ&autoplay=1&mute=1"
-            title="YouTube video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share;"
-            className="w-full h-52 md:h-[400px] rounded-xl"
-          />
-        </div>
-
-        {/* Hitung Mundur */}
-        <div className="my-8 flex justify-center text-white">
-          <div className="grid grid-flow-col gap-5 text-center auto-cols-max">
-            <div className="flex flex-col">
-              <span className="font-mono text-5xl">
-                {timeLeft.days}
-              </span>
-              Hari
-            </div>
-            <div className="flex flex-col">
-              <span className="countdown font-mono text-5xl">
-                <span style={{ "--value": timeLeft.hours }}></span>
-              </span>
-              Jam
-            </div>
-            <div className="flex flex-col">
-              <span className="countdown font-mono text-5xl">
-                <span style={{ "--value": timeLeft.minutes }}></span>
-              </span>
-              Menit
-            </div>
-            <div className="flex flex-col">
-              <span className="countdown font-mono text-5xl">
-                <span style={{ "--value": timeLeft.seconds }}></span>
-              </span>
-              Detik
+              <button
+                type="button"
+                className="text-base font-semibold text-ati-cream underline decoration-ati-gold decoration-1 underline-offset-[6px] transition-colors hover:text-ati-gold-light"
+              >
+                Lainnya
+              </button>
             </div>
           </div>
         </div>
-
-        <div className="flex gap-6 justify-center flex-row">
-          {/* Button 1 */}
-          <Link href={'/winners'} className="bg-gradient-gold text-primary-foreground hover:opacity-90 shadow-gold text-lg px-6 py-2 font-bold group border-2 border-amber-400/50 hover:scale-105 transition-all rounded-xl inline-flex items-center justify-center">
-            Peraih
-            <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
-          </Link>
-
-          {/* Button 2 */}
-          <button className="bg-white/95 border-2 border-amber-400 text-card-foreground hover:bg-card hover:shadow-white text-lg px-10 py-2 font-bold hover:scale-105 transition-all backdrop-blur-sm rounded-xl inline-flex items-center justify-center">
-            Lainnya
-          </button>
-        </div>
-
-
-        {/* Decorative Elements */}
-        <div className="mt-20 flex justify-center gap-8 text-white/60">
-          <div className="text-center">
-            <div className="text-4xl font-display font-bold text-white mb-2">
-
-              <CountUp
-                from={0}
-                to={500}
-                separator=","
-                direction="up"
-                duration={1}
-                className="count-up-text"
-              />
-              +
-            </div>
-            <div className="text-sm uppercase tracking-wider">Pemenang</div>
-          </div>
-          <div className="w-px bg-amber-400/30" />
-          <div className="text-center">
-            <div className="text-4xl font-display font-bold text-white mb-2">
-              <CountUp
-                from={0}
-                to={7}
-                separator=","
-                direction="up"
-                duration={1}
-                className="count-up-text"
-              />
-            </div>
-            <div className="text-sm uppercase tracking-wider">Tahun</div>
-          </div>
-          <div className="w-px bg-amber-400/30" />
-          <div className="text-center">
-            <div className="text-4xl font-display font-bold text-white mb-2">
-              <CountUp
-                from={0}
-                to={20}
-                separator=","
-                direction="up"
-                duration={1}
-                className="count-up-text"
-              />+
-            </div>
-            <div className="text-sm uppercase tracking-wider">Kategori</div>
-          </div>
-        </div>
-
-
-
-
       </div>
 
-      {/* Bottom Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
-    </section >
+      {/* The ledger: what the award has counted, and what is left to count */}
+      <div className="mx-auto max-w-6xl px-6">
+        <dl className="flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-ati-cream/15 pb-8">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex items-baseline gap-2">
+              <dt className="sr-only">{stat.label}</dt>
+              <dd className="flex items-baseline gap-2">
+                <span className="font-heading text-[2.75rem] font-bold leading-none tabular-nums text-ati-cream">
+                  <CountUp from={0} to={stat.to} separator="." duration={1} />
+                  {stat.suffix}
+                </span>
+                <span className="font-heading text-base text-ati-cream/60">
+                  {stat.label}
+                </span>
+              </dd>
+            </div>
+          ))}
+
+          <span className="ml-auto font-heading text-base italic text-ati-gold-light">
+            Sejak 2015
+          </span>
+        </dl>
+
+        <div className="grid grid-cols-2 gap-y-8 py-10 sm:grid-cols-4">
+          {units.map((unit) => (
+            <div key={unit.label} className="border-l border-ati-gold/35 pl-4 first:border-l-0 first:pl-0 sm:border-l sm:pl-6 sm:first:border-l-0 sm:first:pl-0">
+              <div className="font-heading text-[clamp(2.75rem,6vw,4rem)] font-bold leading-none tabular-nums text-ati-cream">
+                {unit.padded ? pad(unit.value) : unit.value}
+              </div>
+              <div className="mt-2 font-heading text-sm text-ati-cream/55">
+                {unit.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="border border-ati-cream/15 bg-black">
+          <iframe
+            src="https://www.youtube.com/embed/dv9VYYepFLo?si=8fc7OHaK_XofVmIJ&autoplay=1&mute=1"
+            title="Anugerah TIMES Indonesia"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share;"
+            className="aspect-video w-full"
+          />
+        </div>
+      </div>
+    </header>
   );
 };
 

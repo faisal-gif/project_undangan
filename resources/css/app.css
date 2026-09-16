@@ -239,3 +239,61 @@
         transform: translateY(-20px);
     }
 }
+/* ✨ Guest (ATI) surface polish */
+.ati-guest {
+    scrollbar-color: hsl(38 62% 56% / 0.5) #12060a;
+}
+
+/* Paper grain, so the flat dark ground has a surface */
+.ati-guest::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Keep the page ground dark past the last section (overscroll, short pages) */
+html:has(.ati-guest),
+body:has(.ati-guest) {
+    background-color: #12060a;
+}
+
+.ati-guest ::selection {
+    background-color: #d6a249;
+    color: #12060a;
+}
+
+.ati-guest :focus-visible {
+    outline: 2px solid #f0d28c;
+    outline-offset: 3px;
+}
+
+.ati-reveal {
+    animation: atiReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes atiReveal {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+        filter: blur(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ati-reveal,
+    .animate-float,
+    .animate-glow {
+        animation: none !important;
+    }
+}

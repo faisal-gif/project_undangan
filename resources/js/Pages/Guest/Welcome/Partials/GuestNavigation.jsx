@@ -1,38 +1,53 @@
-
 import AtiLogo from "@/Components/AtiLogo";
-import { Link } from "@inertiajs/react";
-import { Trophy } from "lucide-react";
+import { Link, usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+
+const links = [
+    { href: "/", label: "Beranda" },
+    { href: "/winners", label: "Peraih" },
+];
 
 const GuestNavigation = () => {
-    return (
-        <nav className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-lg border-b-2 border-primary/30 shadow-burgundy">
-            <div className="container mx-auto px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="p-2 rounded-xl group-hover:scale-110 transition-transform">
-                            <AtiLogo className="w-12 h-10" />
-                        </div>
-                        <span className="hidden md:block text-2xl font-display font-bold text-gradient-gold">
-                            Anugerah TIMES Indonesia
-                        </span>
-                    </Link>
+    const { url } = usePage();
+    const [scrolled, setScrolled] = useState(false);
 
-                    <div className="flex gap-8">
-                        <Link
-                            href="/"
-                            className={`text-lg font-semibold transition-all text-guest-foreground hover:text-amber-400 relative group `}
-                        >
-                            Beranda
-                            <span className={`absolute bottom-0 left-0 h-0.5 text-guest-foreground bg-amtext-amber-400 transition-all`} />
-                        </Link>
-                        <Link
-                            href="/winners"
-                            className={`text-lg font-semibold transition-all text-guest-foreground hover:text-amber-400 relative group`}
-                        >
-                            Peraih
-                            <span className={`absolute bottom-0 left-0 h-0.5 bg-amtext-amber-400 transition-all `} />
-                        </Link>
-                    </div>
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 24);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    return (
+        <nav
+            className={`fixed top-0 z-50 w-full transition-colors duration-300 ${scrolled ? "bg-ati-ink/90 backdrop-blur-md" : "bg-transparent"
+                }`}
+        >
+            <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-6 border-b border-ati-cream/15 px-6">
+                <Link href="/" className="flex items-center gap-3">
+                    <AtiLogo className="h-9 w-9" />
+                    <span className="hidden font-heading text-lg font-semibold tracking-[-0.02em] text-ati-cream md:block">
+                        Anugerah TIMES Indonesia
+                    </span>
+                </Link>
+
+                <div className="flex items-baseline gap-8">
+                    {links.map((link) => {
+                        const active = url === link.href;
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                aria-current={active ? "page" : undefined}
+                                className={`font-heading text-lg transition-colors ${active
+                                    ? "text-ati-gold-light underline decoration-ati-gold decoration-1 underline-offset-[10px]"
+                                    : "text-ati-cream/75 hover:text-ati-cream"
+                                    }`}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
         </nav>

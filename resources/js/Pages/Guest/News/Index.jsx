@@ -11,12 +11,12 @@ function Index({ items }) {
         <title>News</title>
         <meta name="description" content="Join us at Prestige Awards as we honor outstanding achievements and inspire future innovators across various industries." />
       </Head>
-      <div className="min-h-screen  bg-gradient-burgundy">
+      <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
         <GuestNavigation />
         <NewsHero />
         <ListNews news={items} />
       </div>
-      
+
     </>
   )
 }
