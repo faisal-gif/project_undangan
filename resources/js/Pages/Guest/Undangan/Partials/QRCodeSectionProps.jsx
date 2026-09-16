@@ -3,17 +3,20 @@ import { useState } from "react";
 import { Download, QrCode, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import Card from "@/Components/Card";
+import { usePage } from "@inertiajs/react";
 
 export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
+  const { acara } = usePage().props;
 
+  const eventLabel = [acara?.nama, acara?.tahun].filter(Boolean).join(" ");
+  const jadwalLabel = [acara?.tanggal_singkat, acara?.jam_label].filter(Boolean).join(" - ");
 
   const qrData = JSON.stringify({
-    eventId: "ANUGERAH-TIMES-INDONESIA-2025",
+    eventId: eventLabel,
     guestName,
     guestCode,
-    eventDate: "2025-11-27",
-    eventTime: "18:00",
-    venue: "Grand Mercure Malang Mirama"
+    eventDate: acara?.mulai_iso,
+    venue: acara?.tempat
   });
 
   const qrUrl = `/storage/${qr_code}`;
@@ -42,7 +45,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
       ctx.fillText("E-Ticket", 200, 40);
 
       ctx.font = "16px Inter";
-      ctx.fillText("Anugerah Times Indonesia 2025", 200, 65);
+      ctx.fillText(eventLabel, 200, 65);
 
       ctx.font = "14px Inter";
       ctx.fillText(guestName, 200, 410);
@@ -50,7 +53,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
       ctx.font = "12px Inter";
       ctx.fillStyle = "#64748b";
       ctx.fillText(guestCode, 200, 430);
-      ctx.fillText("27 November 2025 - 18:00 WIB", 200, 450);
+      ctx.fillText(jadwalLabel, 200, 450);
 
       const link = document.createElement("a");
       link.download = `e-ticket-${guestName.replace(/\s+/g, "-")}.png`;
@@ -78,7 +81,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
         <Card className="p-8 md:p-12 bg-white text-black/60 shadow-2xl max-w-md mx-auto">
           <div className="text-center mb-6">
             <h3 className="text-2xl font-bold mb-2">E-Ticket</h3>
-            <p className="text-sm text-muted-foreground">Anugerah Times Indonesia 2025</p>
+            <p className="text-sm text-muted-foreground">{eventLabel}</p>
           </div>
 
           <div className="bg-base-100/30 p-6 rounded-lg mb-6">
@@ -96,10 +99,10 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
               <p className="text-lg font-semibold mb-1">{guestName}</p>
               <p className="text-xs text-muted-foreground font-mono mb-3">{guestCode}</p>
               <div className="border-t pt-3">
-                <p className="text-sm text-muted-foreground">Kamis, 27 November 2025</p>
-                <p className="text-sm text-muted-foreground">18:00 WIB</p>
+                <p className="text-sm text-muted-foreground">{acara?.tanggal_label}</p>
+                <p className="text-sm text-muted-foreground">{acara?.jam_label}</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Grand Mercure Malang Mirama
+                  {acara?.tempat}
                 </p>
               </div>
             </div>

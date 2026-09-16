@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2';
 
 function Index({ tamus, filters }) {
-    const { flash } = usePage().props
+    const { flash, acara } = usePage().props
     const [isScanning, setIsScanning] = useState(false);
     const [search, setSearch] = useState(filters.search || "");
 
@@ -93,6 +93,7 @@ function Index({ tamus, filters }) {
                             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
                                 <h1 className="text-2xl font-bold">
                                     Daftar Pendaftar
+                                    {acara && <span className="font-normal text-gray-500"> — {acara.nama} {acara.tahun}</span>}
                                 </h1>
                                 <div className="flex flex-row gap-2 justify-end">
                                     <button

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Acara;
 use App\Models\Tamu;
 use App\Models\Winners;
 use Illuminate\Http\Request;
@@ -23,20 +24,18 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $totalTamu = Tamu::count();
-        $totalTamuDatang = Tamu::where('status', 'datang')->count();
-        $totalTamuUndangan = Tamu::sum('jumlah_orang');
-
-        $totalTamuBelumDatang = Tamu::where('status', 'belum')->count();
-        $totalWinners = Winners::count();
-
+        // Angka tamu selalu untuk edisi yang sedang aktif; pemenang tetap
+        // dihitung lintas tahun karena punya kolom tahun sendiri.
+        $acara = Acara::aktif();
+        $tamus = fn() => Tamu::edisi($acara);
 
         return Inertia::render('Dashboard', [
-            'totalTamu' => $totalTamu,
-            'totalTamuDatang' => $totalTamuDatang,
-            'totalTamuBelumDatang' => $totalTamuBelumDatang,
-            'totalTamuUndangan' => $totalTamuUndangan,
-            'totalWinners' => $totalWinners,
+            'edisi' => $acara?->label(),
+            'totalTamu' => $tamus()->count(),
+            'totalTamuDatang' => $tamus()->where('status', 'datang')->count(),
+            'totalTamuBelumDatang' => $tamus()->where('status', 'belum')->count(),
+            'totalTamuUndangan' => $tamus()->sum('jumlah_orang'),
+            'totalWinners' => Winners::count(),
         ]);
     }
 
@@ -112,7 +111,22 @@ class HomeController extends Controller
 
     public function undangan($id, $nama)
     {
-        $tamu = Tamu::find($id);
+        $tamu = Tamu::with('acara')->findOrFail($id);
+        $acara = Acara::aktif();
+
+        // Undangan edisi lama ditutup: isinya (hitung mundur, QR, rundown)
+        // hanya benar untuk acara yang sedang aktif.
+        if (! $acara || $tamu->acara_id !== $acara->id) {
+            return Inertia::render('Guest/Undangan/Selesai', [
+                'nama' => $tamu->nama,
+                // Bukan 'acara': nama itu akan menimpa prop bersama dari middleware.
+                'edisi' => $tamu->acara?->toShare(),
+            ])->withViewData([
+                'ogTitle' => 'Acara telah berlalu',
+                'ogDescription' => 'Undangan ini untuk acara yang sudah berlangsung.',
+                'ogUrl' => url()->current(),
+            ]);
+        }
 
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,

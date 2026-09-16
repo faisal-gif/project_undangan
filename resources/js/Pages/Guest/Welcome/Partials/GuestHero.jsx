@@ -1,22 +1,6 @@
 import CountUp from "@/Components/CountUp";
-import { Link } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-
-const calculateTimeLeft = () => {
-  const targetDate = new Date("2026-11-27T18:00:00");
-  const difference = targetDate - new Date();
-
-  if (difference <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
-
-  return {
-    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / (1000 * 60)) % 60),
-    seconds: Math.floor((difference / 1000) % 60),
-  };
-};
+import useCountdown from "@/useCountdown";
+import { Link, usePage } from "@inertiajs/react";
 
 const pad = (value) => String(value).padStart(2, "0");
 
@@ -27,12 +11,8 @@ const stats = [
 ];
 
 const GuestHero = () => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const { acara } = usePage().props;
+  const timeLeft = useCountdown(acara?.mulai_iso);
 
   const units = [
     { value: timeLeft.days, label: "Hari", padded: false },
@@ -123,6 +103,14 @@ const GuestHero = () => {
             Sejak 2015
           </span>
         </dl>
+
+        {acara && (
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-8 font-heading text-lg text-ati-cream/80">
+            <span className="text-ati-gold-light">{acara.tanggal_label}</span>
+            <span>{acara.jam_label}</span>
+            {acara.tempat && <span>{acara.tempat}</span>}
+          </p>
+        )}
 
         <div className="grid grid-cols-2 gap-y-8 py-10 sm:grid-cols-4">
           {units.map((unit) => (

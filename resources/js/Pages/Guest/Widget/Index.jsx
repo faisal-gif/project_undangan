@@ -1,35 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import AtiLogo from '@/Components/AtiLogo';
+import useCountdown from '@/useCountdown';
+import { usePage } from '@inertiajs/react';
 
 function Index() {
-    const calculateTimeLeft = () => {
-        const targetDate = new Date("2025-11-27T18:00:00");
-        const now = new Date();
-        const difference = targetDate - now;
+    const { acara } = usePage().props;
+    const timeLeft = useCountdown(acara?.mulai_iso);
 
-        let timeLeft = {};
-        if (difference > 0) {
-            timeLeft = {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / (1000 * 60)) % 60),
-                seconds: Math.floor((difference / 1000) % 60),
-            };
-        } else {
-            timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        }
-        return timeLeft;
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
     return (
         <div className="min-h-screen">
             <a href="https://ati.timesindonesia.co.id/" target="_blank" rel="noopener noreferrer">

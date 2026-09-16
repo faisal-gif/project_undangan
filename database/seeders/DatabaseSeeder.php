@@ -21,5 +21,11 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'password' => bcrypt('password'),
         ]);
+
+        // Data nyata dari produksi; keduanya aman dijalankan berulang.
+        $this->call([
+            WinnersSeeder::class,
+            TamuSeeder::class,
+        ]);
     }
 }

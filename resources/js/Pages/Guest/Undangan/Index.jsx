@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import AwardHeroSection from './Partials/AwardHeroSection';
 import { Award, Sparkles } from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import AtiLogo from '@/Components/AtiLogo';
-import { Head } from '@inertiajs/react';
+import useCountdown from '@/useCountdown';
+import { Head, usePage } from '@inertiajs/react';
 import { AwardsCategorySection } from './Partials/AwardsCategorySection';
 import { AwardsEventSection } from './Partials/AwardsEventSection';
 import { AwardsScheduleSection } from './Partials/AwardsScheduleSection';
@@ -11,37 +12,8 @@ import { QRCodeSection } from './Partials/QRCodeSectionProps';
 
 function Index({ tamu }) {
     const [isInvitationOpen, setIsInvitationOpen] = useState(false);
- 
-
-    const calculateTimeLeft = () => {
-        const targetDate = new Date("2025-11-27T18:00:00");
-        const now = new Date();
-        const difference = targetDate - now;
-
-        let timeLeft = {};
-        if (difference > 0) {
-            timeLeft = {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / (1000 * 60)) % 60),
-                seconds: Math.floor((difference / 1000) % 60),
-            };
-        } else {
-            timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        }
-        return timeLeft;
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
-
+    const { acara } = usePage().props;
+    const timeLeft = useCountdown(acara?.mulai_iso);
 
     if (!isInvitationOpen) {
         return (
@@ -73,7 +45,7 @@ function Index({ tamu }) {
                     </h2>
 
                     <p className="text-xl md:text-2xl text-white/80 mb-8 animate-fade-in" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        Kamis, 27 November 2025
+                        {acara?.tanggal_label}
                     </p>
 
                     <div className="mb-12 animate-fade-in" style={{ animationDelay: '0.8s', opacity: 0 }}>
@@ -135,12 +107,12 @@ function Index({ tamu }) {
             <footer className="py-12 px-4 text-center bg-[#4c0c0c] text-white">
                 <div className="container mx-auto">
                     <AtiLogo className="w-12 h-full mx-auto mb-6 animate-pulse" />
-                    <p className="font-serif text-2xl mb-2">Anugerah TIMES INDONESIA 2025</p>
+                    <p className="font-serif text-2xl mb-2">{acara?.nama} {acara?.tahun}</p>
                     <p className="text-sm text-white/70">
                         Terima kasih atas kehadiran Anda dalam malam penghargaan ini
                     </p>
                     <p className="text-xs text-white/50 mt-4">
-                        © 2025 All Rights Reserved
+                        © {acara?.tahun} All Rights Reserved
                     </p>
                 </div>
             </footer>

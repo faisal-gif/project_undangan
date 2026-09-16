@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Acara;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -38,6 +39,8 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn() => $request->session()->get('success'),
                 'error'   => fn() => $request->session()->get('error'),
             ],
+            // Satu sumber tanggal & lokasi acara untuk seluruh halaman
+            'acara' => fn() => Acara::aktif()?->toShare(),
         ];
     }
 }

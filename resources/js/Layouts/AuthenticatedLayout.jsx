@@ -89,9 +89,14 @@ export default function AuthenticatedLayout({ header, children }) {
                             </li>
 
                             {user.role === 'admin' && (
-                                <li>
-                                    <Link href={route('admin.winners.index')}>Pemenang</Link>
-                                </li>
+                                <>
+                                    <li>
+                                        <Link href={route('admin.winners.index')}>Pemenang</Link>
+                                    </li>
+                                    <li>
+                                        <Link href={route('admin.acara.edit')}>Acara</Link>
+                                    </li>
+                                </>
                             )}
                         </ul>
                     </li>

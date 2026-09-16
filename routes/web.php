@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcaraController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TamuController;
@@ -17,23 +18,29 @@ Route::get('/undangan/{id}/{name}', [HomeController::class, 'undangan'])->name('
 Route::get('/dashboard', [HomeController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    // Wajib sebelum Route::resource: /admin/tamu/{tamu} akan menelan path dua
+    // segmen seperti /admin/tamu/loop-qr.
+    Route::get('/tamu/loop-qr', [TamuController::class, 'loopQr'])->name('tamu.loopQr');
+    Route::get('/tamu/loop-email', [TamuController::class, 'loopSendEmail'])->name('tamu.loopEmail');
+
     Route::resource('tamu', TamuController::class);
     Route::resource('winners', WinnersController::class);
+
+    Route::get('/tamu/{id}/email', [TamuController::class, 'sendEmail'])->name('tamu.sendEmail');
+    Route::get('/tamu/{id}/pdf', [TamuController::class, 'generatePdf'])->name('tamu.undangan');
+
     Route::get('/pdf/{id}', [TamuController::class, 'generatePdf'])->name('pdf');
     Route::get('/attendance/{id}', [TamuController::class, 'attendance'])->name('attendance');
     Route::put('/participants/update-status/{id}', [TamuController::class, 'update_status'])->name('participants.update-status');
     Route::get('/qrScanner', [TamuController::class, 'qrScanner'])->name('qrScanner');
-    Route::post('/qr/validate', [TamuController::class, 'qrValidate'])->name('qrValidate');
     Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');
+    Route::get('/acara', [AcaraController::class, 'edit'])->name('acara.edit');
+    Route::post('/acara', [AcaraController::class, 'store'])->name('acara.store');
+    Route::put('/acara/{acara}', [AcaraController::class, 'update'])->name('acara.update');
+    Route::put('/acara/{acara}/aktifkan', [AcaraController::class, 'aktifkan'])->name('acara.aktifkan');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-Route::get('/sendEmail/{id}',[TamuController::class, 'sendEmail'])->name('sendEmail');
-Route::get('/loop', [TamuController::class, 'loopQr'])->name('loop');
-Route::get('/loopSendEmail', [TamuController::class, 'loopSendEmail'])->name('loopEmail');
-Route::get('undanganDigital/{id}', [TamuController::class, 'generatePdf'])->name('tickets.undangan');
-Route::get('/bubble', [TamuController::class, 'bubble'])->name('bubble');
 
 require __DIR__ . '/auth.php';

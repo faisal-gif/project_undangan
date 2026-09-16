@@ -261,6 +261,19 @@ body:has(.ati-guest) {
     background-color: #12060a;
 }
 
+.ati-guest ::-webkit-scrollbar {
+    width: 8px;
+    height: 6px;
+}
+
+.ati-guest ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ati-guest ::-webkit-scrollbar-thumb {
+    background: hsl(38 62% 56% / 0.45);
+}
+
 .ati-guest ::selection {
     background-color: #d6a249;
     color: #12060a;

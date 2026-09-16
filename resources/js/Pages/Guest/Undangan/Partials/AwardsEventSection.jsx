@@ -1,9 +1,15 @@
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
 import Card from "@/Components/Card";
 
 
 export const AwardsEventSection = () => {
+    const { acara } = usePage().props;
+    const jamMulai = acara?.jam_label?.includes(" - ")
+        ? acara.jam_label.split(" - ")[0] + " WIB"
+        : acara?.jam_label;
+
     return (
         <section className="py-16 md:py-24 px-4">
             <div className="container mx-auto max-w-6xl">
@@ -23,7 +29,7 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Tanggal</p>
-                                    <p className="text-xl font-semibold">Kamis, 27 November 2025</p>
+                                    <p className="text-xl font-semibold">{acara?.tanggal_label}</p>
                                 </div>
                             </div>
 
@@ -33,9 +39,9 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Waktu</p>
-                                    <p className="text-xl font-semibold">18:00 - 21:00 WIB</p>
+                                    <p className="text-xl font-semibold">{acara?.jam_label}</p>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        Registrasi: 18:00 WIB
+                                        Registrasi: {jamMulai}
                                     </p>
                                 </div>
                             </div>
@@ -48,10 +54,9 @@ export const AwardsEventSection = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">Lokasi</p>
-                                    <p className="text-xl font-semibold">Grand Ballroom</p>
+                                    <p className="text-xl font-semibold">{acara?.tempat}</p>
                                     <p className="text-base text-muted-foreground mt-1">
-                                        Grand Mercure Malang Mirama<br />
-                                        Jl. Raden Panji Suroso No.7, Purwodadi, Kec. Blimbing, Kota Malang, Jawa Timur 65126
+                                        {acara?.alamat}
                                     </p>
                                 </div>
                             </div>
@@ -71,7 +76,7 @@ export const AwardsEventSection = () => {
                     <div className="pt-6 border-t border-border animate-fade-in" style={{ animationDelay: '0.5s', opacity: 0 }}>
 
                         <a
-                            href="https://maps.app.goo.gl/3sfP2FmW4SqXBiWw5"
+                            href={acara?.peta_url}
                             target="_blank"
                             className="btn bg-amber-400 w-full"
                             rel="noopener noreferrer"

@@ -4,7 +4,7 @@ import { Check, Copy, Edit2, Eye, Send, User } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-function Index({ tamus, filters }) {
+function Index({ tamus, filters, acaras = [], acaraDilihat }) {
     const user = usePage().props.auth.user;
 
     const { flash } = usePage().props
@@ -24,7 +24,12 @@ function Index({ tamus, filters }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route("admin.tamu.index", { search }));
+        router.get(route("admin.tamu.index", { search, acara: acaraDilihat?.id }));
+    };
+
+    // Pindah edisi: bawa pencarian, tapi kembali ke halaman 1.
+    const gantiEdisi = (id) => {
+        router.get(route("admin.tamu.index", { acara: id, search }), {}, { preserveState: false });
     };
 
     const getStatusBadge = (status) => {
@@ -82,12 +87,28 @@ function Index({ tamus, filters }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
-                            <div className="flex justify-between items-center mb-4">
-                                <h1 className="text-2xl font-bold">
-                                    Daftar Pendaftar
-                                </h1>
+                            <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-2xl font-bold">
+                                        Daftar Pendaftar
+                                    </h1>
+                                    {acaras.length > 0 && (
+                                        <select
+                                            className="select select-bordered select-sm"
+                                            value={acaraDilihat?.id ?? ""}
+                                            onChange={(e) => gantiEdisi(e.target.value)}
+                                            aria-label="Pilih edisi acara"
+                                        >
+                                            {acaras.map((a) => (
+                                                <option key={a.id} value={a.id}>
+                                                    {a.label} ({a.jumlah}){a.aktif ? " • aktif" : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </div>
                                 {user.role === 'admin' && (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div className="flex flex-wrap gap-4">
 
                                         <Link
                                             href={route("admin.tamu.create")}
@@ -101,12 +122,14 @@ function Index({ tamus, filters }) {
                                         >
                                             Refresh
                                         </button>
-                                        <Link
-                                            href={route("loop")}
-                                            className="btn btn-neutral btn-sm"
-                                        >
-                                            Generate Qr Code
-                                        </Link>
+                                        {acaraDilihat?.aktif && (
+                                            <Link
+                                                href={route("admin.tamu.loopQr")}
+                                                className="btn btn-neutral btn-sm"
+                                            >
+                                                Generate Qr Code
+                                            </Link>
+                                        )}
 
 
                                     </div>
@@ -114,6 +137,14 @@ function Index({ tamus, filters }) {
 
 
                             </div>
+
+                            {acaraDilihat && !acaraDilihat.aktif && (
+                                <div className="alert alert-warning mb-4">
+                                    <span>
+                                        Anda sedang melihat arsip {acaraDilihat.label}. Tamu baru tetap masuk ke edisi aktif.
+                                    </span>
+                                </div>
+                            )}
                             <form
                                 onSubmit={handleSearch}
                                 className="flex items-center mb-4"
