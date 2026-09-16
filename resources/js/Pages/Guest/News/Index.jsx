@@ -7,10 +7,7 @@ import ListNews from './Partials/ListNews'
 function Index({ items }) {
   return (
     <>
-      <Head>
-        <title>News</title>
-        <meta name="description" content="Join us at Prestige Awards as we honor outstanding achievements and inspire future innovators across various industries." />
-      </Head>
+      <Head title="Berita Seputar ATI" />
       <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
         <GuestNavigation />
         <NewsHero />

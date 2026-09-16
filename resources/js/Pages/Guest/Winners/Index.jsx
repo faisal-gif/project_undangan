@@ -14,10 +14,7 @@ const Winners = ({ winnersByYear }) => {
 
   return (
     <>
-      <Head>
-        <title>Winners</title>
-        <meta name="description" content="Discover the distinguished winners of the Anugerah TIMES Indonesia, celebrating excellence and innovation across various industries since 2020." />
-      </Head>
+      <Head title="Para Peraih Anugerah" />
 
       <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
         <GuestNavigation />

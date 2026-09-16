@@ -39,6 +39,30 @@ class HomeController extends Controller
         ]);
     }
 
+    /**
+     * Meta untuk perayap. Tag <Head> milik Inertia hanya dirender di browser,
+     * jadi WhatsApp, Facebook, dan Google membaca yang dari Blade ini.
+     */
+    private function meta(string $judul, string $keterangan, bool $indeks = true): array
+    {
+        return [
+            'ogTitle' => $judul,
+            'ogDescription' => $keterangan,
+            'ogUrl' => url()->current(),
+            'robots' => $indeks ? 'index, follow' : 'noindex, nofollow',
+        ];
+    }
+
+    /**
+     * "Anugerah TIMES Indonesia 2026" dari acara aktif.
+     */
+    private function namaAcara(): string
+    {
+        $acara = Acara::aktif();
+
+        return trim(($acara?->nama ?: config('app.name')) . ' ' . ($acara?->mulai?->timezone(Acara::ZONA)->year ?? ''));
+    }
+
     public function index()
     {
 
@@ -53,7 +77,14 @@ class HomeController extends Controller
 
         $data = $response->successful() ? $response->json() : null;
 
-        return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data'] ?? []]);
+        $acara = Acara::aktif()?->toShare();
+        $kapan = $acara ? "{$acara['tanggal_label']}, {$acara['jam_label']}" . ($acara['tempat'] ? " di {$acara['tempat']}" : '') . '. ' : '';
+
+        return Inertia::render('Guest/Welcome/Index', ['apiData' => $data['data'] ?? []])
+            ->withViewData($this->meta(
+                $this->namaAcara(),
+                $kapan . 'Merayakan pencapaian luar biasa dan memberikan penghargaan kepada insan inspiratif yang membawa dampak positif bagi banyak orang.'
+            ));
     }
 
     public function news(Request $request)
@@ -78,7 +109,10 @@ class HomeController extends Controller
             'items'      => $data['data'] ?? [], // isi berita
             'page'       => $page,
             'limit'      => $limit,
-        ]);
+        ])->withViewData($this->meta(
+            'Berita Seputar ATI - ' . config('app.name'),
+            'Kabar terbaru seputar Anugerah TIMES Indonesia dan para penerimanya.'
+        ));
     }
 
 
@@ -99,14 +133,22 @@ class HomeController extends Controller
 
         return Inertia::render('Guest/Winners/Index', [
             'winnersByYear' => $groupedWinners
-        ]);
+        ])->withViewData($this->meta(
+            'Para Peraih Anugerah TIMES Indonesia',
+            'Daftar peraih Anugerah TIMES Indonesia dari tahun ke tahun, penghormatan bagi individu dan lembaga yang menorehkan kontribusi luar biasa.'
+        ));
     }
 
 
 
     public function widget()
     {
-        return Inertia::render('Guest/Widget/Index');
+        return Inertia::render('Guest/Widget/Index')
+            ->withViewData($this->meta(
+                'Hitung Mundur ' . $this->namaAcara(),
+                'Hitung mundur menuju malam ' . $this->namaAcara() . '.',
+                indeks: false
+            ));
     }
 
     public function undangan($id, $nama)
@@ -121,19 +163,20 @@ class HomeController extends Controller
                 'nama' => $tamu->nama,
                 // Bukan 'acara': nama itu akan menimpa prop bersama dari middleware.
                 'edisi' => $tamu->acara?->toShare(),
-            ])->withViewData([
-                'ogTitle' => 'Acara telah berlalu',
-                'ogDescription' => 'Undangan ini untuk acara yang sudah berlangsung.',
-                'ogUrl' => url()->current(),
-            ]);
+            ])->withViewData($this->meta(
+                'Acara Sudah Berlalu - ' . config('app.name'),
+                'Undangan ini berlaku untuk acara yang sudah berlangsung.',
+                indeks: false
+            ));
         }
 
         return Inertia::render('Guest/Undangan/Index', [
             'tamu' => $tamu,
-        ])->withViewData([
-            'ogTitle' => 'Kepada ' . $tamu->nama,
-            'ogDescription' => 'Kami menantikan kehadiran Anda di malam Anugerah TIMES Indonesia',
-            'ogUrl' => url()->current(),
-        ]);;
+        ])->withViewData($this->meta(
+            'Undangan untuk ' . $tamu->nama,
+            'Kami menantikan kehadiran Anda di malam ' . $this->namaAcara() . '.',
+            // Undangan memuat nama tamu, jangan sampai terindeks mesin pencari.
+            indeks: false
+        ));
     }
 }
