@@ -5,7 +5,7 @@ import { Link, usePage } from "@inertiajs/react";
 const pad = (value) => String(value).padStart(2, "0");
 
 const stats = [
-  { to: 500, suffix: "+", label: "Pemenang" },
+  { to: 500, suffix: "+", label: "Peraih" },
   { to: 7, suffix: "", label: "Tahun" },
   { to: 20, suffix: "+", label: "Kategori" },
 ];
