@@ -16,6 +16,7 @@ class Acara extends Model
         'tempat',
         'alamat',
         'peta_url',
+        'video_url',
         'aktif',
     ];
 
@@ -76,7 +77,52 @@ class Acara extends Model
             'tempat' => $this->tempat,
             'alamat' => $this->alamat,
             'peta_url' => $this->peta_url,
+            'video_embed' => $this->videoEmbed(),
         ];
+    }
+
+    /**
+     * Ubah tautan YouTube apa pun menjadi bentuk sematan. Admin boleh menempel
+     * tautan biasa dari bilah alamat, tombol Bagikan, atau Shorts.
+     */
+    public function videoEmbed(): ?string
+    {
+        $id = self::idYoutube($this->video_url);
+
+        return $id ? "https://www.youtube.com/embed/{$id}?autoplay=1&mute=1&playsinline=1" : null;
+    }
+
+    /**
+     * Ambil id video dari bentuk watch?v=, youtu.be/, /embed/, /shorts/, atau
+     * id telanjang. Mengembalikan null kalau bukan tautan YouTube.
+     */
+    public static function idYoutube(?string $url): ?string
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return null;
+        }
+
+        if (preg_match('~^[A-Za-z0-9_-]{11}$~', $url)) {
+            return $url;
+        }
+
+        $pola = [
+            '~youtube\.com/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})~i',
+            '~youtu\.be/([A-Za-z0-9_-]{11})~i',
+            '~youtube\.com/embed/([A-Za-z0-9_-]{11})~i',
+            '~youtube\.com/shorts/([A-Za-z0-9_-]{11})~i',
+            '~youtube\.com/live/([A-Za-z0-9_-]{11})~i',
+        ];
+
+        foreach ($pola as $satu) {
+            if (preg_match($satu, $url, $cocok)) {
+                return $cocok[1];
+            }
+        }
+
+        return null;
     }
 
     private function jamLabel(): ?string

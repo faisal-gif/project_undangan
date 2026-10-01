@@ -84,6 +84,11 @@ class EdisiAcaraTest extends TestCase
 
     public function test_tamu_baru_masuk_edisi_aktif(): void
     {
+        // store() membuat QR PNG lewat BaconQrCode yang butuh ekstensi imagick.
+        if (! extension_loaded('imagick')) {
+            $this->markTestSkipped('Ekstensi imagick tidak tersedia di lingkungan ini.');
+        }
+
         $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
 
         $this->actingAs($this->admin())

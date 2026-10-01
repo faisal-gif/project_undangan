@@ -13,6 +13,7 @@ const kosong = {
     tempat: "",
     alamat: "",
     peta_url: "",
+    video_url: "",
 };
 
 /**
@@ -30,6 +31,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 tempat: acara.tempat || "",
                 alamat: acara.alamat || "",
                 peta_url: acara.peta_url || "",
+                video_url: acara.video_url || "",
             }
     );
 
@@ -119,6 +121,21 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                     placeholder="https://maps.app.goo.gl/..."
                 />
                 <InputError message={errors.peta_url} className="mt-2" />
+            </div>
+
+            <div>
+                <InputLabel htmlFor="video_url" value="Video sorotan (YouTube)" />
+                <TextInput
+                    id="video_url"
+                    className="mt-1 block w-full"
+                    value={data.video_url}
+                    onChange={(e) => setData("video_url", e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                    Tampil di halaman depan. Tempel tautan biasa dari YouTube; kosongkan untuk menyembunyikan video.
+                </p>
+                <InputError message={errors.video_url} className="mt-2" />
             </div>
 
             <div className="flex flex-wrap items-center gap-4">

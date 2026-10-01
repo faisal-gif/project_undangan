@@ -125,14 +125,16 @@ const GuestHero = () => {
           ))}
         </div>
 
-        <div className="border border-ati-cream/15 bg-black">
-          <iframe
-            src="https://www.youtube.com/embed/dv9VYYepFLo?si=8fc7OHaK_XofVmIJ&autoplay=1&mute=1"
-            title="Anugerah TIMES Indonesia"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share;"
-            className="aspect-video w-full"
-          />
-        </div>
+        {acara?.video_embed && (
+          <div className="border border-ati-cream/15 bg-black">
+            <iframe
+              src={acara.video_embed}
+              title={acara.nama ?? 'Anugerah TIMES Indonesia'}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share;"
+              className="aspect-video w-full"
+            />
+          </div>
+        )}
       </div>
     </header>
   );

@@ -6,6 +6,7 @@ use App\Models\Acara;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class AcaraController extends Controller
@@ -24,6 +25,7 @@ class AcaraController extends Controller
                 'tempat' => $acara->tempat,
                 'alamat' => $acara->alamat,
                 'peta_url' => $acara->peta_url,
+                'video_url' => $acara->video_url,
                 'aktif' => $acara->aktif,
             ] : null,
             'acaras' => Acara::withCount('tamus')->orderByDesc('mulai')->get()
@@ -76,6 +78,7 @@ class AcaraController extends Controller
             'tempat' => 'nullable|string|max:255',
             'alamat' => 'nullable|string|max:1000',
             'peta_url' => 'nullable|url|max:255',
+            'video_url' => 'nullable|string|max:255',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
             'mulai.required' => 'Tanggal dan jam mulai wajib diisi.',
@@ -84,9 +87,19 @@ class AcaraController extends Controller
             'peta_url.url' => 'Tautan peta harus berupa URL lengkap.',
         ]);
 
+        // Terima bentuk tautan YouTube apa pun, tolak yang bukan YouTube.
+        if (filled($data['video_url'] ?? null) && ! Acara::idYoutube($data['video_url'])) {
+            throw ValidationException::withMessages([
+                'video_url' => 'Tautan video harus dari YouTube, misalnya https://www.youtube.com/watch?v=xxxxxxxxxxx',
+            ]);
+        }
+
         // Yang diketik admin adalah waktu WIB
         $data['mulai'] = Carbon::parse($data['mulai'], Acara::ZONA);
-        $data['selesai'] = $data['selesai'] ? Carbon::parse($data['selesai'], Acara::ZONA) : null;
+        // Kolom opsional tidak selalu ikut terkirim, jadi jangan diakses langsung.
+        $data['selesai'] = filled($data['selesai'] ?? null)
+            ? Carbon::parse($data['selesai'], Acara::ZONA)
+            : null;
 
         return $data;
     }
