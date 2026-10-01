@@ -3,7 +3,9 @@ import { Head, useForm } from "@inertiajs/react";
 import React from "react";
 
 function Edit({ tamu, edisi }) {
-    const { data, setData, put, processing, errors } = useForm({
+    // Lihat catatan di Admin/Acara/Edit.jsx: PUT asli diblokir Cloudflare.
+    const { data, setData, post, processing, errors } = useForm({
+        _method: "put",
         nama: tamu.nama || "",
         lembaga: tamu.lembaga || "",
         alamat: tamu.alamat || "",
@@ -14,7 +16,7 @@ function Edit({ tamu, edisi }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route("admin.tamu.update", tamu.id));
+        post(route("admin.tamu.update", tamu.id));
     };
 
     return (

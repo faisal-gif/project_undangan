@@ -12,8 +12,10 @@ export default function UpdateProfileInformation({
 }) {
     const user = usePage().props.auth.user;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
+    // PATCH/PUT/DELETE asli diblokir Cloudflare di produksi; pakai _method.
+    const { data, setData, post, errors, processing, recentlySuccessful } =
         useForm({
+            _method: 'patch',
             name: user.name,
             email: user.email,
         });
@@ -21,7 +23,7 @@ export default function UpdateProfileInformation({
     const submit = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'));
+        post(route('admin.profile.update'));
     };
 
     return (

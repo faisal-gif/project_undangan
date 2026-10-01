@@ -21,10 +21,13 @@ const kosong = {
  * memasang ulang komponen ini dan useForm terisi nilai edisi yang benar.
  */
 function FormAcara({ acara, membuatBaru, onBatalBaru }) {
-    const { data, setData, post, put, processing, errors } = useForm(
+    // Cloudflare di domain produksi hanya mengizinkan GET/POST, jadi pembaruan
+    // dikirim sebagai POST dengan _method (pola yang sama dipakai form Pemenang).
+    const { data, setData, post, processing, errors } = useForm(
         membuatBaru || !acara
-            ? kosong
+            ? { ...kosong, _method: "post" }
             : {
+                _method: "put",
                 nama: acara.nama || "",
                 mulai: acara.mulai || "",
                 selesai: acara.selesai || "",
@@ -41,7 +44,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
         if (membuatBaru || !acara) {
             post(route("admin.acara.store"));
         } else {
-            put(route("admin.acara.update", acara.id));
+            post(route("admin.acara.update", acara.id));
         }
     };
 
@@ -164,7 +167,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         <button
                             type="button"
                             className="btn btn-sm btn-warning"
-                            onClick={() => router.put(route("admin.acara.aktifkan", acara.id))}
+                            onClick={() => router.post(route("admin.acara.aktifkan", acara.id), { _method: "put" })}
                         >
                             Jadikan Aktif
                         </button>

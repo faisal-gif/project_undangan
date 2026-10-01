@@ -22,7 +22,8 @@ import {
 const Show = ({ participant }) => {
 
     const handleUpdateStatus = () => {
-        router.put(route("admin.participants.update-status", participant.id), {
+        router.post(route("admin.participants.update-status", participant.id), {
+            _method: "put",
             status: "ambil",
         });
     };
