@@ -3,7 +3,7 @@ import AtiLogo from "@/Components/AtiLogo";
 const NewsHero = () => {
   return (
     <header className="mx-auto max-w-6xl px-6 pb-8 pt-32">
-      <AtiLogo className="h-14 w-14" />
+      <AtiLogo className="h-14 w-auto" />
 
       <h1 className="mt-8 font-heading text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[0.9] tracking-[-0.045em] text-ati-cream">
         Berita Seputar{" "}

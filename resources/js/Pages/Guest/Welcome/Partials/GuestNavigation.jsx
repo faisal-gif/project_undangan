@@ -25,7 +25,7 @@ const GuestNavigation = () => {
         >
             <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-6 border-b border-ati-cream/15 px-6">
                 <Link href="/" className="flex items-center gap-3">
-                    <AtiLogo className="h-9 w-9" />
+                    <AtiLogo className="h-9 w-auto" />
                     <span className="hidden font-heading text-lg font-semibold tracking-[-0.02em] text-ati-cream md:block">
                         Anugerah TIMES Indonesia
                     </span>

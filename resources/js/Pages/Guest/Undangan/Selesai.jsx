@@ -7,7 +7,7 @@ export default function Selesai({ nama, edisi }) {
             <Head title="Acara Sudah Berlalu" />
 
             <div className="w-full max-w-xl text-center">
-                <AtiLogo className="mx-auto h-16 w-16" />
+                <AtiLogo className="mx-auto h-16 w-auto" />
 
                 <h1 className="mt-8 font-heading text-[clamp(2rem,5vw,3rem)] font-bold leading-[0.95] tracking-[-0.03em] text-ati-cream">
                     Acara Sudah Berlalu
