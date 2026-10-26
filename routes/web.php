@@ -13,24 +13,26 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/news', [HomeController::class, 'news'])->name('news');
 Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
-Route::get('/undangan/{id}/{name}', [HomeController::class, 'undangan'])->name('undangan');
+// Dikunci kode acak; segmen nama hanya hiasan agar tautannya terasa personal.
+Route::get('/undangan/{kode}/{nama?}', [HomeController::class, 'undangan'])->name('undangan');
+// Gambar QR tamu, dibuat saat diminta. Dikunci kode acak, bukan nomor id.
+Route::get('/qr/{kode}', [TamuController::class, 'qr'])->name('tamu.qr');
 
 Route::get('/dashboard', [HomeController::class, 'dashboard'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Wajib sebelum Route::resource: /admin/tamu/{tamu} akan menelan path dua
-    // segmen seperti /admin/tamu/loop-qr.
-    Route::get('/tamu/loop-qr', [TamuController::class, 'loopQr'])->name('tamu.loopQr');
+    // segmen seperti /admin/tamu/salin.
+    Route::get('/tamu/salin', [TamuController::class, 'salinForm'])->name('tamu.salinForm');
+    Route::post('/tamu/salin', [TamuController::class, 'salin'])->name('tamu.salin');
     Route::get('/tamu/loop-email', [TamuController::class, 'loopSendEmail'])->name('tamu.loopEmail');
 
     Route::resource('tamu', TamuController::class);
     Route::resource('winners', WinnersController::class);
 
     Route::get('/tamu/{id}/email', [TamuController::class, 'sendEmail'])->name('tamu.sendEmail');
-    Route::get('/tamu/{id}/pdf', [TamuController::class, 'generatePdf'])->name('tamu.undangan');
 
-    Route::get('/pdf/{id}', [TamuController::class, 'generatePdf'])->name('pdf');
-    Route::get('/attendance/{id}', [TamuController::class, 'attendance'])->name('attendance');
+    Route::get('/attendance/{kode}', [TamuController::class, 'attendance'])->name('attendance');
     Route::put('/participants/update-status/{id}', [TamuController::class, 'update_status'])->name('participants.update-status');
     Route::get('/qrScanner', [TamuController::class, 'qrScanner'])->name('qrScanner');
     Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');

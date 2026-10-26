@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\GenerateTicketJob;
 use App\Jobs\SendTicketJob;
 use App\Mail\TicketMail;
 use App\Models\Acara;
 use App\Models\EmailLog;
 use App\Models\Tamu;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -21,21 +19,22 @@ use Intervention\Image\Typography\FontFactory;
 class TamuController extends Controller
 {
 
-    public function generateQrCode($id)
+    /**
+     * Gambar QR untuk satu tamu, dibuat saat diminta - tidak ada berkas yang
+     * disimpan. Isinya kode acak milik tamu, bukan nomor id, supaya QR tamu
+     * lain tidak bisa ditebak. SVG dipilih karena tidak butuh ekstensi imagick
+     * dan tetap tajam di layar maupun cetak.
+     */
+    public function qr(string $kode)
     {
-        $tamu = Tamu::find($id);
+        $tamu = Tamu::where('code', $kode)->firstOrFail();
 
-        // Generate QR Code (misalnya berdasarkan ID atau kode unik)
-        $qrCodeContent = $tamu->id; // atau $request->ticket_code
-        $qrImage = QrCode::format('png')->size(300)->generate($qrCodeContent);
+        $svg = QrCode::format('svg')->size(300)->margin(1)->generate($tamu->code);
 
-        // Simpan QR code ke storage
-        $path = "qrcodes/{$tamu->id}.png";
-        Storage::disk('public')->put($path, $qrImage);
-
-        // Simpan path QR di database
-        $tamu->qr_code = $path;
-        $tamu->save();
+        return response((string) $svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'public, max-age=604800',
+        ]);
     }
 
     /**
@@ -69,6 +68,122 @@ class TamuController extends Controller
                 'aktif' => $acara->aktif,
             ] : null,
         ]);
+    }
+
+    /**
+     * Halaman untuk menyalin tamu dari edisi sebelumnya ke edisi aktif.
+     */
+    public function salinForm(Request $request)
+    {
+        $tujuan = Acara::aktif();
+        $sumberLain = Acara::where('id', '!=', $tujuan?->id)->orderByDesc('mulai')->get();
+        $sumber = $sumberLain->firstWhere('id', $request->integer('dari')) ?? $sumberLain->first();
+
+        // Nama yang sudah ada di edisi tujuan, untuk menandai baris yang akan dilewati.
+        $sudahAda = $tujuan
+            ? Tamu::edisi($tujuan)->pluck('nama')->map(fn ($n) => $this->kunciNama($n))->filter()->flip()
+            : collect();
+
+        return Inertia::render('Admin/Tamu/Salin', [
+            'tujuan' => $tujuan ? ['id' => $tujuan->id, 'label' => $tujuan->label()] : null,
+            'sumber' => $sumber ? ['id' => $sumber->id, 'label' => $sumber->label()] : null,
+            'sumberTersedia' => $sumberLain->map(fn (Acara $a) => [
+                'id' => $a->id,
+                'label' => $a->label(),
+                'jumlah' => $a->tamus()->count(),
+            ]),
+            'tamus' => $sumber
+                ? Tamu::edisi($sumber)->orderBy('nama')->get()
+                    ->map(fn (Tamu $t) => [
+                        'id' => $t->id,
+                        'nama' => $t->nama,
+                        'lembaga' => $t->lembaga,
+                        'pic' => $t->pic,
+                        'jumlah_orang' => $t->jumlah_orang,
+                        'status' => $t->status,
+                        'sudah_ada' => $sudahAda->has($this->kunciNama($t->nama)),
+                    ])
+                : [],
+        ]);
+    }
+
+    /**
+     * Salin tamu terpilih ke edisi aktif. Yang disalin hanya datanya: status
+     * kembali ke "belum" dan QR dibuat ulang, karena kodenya baru.
+     */
+    public function salin(Request $request)
+    {
+        $request->validate([
+            'tamu_ids' => 'required|array|min:1',
+            'tamu_ids.*' => 'integer|exists:tamus,id',
+        ], [
+            'tamu_ids.required' => 'Pilih dulu tamu yang mau disalin.',
+        ]);
+
+        $tujuan = Acara::aktif();
+
+        if (! $tujuan) {
+            return back()->with('error', 'Belum ada acara aktif.');
+        }
+
+        $sudahAda = Tamu::edisi($tujuan)->pluck('nama')
+            ->map(fn ($n) => $this->kunciNama($n))->filter()->flip();
+
+        $disalin = 0;
+        $dilewati = 0;
+
+        foreach (Tamu::whereIn('id', $request->tamu_ids)->where('acara_id', '!=', $tujuan->id)->get() as $asal) {
+            $kunci = $this->kunciNama($asal->nama);
+
+            if ($kunci !== '' && $sudahAda->has($kunci)) {
+                $dilewati++;
+                continue;
+            }
+
+            Tamu::create([
+                'acara_id' => $tujuan->id,
+                'nama' => $asal->nama,
+                'lembaga' => $asal->lembaga,
+                'alamat' => $asal->alamat,
+                'pic' => $asal->pic,
+                'jumlah_orang' => $asal->jumlah_orang,
+                'code' => $this->kodeUnik(),
+                'status' => 'belum',
+            ]);
+
+            $sudahAda->put($kunci, true);
+            $disalin++;
+        }
+
+        $pesan = $disalin . ' tamu disalin ke ' . $tujuan->label() . '.';
+
+        if ($dilewati > 0) {
+            $pesan .= ' ' . $dilewati . ' dilewati karena namanya sudah ada.';
+        }
+
+        $pesan .= ' Jalankan "Generate Qr Code" untuk membuat QR-nya.';
+
+        return redirect()->route('admin.tamu.index')->with('success', $pesan);
+    }
+
+    /**
+     * Kode undangan acak yang belum dipakai tamu mana pun.
+     */
+    private function kodeUnik(): string
+    {
+        do {
+            $kode = strtoupper(Str::random(8));
+        } while (Tamu::where('code', $kode)->exists());
+
+        return $kode;
+    }
+
+    /**
+     * Nama yang disamakan bentuknya, untuk mendeteksi tamu yang sama.
+     */
+    private function kunciNama(?string $nama): string
+    {
+        return mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $nama)));
     }
 
     /**
@@ -108,14 +223,6 @@ class TamuController extends Controller
             'pic' => 'nullable|string|max:255',
         ]);
 
-        // generate unique random code and attach it to the new Tamu via creating event
-        $randomCode = strtoupper(Str::random(8));
-
-        while (Tamu::where('code', $randomCode)->exists()) {
-            $randomCode = strtoupper(Str::random(8));
-        }
-
-
         $tamu = Tamu::create([
             // Tamu baru selalu masuk edisi yang sedang aktif.
             'acara_id' => Acara::aktif()?->id,
@@ -124,10 +231,8 @@ class TamuController extends Controller
             'lembaga' => $request->lembaga,
             'pic' => $request->pic,
             'jumlah_orang' => $request->jumlah_orang,
-            'code' => $randomCode,
+            'code' => $this->kodeUnik(),
         ]);
-
-        $this->generateQrCode($tamu->id);
 
         return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
@@ -222,43 +327,6 @@ class TamuController extends Controller
         ]);
     }
 
-    public function generatePdf($id)
-    {
-
-        $tamu = Tamu::find($id);
-        // Ambil data dari database sesuai ID undangan
-        // Contoh data dummy dulu
-        $data = [
-            'nama' => !empty($tamu->nama) ? $tamu->nama : $tamu->lembaga,
-            'lembaga' => !empty($tamu->lembaga) ? $tamu->lembaga : '',
-            'qrCode' => $tamu->qr_code,
-        ];
-
-        $pdf = Pdf::loadView('pdf.undangan', compact('data'))
-            ->setPaper('a4', 'portrait');
-
-        $slugNama = str_replace(['/', '\\'], '', Str::slug($data['nama'], '-'));
-        return $pdf->download('undangan-' . $slugNama . '.pdf');
-    }
-
-
-    public function loopQr()
-    {
-        $acara = Acara::aktif();
-
-        if (! $acara) {
-            return back()->with('error', 'Belum ada acara aktif.');
-        }
-
-        Tamu::edisi($acara)->chunkById(100, function ($tamus) {
-            foreach ($tamus as $tamu) {
-                dispatch(new GenerateTicketJob($tamu->id));
-            }
-        });
-
-        return back()->with('success', 'Generate QR untuk ' . $acara->label() . ' sudah masuk antrean.');
-    }
-
     public function loopSendEmail()
     {
         $acara = Acara::aktif();
@@ -315,11 +383,13 @@ class TamuController extends Controller
         return redirect()->back()->with('success', "Email {$tamu->nama} Sedang Dikirim!");
     }
 
-    public function attendance($id)
+    public function attendance(string $kode)
     {
-
-        // Contoh: cari berdasarkan data dari QR
-        $tamu = Tamu::with('acara')->where('id', $id)->first();
+        // QR sekarang berisi kode acak. Nomor id masih dicoba sebagai cadangan
+        // supaya QR lama tetap dikenali - lalu ditolak gerbang edisi di bawah
+        // dengan pesan yang jelas.
+        $tamu = Tamu::with('acara')->where('code', $kode)->first()
+            ?? (ctype_digit($kode) ? Tamu::with('acara')->find($kode) : null);
 
         if (!$tamu) {
             return back()->with('error', 'Undangan Tidak ditemukan');

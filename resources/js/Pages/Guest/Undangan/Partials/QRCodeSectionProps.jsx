@@ -1,68 +1,15 @@
-import { useState } from "react";
-
-import { Download, QrCode, Ticket } from "lucide-react";
-import { toast } from "sonner";
+import { QrCode, Ticket } from "lucide-react";
 import Card from "@/Components/Card";
 import { usePage } from "@inertiajs/react";
 
-export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
+export const QRCodeSection = ({ guestName, guestCode }) => {
   const { acara } = usePage().props;
 
   const eventLabel = [acara?.nama, acara?.tahun].filter(Boolean).join(" ");
   const jadwalLabel = [acara?.tanggal_singkat, acara?.jam_label].filter(Boolean).join(" - ");
 
-  const qrData = JSON.stringify({
-    eventId: eventLabel,
-    guestName,
-    guestCode,
-    eventDate: acara?.mulai_iso,
-    venue: acara?.tempat
-  });
-
-  const qrUrl = `/storage/${qr_code}`;
-
-  const downloadQRCode = async () => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = qrUrl;
-
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 400;
-      canvas.height = 500;
-
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw QR
-      ctx.drawImage(img, 50, 80, 300, 300);
-
-      // Text
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "bold 20px Inter";
-      ctx.textAlign = "center";
-      ctx.fillText("E-Ticket", 200, 40);
-
-      ctx.font = "16px Inter";
-      ctx.fillText(eventLabel, 200, 65);
-
-      ctx.font = "14px Inter";
-      ctx.fillText(guestName, 200, 410);
-
-      ctx.font = "12px Inter";
-      ctx.fillStyle = "#64748b";
-      ctx.fillText(guestCode, 200, 430);
-      ctx.fillText(jadwalLabel, 200, 450);
-
-      const link = document.createElement("a");
-      link.download = `e-ticket-${guestName.replace(/\s+/g, "-")}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-
-      toast.success("E-Ticket berhasil diunduh!");
-    };
-  };
+  // Dibuat saat diminta oleh server; tidak ada berkas tersimpan.
+  const qrUrl = route('tamu.qr', guestCode);
 
   return (
     <section className="py-16 md:py-24 px-4 bg-gradient-burgundy text-white">
@@ -74,7 +21,7 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
           <h2 className="font-serif text-4xl md:text-5xl mb-4">E-Ticket Anda</h2>
           <div className="w-24 h-1 bg-amber-400 mx-auto mb-6" />
           <p className="text-white/70 max-w-2xl mx-auto">
-            Silakan simpan atau unduh QR code ini. Tunjukkan pada saat registrasi.
+            Tunjukkan QR code ini dari layar ponsel Anda saat registrasi.
           </p>
         </div>
 
@@ -109,23 +56,14 @@ export const QRCodeSection = ({ guestName, guestId, guestCode, qr_code }) => {
           </div>
 
           <div className="space-y-3">
-           
-              <button
-                onClick={downloadQRCode}
-                className="w-full bg-amber-400 hover:bg-amber-500 text-primary font-semibold py-3 rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
-              >
-                <Download className="h-5 w-5" />
-                Unduh E-Ticket
-              </button>
-            
             <div className="bg-amber-400/10 border border-amber-400/20 rounded-lg p-4">
               <div className="flex gap-3">
                 <QrCode className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="font-medium mb-1">Petunjuk Penggunaan:</p>
                   <ul className="text-muted-foreground space-y-1 text-xs">
-                    <li>• Unduh dan simpan QR code ini</li>
-                    <li>• Tunjukkan saat registrasi</li>
+                    <li>• Tunjukkan QR ini dari layar ponsel saat registrasi</li>
+                    <li>• Simpan tautan undangan ini agar mudah dibuka lagi</li>
                     <li>• Datang 30 menit sebelum acara</li>
                     <li>• Dress code: Batik</li>
                   </ul>

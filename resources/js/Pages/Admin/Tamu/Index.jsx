@@ -43,7 +43,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
     };
 
     const copyLink = (tamu) => {
-        const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
+        const url = route("undangan", [tamu.code, slugify(tamu.nama)]);
         navigator.clipboard.writeText(url);
 
         setCopiedId(tamu.id); // tandai yang dicopy
@@ -54,7 +54,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
     };
 
     const sendWhatsapp = (tamu) => {
-        const url = route("undangan", [tamu.id, slugify(tamu.nama)]);
+        const url = route("undangan", [tamu.code, slugify(tamu.nama)]);
         const message = `Kepada Yth. ${tamu.nama}\n\nDengan hormat, Melalui pesan ini, kami bermaksud menyampaikan undangan resmi kepada Bapak/Ibu. Besar harapan kami agar Bapak/Ibu berkenan membuka tautan undangan digital berikut untuk informasi lengkap acara:\n\n${url}\n\nAtas perhatian dan waktunya, kami ucapkan terima kasih.\n\nSalam hormat.\nTIMES Indonesia`;
 
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -124,10 +124,10 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                         </button>
                                         {acaraDilihat?.aktif && (
                                             <Link
-                                                href={route("admin.tamu.loopQr")}
+                                                href={route("admin.tamu.salinForm")}
                                                 className="btn btn-neutral btn-sm"
                                             >
-                                                Generate Qr Code
+                                                Salin dari Edisi Lain
                                             </Link>
                                         )}
 
@@ -199,7 +199,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
 
                                                     {/* Lihat Undangan */}
                                                     <Link
-                                                        href={route("undangan", [tamu.id, slugify(tamu.nama)])}
+                                                        href={route("undangan", [tamu.code, slugify(tamu.nama)])}
                                                         className="btn btn-xs btn-neutral"
                                                     >
                                                         <User size={16} />
@@ -212,12 +212,6 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                                         <Send size={16} />
                                                     </button>
 
-                                                    {/* <a
-                                                        href={route("tickets.undangan", tamu.id)}
-                                                        className="btn btn-primary btn-xs"
-                                                    >
-                                                        pdf
-                                                    </a> */}
                                                 </td>
                                             </tr>
                                         ))}

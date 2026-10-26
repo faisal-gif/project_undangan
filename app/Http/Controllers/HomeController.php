@@ -151,10 +151,25 @@ class HomeController extends Controller
             ));
     }
 
-    public function undangan($id, $nama)
+    public function undangan(string $kode, ?string $nama = null)
     {
-        $tamu = Tamu::with('acara')->findOrFail($id);
         $acara = Acara::aktif();
+        $tamu = Tamu::with('acara')->where('code', $kode)->first();
+
+        // Tautan lama memakai nomor id yang mudah ditebak. Masih dilayani,
+        // tapi hanya untuk undangan edisi yang sudah lewat - undangan edisi
+        // aktif wajib lewat kode, supaya tamu lain tidak bisa dibuka.
+        if (! $tamu && ctype_digit($kode)) {
+            $lama = Tamu::with('acara')->find($kode);
+
+            if ($lama && $acara && $lama->acara_id === $acara->id) {
+                abort(404);
+            }
+
+            $tamu = $lama;
+        }
+
+        abort_unless($tamu, 404);
 
         // Undangan edisi lama ditutup: isinya (hitung mundur, QR, rundown)
         // hanya benar untuk acara yang sedang aktif.

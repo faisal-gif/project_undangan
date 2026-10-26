@@ -159,7 +159,7 @@ function Index({ tamus, filters }) {
                                                 </td>
                                                 <td className="py-2 px-4 border-b ">
                                                     <Link
-                                                        href={route("admin.attendance", tamu.id)}
+                                                        href={route("admin.attendance", tamu.code)}
                                                         className="btn btn-xs btn-neutral"
 
                                                     >

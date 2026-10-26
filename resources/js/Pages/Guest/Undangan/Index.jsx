@@ -100,7 +100,7 @@ function Index({ tamu }) {
 
             {/* Why We Celebrate Section */}
 
-            <QRCodeSection guestId={tamu.id} guestCode={tamu.code}  guestName={tamu.nama} qr_code={tamu.qr_code} />
+            <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
 
 
             {/* Footer */}

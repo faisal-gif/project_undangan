@@ -33,6 +33,7 @@ class EdisiAcaraTest extends TestCase
             'acara_id' => $this->aktif->id,
             'nama' => 'Tamu Sekarang',
             'lembaga' => 'Lembaga Sekarang',
+            'code' => 'KODEBARU',
             'status' => 'belum',
         ]);
 
@@ -40,6 +41,7 @@ class EdisiAcaraTest extends TestCase
             'acara_id' => $this->lama->id,
             'nama' => 'Tamu Kemarin',
             'lembaga' => 'Lembaga Kemarin',
+            'code' => 'KODELAMA',
             'status' => 'belum',
         ]);
     }
@@ -126,7 +128,7 @@ class EdisiAcaraTest extends TestCase
 
     public function test_undangan_edisi_lama_menampilkan_halaman_tertutup(): void
     {
-        $this->get(route('undangan', [$this->tamuLama->id, 'tamu-kemarin']))
+        $this->get(route('undangan', [$this->tamuLama->code, 'tamu-kemarin']))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Guest/Undangan/Selesai')
@@ -135,33 +137,27 @@ class EdisiAcaraTest extends TestCase
 
     public function test_undangan_edisi_aktif_tetap_hidup(): void
     {
-        $this->get(route('undangan', [$this->tamuAktif->id, 'tamu-sekarang']))
+        $this->get(route('undangan', [$this->tamuAktif->code, 'tamu-sekarang']))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('Guest/Undangan/Index'));
     }
 
     public function test_undangan_id_tidak_dikenal_menghasilkan_404(): void
     {
-        $this->get(route('undangan', [999999, 'x']))->assertNotFound();
+        $this->get(route('undangan', ['KODEASING', 'x']))->assertNotFound();
+
+        // Tautan lama bernomor hanya boleh membuka undangan edisi yang lewat.
+        $this->get(route('undangan', [$this->tamuLama->id, 'x']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Guest/Undangan/Selesai'));
+
+        // Undangan edisi aktif tidak boleh bisa dibuka lewat nomor id.
+        $this->get(route('undangan', [$this->tamuAktif->id, 'x']))->assertNotFound();
     }
 
     public function test_rute_massal_butuh_login(): void
     {
-        $this->get(route('admin.tamu.loopQr'))->assertRedirect(route('login'));
         $this->get(route('admin.tamu.loopEmail'))->assertRedirect(route('login'));
-    }
-
-    public function test_generate_qr_massal_hanya_menyentuh_edisi_aktif(): void
-    {
-        \Illuminate\Support\Facades\Queue::fake();
-
-        $this->actingAs($this->admin())
-            ->get(route('admin.tamu.loopQr'))
-            ->assertRedirect();
-
-        \Illuminate\Support\Facades\Queue::assertPushed(
-            \App\Jobs\GenerateTicketJob::class,
-            1
-        );
+        $this->get(route('admin.tamu.salinForm'))->assertRedirect(route('login'));
     }
 }
