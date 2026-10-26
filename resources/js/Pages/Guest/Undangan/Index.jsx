@@ -1,19 +1,25 @@
 import React, { useState } from 'react'
 import AwardHeroSection from './Partials/AwardHeroSection';
-import { Award, Sparkles } from 'lucide-react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import AtiLogo from '@/Components/AtiLogo';
 import useCountdown from '@/useCountdown';
 import { Head, usePage } from '@inertiajs/react';
-import { AwardsCategorySection } from './Partials/AwardsCategorySection';
 import { AwardsEventSection } from './Partials/AwardsEventSection';
 import { AwardsScheduleSection } from './Partials/AwardsScheduleSection';
 import { QRCodeSection } from './Partials/QRCodeSectionProps';
+
+const pad = (value) => String(value).padStart(2, '0');
 
 function Index({ tamu }) {
     const [isInvitationOpen, setIsInvitationOpen] = useState(false);
     const { acara } = usePage().props;
     const timeLeft = useCountdown(acara?.mulai_iso);
+
+    const units = [
+        { value: timeLeft.days, label: 'Hari', padded: false },
+        { value: timeLeft.hours, label: 'Jam', padded: true },
+        { value: timeLeft.minutes, label: 'Menit', padded: true },
+        { value: timeLeft.seconds, label: 'Detik', padded: true },
+    ];
 
     if (!isInvitationOpen) {
         return (
@@ -23,98 +29,73 @@ function Index({ tamu }) {
             </>
         );
     }
+
     return (
-        <div className="min-h-screen">
+        <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
             <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
-            {/* Opening Section */}
-            <section className="py-16 md:py-24 px-4 text-center bg-gradient-burgundy text-white">
-                {/* Animated Background Effects */}
-                <div className="absolute inset-0 bg-gradient-radial-burgundy opacity-60" />
-                <div className="absolute inset-0 bg-pattern-dots" />
 
-                <div className="container mx-auto max-w-4xl">
-                    <div className="flex justify-center mb-6 animate-scale-in">
-                        <AtiLogo className="w-32 h-full mx-auto mb-6 animate-pulse" />
-                    </div>
+            {/* Pembuka */}
+            <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
+                <AtiLogo className="mx-auto h-16 w-auto" />
 
+                <h2 className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
+                    Anugerah
+                    <br />
+                    <span className="text-ati-gold-light">TIMES Indonesia</span>
+                </h2>
 
+                <p className="mt-5 font-heading text-xl text-ati-cream/80">
+                    {acara?.tanggal_label}
+                </p>
 
-                    <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-                        <span className="block mb-3">Anugerah</span>
-                        <span className="block text-amber-400">TIMES INDONESIA</span>
-                    </h2>
+                {/* Hitung mundur */}
+                <p className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
 
-                    <p className="text-xl md:text-2xl text-white/80 mb-8 animate-fade-in" style={{ animationDelay: '0.6s', opacity: 0 }}>
-                        {acara?.tanggal_label}
-                    </p>
-
-                    <div className="mb-12 animate-fade-in" style={{ animationDelay: '0.8s', opacity: 0 }}>
-                        <p className="text-sm md:text-base text-white/70 mb-6 uppercase tracking-wider">
-                            Menghitung Hari
-                        </p>
-                        {/* Hitung Mundur */}
-                        <div className="my-8 flex justify-center text-white">
-                            <div className="grid grid-flow-col gap-5 text-center auto-cols-max">
-                                <div className="flex flex-col">
-                                    <span className="countdown font-mono text-5xl">
-                                        <span style={{ "--value": timeLeft.days }}></span>
-                                    </span>
-                                    Hari
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="countdown font-mono text-5xl">
-                                        <span style={{ "--value": timeLeft.hours }}></span>
-                                    </span>
-                                    Jam
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="countdown font-mono text-5xl">
-                                        <span style={{ "--value": timeLeft.minutes }}></span>
-                                    </span>
-                                    Menit
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="countdown font-mono text-5xl">
-                                        <span style={{ "--value": timeLeft.seconds }}></span>
-                                    </span>
-                                    Detik
-                                </div>
+                <div className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
+                    {units.map((unit, index) => (
+                        <div
+                            key={unit.label}
+                            className={`px-1 py-5 ${index > 0 ? 'border-l border-ati-cream/15' : ''}`}
+                        >
+                            <div className="font-heading text-[clamp(1.75rem,7vw,2.75rem)] font-bold leading-none tabular-nums text-ati-gold-light">
+                                {unit.padded ? pad(unit.value) : unit.value}
+                            </div>
+                            <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ati-cream/55">
+                                {unit.label}
                             </div>
                         </div>
-                    </div>
-
-                    <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-sm border border-gold/20 rounded-lg p-8 animate-scale-in hover:scale-105 transition-transform duration-300" >
-                        <Award className="h-12 w-12 text-gold mx-auto mb-4 animate-pulse" />
-                        <p className="text-white/90 italic leading-relaxed">
-                            "Excellence is not a destination; it is a continuous journey that never ends."
-                        </p>
-                        <p className="text-sm text-gold mt-3 font-medium">
-                            - Brian Tracy
-                        </p>
-                    </div>
+                    ))}
                 </div>
+
+                {/* Kutipan */}
+                <blockquote className="mt-16">
+                    <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
+                        &ldquo;Excellence is not a destination; it is a continuous journey that never
+                        ends.&rdquo;
+                    </p>
+                    <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
+                </blockquote>
             </section>
 
             <AwardsEventSection />
             <AwardsScheduleSection />
 
-            {/* Why We Celebrate Section */}
-
             <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
 
+            <footer className="border-t border-ati-cream/15 px-6 py-14 text-center">
+                <AtiLogo className="mx-auto h-12 w-auto" />
 
-            {/* Footer */}
-            <footer className="py-12 px-4 text-center bg-[#4c0c0c] text-white">
-                <div className="container mx-auto">
-                    <AtiLogo className="w-12 h-full mx-auto mb-6 animate-pulse" />
-                    <p className="font-serif text-2xl mb-2">{acara?.nama} {acara?.tahun}</p>
-                    <p className="text-sm text-white/70">
-                        Terima kasih atas kehadiran Anda dalam malam penghargaan ini
-                    </p>
-                    <p className="text-xs text-white/50 mt-4">
-                        © {acara?.tahun} All Rights Reserved
-                    </p>
-                </div>
+                <p className="mt-6 font-heading text-2xl font-semibold tracking-[-0.02em] text-ati-cream">
+                    {acara?.nama} {acara?.tahun}
+                </p>
+
+                <p className="mt-2 text-ati-cream/65">
+                    Terima kasih atas kehadiran Anda dalam malam penghargaan ini
+                </p>
+
+                <p className="mt-6 text-xs text-ati-cream/40">
+                    © {acara?.tahun} All Rights Reserved
+                </p>
             </footer>
         </div>
     )

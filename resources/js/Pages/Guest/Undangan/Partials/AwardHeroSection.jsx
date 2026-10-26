@@ -1,62 +1,67 @@
 import AtiLogo from '@/Components/AtiLogo'
-import { Award } from 'lucide-react'
+import { usePage } from '@inertiajs/react'
 import React from 'react'
 
 function AwardHeroSection({ guestName, lembaga, jumlah_orang, onOpenInvitation }) {
+    const { acara } = usePage().props
+
     return (
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <section className="ati-guest relative isolate flex min-h-[100svh] items-end overflow-hidden bg-ati-ink font-sans text-ati-cream">
+            <img
+                src="/bg-ati.jpg"
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+            />
             <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(/bg-ati.jpg)` }}
-            >
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80" />
-            </div>
+                aria-hidden="true"
+                className="absolute inset-0 -z-10"
+                style={{
+                    background:
+                        'linear-gradient(180deg, rgba(18,6,10,0.86) 0%, rgba(18,6,10,0.5) 35%, rgba(18,6,10,0.94) 85%, #12060A 100%)',
+                }}
+            />
 
-            <div className="relative z-10 text-center px-4 max-w-4xl">
-                <div className="mb-6 flex justify-center animate-scale-in">
-                    <AtiLogo className="w-32 h-full mx-auto mb-6 animate-pulse" />
-                </div>
+            <div className="mx-auto w-full max-w-2xl px-6 pb-16 pt-28 text-center">
+                <AtiLogo className="ati-reveal mx-auto h-20 w-auto" />
 
-                <p className="text-amber-400 text-sm md:text-base mb-4 tracking-[0.3em] uppercase font-medium animate-fade-in" style={{ animationDelay: '0.2s', opacity: 0 }}>
-                    Proudly Presents
-                </p>
-
-                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl mb-6 text-white leading-tight animate-slide-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-                    <span className="block mb-4">Anugerah</span>
-                    <span className="block text-gold">TIMES Indonesia</span>
-
+                <h1 className="ati-reveal mt-8 font-heading text-[clamp(2.5rem,8vw,4rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream" style={{ animationDelay: '80ms' }}>
+                    Anugerah
+                    <br />
+                    <span className="text-ati-gold-light">TIMES Indonesia</span>
                 </h1>
 
-                <div className="border-t border-b border-gold/50 py-6 mb-4 max-w-md mx-auto animate-fade-in" >
-                    <p className="text-white/80 text-sm md:text-base tracking-wide">
-                        Kepada Yth.
+                {acara?.tanggal_label && (
+                    <p className="ati-reveal mt-4 font-heading text-lg text-ati-cream/75" style={{ animationDelay: '140ms' }}>
+                        {acara.tanggal_label}
                     </p>
-                    <p className="text-white font-medium text-lg md:text-xl mt-2 animate-fade-in">
+                )}
+
+                <div className="ati-reveal mt-10 border-y border-ati-gold/40 py-7" style={{ animationDelay: '220ms' }}>
+                    <p className="text-sm text-ati-cream/65">Kepada Yth.</p>
+
+                    <p className="mt-2 font-heading text-[clamp(1.35rem,4.5vw,1.9rem)] font-semibold leading-tight text-ati-cream">
                         {guestName}
                     </p>
-                    <p className="text-white font-medium text-sm md:text-lg mt-1 animate-fade-in">
-                        {lembaga}
+
+                    {lembaga && <p className="mt-1 text-ati-cream/70">{lembaga}</p>}
+                </div>
+
+                {jumlah_orang && (
+                    <p className="ati-reveal mt-4 text-sm text-ati-cream/60" style={{ animationDelay: '280ms' }}>
+                        Berlaku untuk maksimal {jumlah_orang} orang
                     </p>
-                </div>
+                )}
 
-                {
-                    jumlah_orang && (
-                        <p className="text-white font-medium text-sm md:text-lg my-4 animate-fade-in">
-                            Jumlah Max {jumlah_orang} Orang
-                        </p>
-                    )
-                }
-
-
-                <div>
-                    <button
-                        onClick={onOpenInvitation}
-                        className="btn"
-                    >
-                        <Award className="mr-2 h-5 w-5" />
-                        Buka Undangan
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    onClick={onOpenInvitation}
+                    className="ati-reveal mt-10 inline-flex items-baseline gap-3 bg-ati-gold px-8 py-3.5 text-base font-semibold text-ati-ink transition-colors hover:bg-ati-gold-light"
+                    style={{ animationDelay: '340ms' }}
+                >
+                    Buka Undangan
+                    <span aria-hidden="true">&rarr;</span>
+                </button>
             </div>
         </section>
     )

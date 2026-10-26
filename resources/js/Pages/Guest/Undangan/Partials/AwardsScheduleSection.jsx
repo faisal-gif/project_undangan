@@ -1,7 +1,3 @@
-import Card from "@/Components/Card";
-import { Clock } from "lucide-react";
-
-
 const schedule = [
   { time: "18:00", title: "Registrasi & Welcome Drink", description: "Check-in tamu undangan" },
   { time: "19:00", title: "Opening Ceremony & Penampilan Musik Pembuka", description: "Sambutan dari Master of Ceremony" },
@@ -13,40 +9,34 @@ const schedule = [
 
 export const AwardsScheduleSection = () => {
   return (
-    <section className="py-16 md:py-24 px-4 bg-base-300/30">
-      <div className="container mx-auto max-w-4xl">
-        <div className="text-center mb-12">
-          <h2 className="font-serif text-4xl md:text-5xl mb-4">
-            Rundown Acara
-          </h2>
-          <div className="w-24 h-1 bg-amber-400 mx-auto mb-6" />
-          <p className="text-muted-foreground">
-            Jadwal acara pemberian penghargaan
-          </p>
-        </div>
+    <section className="border-t border-ati-cream/15 px-6 py-20 lg:py-24">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
+          Rundown Acara
+        </h2>
+        <p className="mt-3 text-ati-cream/65">Jadwal acara pemberian penghargaan</p>
 
-        <div className="space-y-4">
-          {schedule.map((item, index) => (
-            <Card 
-              key={index} 
-              className="p-6 border-l-4 bg-base-100 border-l-amber-400 hover:shadow-lg transition-all duration-300 hover:scale-105 animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s`, opacity: 0 }}
+        <ol className="mt-8">
+          {schedule.map((item) => (
+            <li
+              key={item.time + item.title}
+              className="grid grid-cols-[4.5rem_1fr] items-baseline gap-x-5 border-t border-ati-cream/15 py-6 last:border-b sm:grid-cols-[6rem_1fr] sm:gap-x-8"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-lg bg-amber-400/10 flex flex-col items-center justify-center transition-transform duration-300 hover:scale-110">
-                    <Clock className="h-5 w-5 text-amber-400 mb-1" />
-                    <span className="text-xs font-bold text-amber-400">{item.time}</span>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                </div>
-              </div>
-            </Card>
+              <span className="font-heading text-lg font-semibold tabular-nums text-ati-gold sm:text-xl">
+                {item.time}
+              </span>
+
+              <span>
+                <span className="block font-heading text-lg font-semibold leading-snug text-ati-cream sm:text-xl">
+                  {item.title}
+                </span>
+                <span className="mt-1 block text-sm leading-[1.6] text-ati-cream/60">
+                  {item.description}
+                </span>
+              </span>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );
