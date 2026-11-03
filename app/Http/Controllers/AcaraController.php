@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Acara;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -94,12 +93,9 @@ class AcaraController extends Controller
             ]);
         }
 
-        // Yang diketik admin adalah waktu WIB
-        $data['mulai'] = Carbon::parse($data['mulai'], Acara::ZONA);
+        // Yang diketik admin adalah waktu WIB; model yang mengubahnya ke UTC.
         // Kolom opsional tidak selalu ikut terkirim, jadi jangan diakses langsung.
-        $data['selesai'] = filled($data['selesai'] ?? null)
-            ? Carbon::parse($data['selesai'], Acara::ZONA)
-            : null;
+        $data['selesai'] = $data['selesai'] ?? null;
 
         return $data;
     }

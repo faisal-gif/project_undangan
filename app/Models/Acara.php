@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -25,6 +27,38 @@ class Acara extends Model
         'selesai' => 'datetime',
         'aktif' => 'boolean',
     ];
+
+    /**
+     * Waktu selalu disimpan dalam UTC. Tanpa ini Laravel menulis jam apa
+     * adanya ("19:30") lalu membacanya kembali sebagai UTC, sehingga jam yang
+     * diketik admin melompat 7 jam setiap kali disimpan.
+     */
+    public function setMulaiAttribute($value): void
+    {
+        $this->attributes['mulai'] = $this->keUtc($value);
+    }
+
+    public function setSelesaiAttribute($value): void
+    {
+        $this->attributes['selesai'] = $this->keUtc($value);
+    }
+
+    /**
+     * Teks polos dari form dibaca sebagai WIB; nilai yang sudah membawa zona
+     * waktu sendiri tinggal dipindah ke UTC.
+     */
+    private function keUtc($value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $waktu = $value instanceof DateTimeInterface
+            ? Carbon::instance($value)
+            : Carbon::parse($value, self::ZONA);
+
+        return $waktu->utc()->format('Y-m-d H:i:s');
+    }
 
     public function tamus(): HasMany
     {

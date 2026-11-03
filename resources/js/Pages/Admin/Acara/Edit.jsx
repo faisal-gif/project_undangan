@@ -17,6 +17,24 @@ const kosong = {
 };
 
 /**
+ * "2026-11-27T19:30" -> "Jumat, 27 November 2026 pukul 19.30 WIB".
+ * Dibaca sebagai teks apa adanya, bukan lewat Date(), supaya tidak ikut
+ * bergeser oleh zona waktu komputer admin.
+ */
+function bacaWib(nilai) {
+    const cocok = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(nilai || "");
+    if (!cocok) return null;
+
+    const [, th, bl, tg, jam, menit] = cocok;
+    const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli",
+        "Agustus", "September", "Oktober", "November", "Desember"];
+    const tanggal = new Date(Number(th), Number(bl) - 1, Number(tg));
+
+    return `${hari[tanggal.getDay()]}, ${Number(tg)} ${bulan[Number(bl) - 1]} ${th} pukul ${jam}.${menit} WIB`;
+}
+
+/**
  * Form diberi key={acara?.id} oleh pemanggilnya, jadi berpindah edisi
  * memasang ulang komponen ini dan useForm terisi nilai edisi yang benar.
  */
@@ -73,6 +91,9 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         onChange={(e) => setData("mulai", e.target.value)}
                         required
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                        {bacaWib(data.mulai) ?? "Tanggal dan jam mulai acara."}
+                    </p>
                     <InputError message={errors.mulai} className="mt-2" />
                 </div>
 
@@ -85,6 +106,9 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         value={data.selesai}
                         onChange={(e) => setData("selesai", e.target.value)}
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                        {bacaWib(data.selesai) ?? "Boleh dikosongkan bila jam selesai belum pasti."}
+                    </p>
                     <InputError message={errors.selesai} className="mt-2" />
                 </div>
             </div>
