@@ -255,6 +255,81 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* 🏛️ Undangan: latar tiap bagian.
+
+   Satu warna rata untuk seluruh halaman terasa seperti slide, bukan ruang.
+   Tiga lapis di bawah ini dipakai bergantian antar bagian supaya tamu merasa
+   berjalan melewati ruangan: sorot panggung, panel anggur, lalu gelap lagi.
+   Semuanya gradien - tanpa berkas gambar tambahan. */
+
+/* Selang-seling antar bagian ditentukan dari urutannya, bukan dari kelas yang
+   ditempel di tiap komponen: undangan penerima punya satu bagian lebih banyak
+   daripada undangan hadir biasa, dan hanya cara ini yang tetap berselang di
+   kedua versi tanpa dua panel sewarna bersebelahan. */
+.ati-isi > section:nth-of-type(even) {
+    background:
+        radial-gradient(ellipse 120% 85% at 50% 0%, rgba(122, 15, 31, 0.26) 0%, transparent 62%),
+        linear-gradient(180deg, #1a0810 0%, #230a13 48%, #12060a 100%);
+}
+
+/* Pembuka dan kartu QR adalah dua panggung undangan ini: yang satu menyebut
+   nama tamu, yang satu jadi tiket masuknya. Keduanya diberi sorot lampu. */
+.ati-isi > section:first-of-type,
+.ati-isi > section:last-of-type {
+    background:
+        radial-gradient(ellipse 62% 48% at 50% -8%, rgba(214, 162, 73, 0.17) 0%, transparent 64%),
+        radial-gradient(ellipse 110% 55% at 50% 112%, rgba(122, 15, 31, 0.24) 0%, transparent 70%),
+        #12060a;
+}
+
+/* Ornamen damask emas yang nyaris tak terlihat - baru terbaca saat layar
+   dilihat dari dekat, seperti cetakan emboss pada kertas undangan. Ditopengi
+   di tepi supaya ubinannya tidak terpotong kaku. */
+.ati-damask {
+    position: relative;
+}
+
+.ati-damask::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-size: 132px 132px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='132'%3E%3Cg fill='none' stroke='%23D6A249' stroke-width='1.1'%3E%3Cpath d='M66 6 126 66 66 126 6 66Z'/%3E%3Ccircle cx='66' cy='66' r='21'/%3E%3Cpath d='M66 45v-14M66 101v-14M45 66H31M101 66h-14'/%3E%3C/g%3E%3Cg fill='%23D6A249'%3E%3Ccircle cx='66' cy='66' r='2.4'/%3E%3Ccircle cx='0' cy='66' r='2'/%3E%3Ccircle cx='132' cy='66' r='2'/%3E%3Ccircle cx='66' cy='0' r='2'/%3E%3Ccircle cx='66' cy='132' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image: radial-gradient(ellipse 78% 68% at 50% 50%, #000 18%, transparent 76%);
+    mask-image: radial-gradient(ellipse 78% 68% at 50% 50%, #000 18%, transparent 76%);
+}
+
+/* Isi bagian harus berada di atas ornamennya. */
+.ati-damask > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Garis pemisah antar bagian: benang emas yang memudar di kedua ujung,
+   bukan garis abu-abu yang memotong halaman dari tepi ke tepi. */
+.ati-rule {
+    position: relative;
+}
+
+.ati-rule::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(214, 162, 73, 0.42) 20%,
+            rgba(240, 210, 140, 0.72) 50%,
+            rgba(214, 162, 73, 0.42) 80%,
+            transparent 100%);
+}
+
 /* Keep the page ground dark past the last section (overscroll, short pages) */
 html:has(.ati-guest),
 body:has(.ati-guest) {

@@ -31,7 +31,7 @@ export const RsvpSection = ({ kode, rsvp }) => {
     const sudah = rsvp === 'hadir' || rsvp === 'berhalangan';
 
     return (
-        <section className="border-t border-ati-cream/15 px-6 py-20 lg:py-24">
+        <section className="ati-rule px-6 py-20 lg:py-24">
             <div className="mx-auto max-w-4xl">
                 <h2 data-tampil className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
                     Konfirmasi Kehadiran

@@ -110,9 +110,10 @@ function Index({ tamu }) {
 
             {/* Isi dipasang dari awal, hanya disembunyikan - tanpa transisi,
                 karena yang menyingkap isi adalah tirai di atasnya, bukan pudar. */}
-            <div className={dibuka ? '' : 'opacity-0 pointer-events-none'}>
+            <div className={`ati-isi ${dibuka ? '' : 'opacity-0 pointer-events-none'}`}>
                 {/* Pembuka */}
-                <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
+                <section className="ati-damask px-6 pb-20 pt-20">
+                    <div className="mx-auto max-w-3xl text-center">
                     <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
                     <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
                         Anugerah
@@ -159,7 +160,8 @@ function Index({ tamu }) {
                             ends.&rdquo;
                         </p>
                         <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
-                    </blockquote>
+                        </blockquote>
+                    </div>
                 </section>
 
                 <AwardsEventSection kode={tamu.code} />
@@ -168,7 +170,7 @@ function Index({ tamu }) {
                 <RsvpSection kode={tamu.code} rsvp={tamu.rsvp} />
                 <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
 
-                <footer className="border-t border-ati-cream/15 px-6 py-14 text-center">
+                <footer className="ati-rule px-6 py-14 text-center">
                     <AtiLogo className="mx-auto h-12 w-auto" />
                     <p className="mt-6 font-heading text-2xl font-semibold tracking-[-0.02em] text-ati-cream">
                         {acara?.nama} {acara?.tahun}
