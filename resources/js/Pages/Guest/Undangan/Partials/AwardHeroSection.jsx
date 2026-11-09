@@ -1,31 +1,74 @@
 import AtiLogo from '@/Components/AtiLogo'
 import { usePage } from '@inertiajs/react'
+import { motion, useReducedMotion } from 'motion/react'
 import React from 'react'
 import { Ornamen } from './Ornamen'
 
-function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori, menutup, onOpenInvitation }) {
-    const { acara } = usePage().props
+const LAPISAN_GELAP =
+    'linear-gradient(180deg, rgba(18,6,10,0.86) 0%, rgba(18,6,10,0.42) 32%, rgba(18,6,10,0.94) 84%, #12060A 100%)'
 
-    return (
-        <section
-            className={`ati-guest relative isolate flex min-h-[100svh] items-end overflow-hidden bg-ati-ink font-sans text-ati-cream ${menutup ? 'ati-sampul-tutup' : ''}`}
-        >
+/**
+ * Satu daun tirai: separuh lebar layar yang di dalamnya memuat gambar sampul
+ * berukuran penuh, lalu dipotong oleh overflow-hidden.
+ *
+ * Lapisan dalamnya sengaja selebar 200% daun (= selebar layar) dan ditempel ke
+ * tepi luar, supaya kedua daun memperlihatkan potongan gambar yang sama persis
+ * seperti satu gambar utuh. Saat dibuka, gambarnya benar-benar terbelah di
+ * tengah - bukan dua gambar berbeda yang kebetulan bersebelahan.
+ */
+const Tirai = ({ kanan, menutup, diam }) => (
+    <motion.div
+        aria-hidden="true"
+        initial={false}
+        animate={{ x: menutup ? (kanan ? '100%' : '-100%') : '0%' }}
+        transition={{ duration: diam ? 0 : 1.1, ease: [0.76, 0, 0.24, 1] }}
+        className={`absolute inset-y-0 w-1/2 overflow-hidden ${
+            kanan
+                ? 'right-0 shadow-[inset_1px_0_0_rgba(214,162,73,0.45)]'
+                : 'left-0 shadow-[inset_-1px_0_0_rgba(214,162,73,0.45)]'
+        }`}
+    >
+        <div className={`absolute inset-y-0 w-[200%] ${kanan ? 'right-0' : 'left-0'}`}>
             <img
                 src="/bg-ati.jpg"
                 alt=""
-                aria-hidden="true"
-                className="ati-bernapas absolute inset-0 -z-20 h-full w-full object-cover object-center"
+                className="ati-bernapas h-full w-full object-cover object-center"
             />
-            <div
-                aria-hidden="true"
-                className="absolute inset-0 -z-10"
-                style={{
-                    background:
-                        'linear-gradient(180deg, rgba(18,6,10,0.86) 0%, rgba(18,6,10,0.42) 32%, rgba(18,6,10,0.94) 84%, #12060A 100%)',
-                }}
-            />
+            <div className="absolute inset-0" style={{ background: LAPISAN_GELAP }} />
+        </div>
+    </motion.div>
+)
 
-            <div className="mx-auto w-full max-w-2xl px-6 pb-16 pt-28 text-center">
+function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori, menutup, onOpenInvitation }) {
+    const { acara } = usePage().props
+    const diam = useReducedMotion()
+
+    return (
+        <section className="ati-guest relative isolate flex min-h-[100svh] items-end overflow-hidden bg-ati-ink font-sans text-ati-cream">
+            {/* Cahaya panggung yang bocor dari celah tirai saat mulai terbuka. */}
+            {menutup && !diam && (
+                <motion.div
+                    aria-hidden="true"
+                    initial={{ opacity: 0.75 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ duration: 1.1, ease: 'easeOut' }}
+                    className="absolute inset-0"
+                    style={{
+                        background:
+                            'radial-gradient(ellipse 22% 70% at 50% 50%, rgba(214,162,73,0.55) 0%, rgba(214,162,73,0.12) 45%, transparent 75%)',
+                    }}
+                />
+            )}
+
+            <Tirai menutup={menutup} diam={diam} />
+            <Tirai kanan menutup={menutup} diam={diam} />
+
+            <motion.div
+                initial={false}
+                animate={{ opacity: menutup ? 0 : 1, y: menutup ? -28 : 0 }}
+                transition={{ duration: diam ? 0 : 0.45, ease: [0.4, 0, 1, 1] }}
+                className="relative z-10 mx-auto w-full max-w-2xl px-6 pb-16 pt-28 text-center"
+            >
                 <AtiLogo className="ati-reveal mx-auto h-20 w-auto" />
 
                 <h1 className="ati-reveal mt-7 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream" style={{ animationDelay: '80ms' }}>
@@ -85,7 +128,7 @@ function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori
                         &rarr;
                     </span>
                 </button>
-            </div>
+            </motion.div>
         </section>
     )
 }

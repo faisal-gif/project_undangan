@@ -35,9 +35,9 @@ function Index({ tamu }) {
         setMenutupSampul(true);
         window.scrollTo(0, 0);
 
-        // Sedikit lebih lama dari animasi 0,7 detik, supaya sampul tidak
-        // dicabut saat masih setengah terlihat.
-        setTimeout(() => setSampulAda(false), 780);
+        // Sedikit lebih lama dari tirai yang 1,1 detik, supaya sampul tidak
+        // dicabut saat kedua daunnya masih kelihatan.
+        setTimeout(() => setSampulAda(false), 1250);
     };
 
     // Tiap bagian muncul saat masuk layar. Kalau pengamatnya tidak tersedia,
@@ -89,12 +89,13 @@ function Index({ tamu }) {
         <div ref={isi} className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
             <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
 
-            {/* Satu-satunya pemutar: kalau dipasang dua kali, tombolnya
-                berkedip dan lagunya mengulang dari awal saat sampul dilepas. */}
             <MusikLatar src={acara?.musik_url} mainkan={menutupSampul} />
 
+            {/* Sampul tetap ada sampai kedua daun tirai selesai menepi.
+                overflow-y-auto: di layar pendek isi sampul lebih tinggi dari
+                layar, tanpa itu tombolnya terpotong dan tak bisa dijangkau. */}
             {sampulAda && (
-                <div className={`fixed inset-0 z-40 ${menutupSampul ? 'pointer-events-none' : ''}`}>
+                <div className={`fixed inset-0 z-40 overflow-y-auto ${menutupSampul ? 'overflow-hidden pointer-events-none' : ''}`}>
                     <AwardHeroSection
                         guestName={tamu.nama}
                         jumlah_orang={tamu.jumlah_orang}
@@ -107,88 +108,79 @@ function Index({ tamu }) {
                 </div>
             )}
 
-            {dibuka && (
-            <>
-            {/* Pembuka */}
-            <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
-                <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
-
-                <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
-                    Anugerah
-                    <br />
-                    <span className="text-ati-gold-light">TIMES Indonesia</span>
-                </h2>
-
-                <Ornamen data-tampil className="mt-7" />
-
-                <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
-                    {acara?.tanggal_label}
-                </p>
-
-                {penerima && (
-                    <p data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8 text-lg leading-[1.6] text-ati-cream/85">
-                        Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
-                        <span className="text-ati-gold-light">
-                            {kategori || `${acara?.nama} ${acara?.tahun}`}
-                        </span>
-                        . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
+            {/* Isi dipasang dari awal, hanya disembunyikan - tanpa transisi,
+                karena yang menyingkap isi adalah tirai di atasnya, bukan pudar. */}
+            <div className={dibuka ? '' : 'opacity-0 pointer-events-none'}>
+                {/* Pembuka */}
+                <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
+                    <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
+                    <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
+                        Anugerah
+                        <br />
+                        <span className="text-ati-gold-light">TIMES Indonesia</span>
+                    </h2>
+                    <Ornamen data-tampil className="mt-7" />
+                    <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
+                        {acara?.tanggal_label}
                     </p>
-                )}
 
-                {/* Hitung mundur */}
-                <p data-tampil className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
+                    {penerima && (
+                        <p data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8 text-lg leading-[1.6] text-ati-cream/85">
+                            Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
+                            <span className="text-ati-gold-light">
+                                {kategori || `${acara?.nama} ${acara?.tahun}`}
+                            </span>
+                            . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
+                        </p>
+                    )}
 
-                <div data-tampil className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
-                    {units.map((unit, index) => (
-                        <div
-                            key={unit.label}
-                            className={`px-1 py-5 ${index > 0 ? 'border-l border-ati-cream/15' : ''}`}
-                        >
-                            <div className="font-heading text-[clamp(1.75rem,7vw,2.75rem)] font-bold leading-none tabular-nums text-ati-gold-light">
-                                {unit.padded ? pad(unit.value) : unit.value}
+                    {/* Hitung mundur */}
+                    <p data-tampil className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
+                    <div data-tampil className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
+                        {units.map((unit, index) => (
+                            <div
+                                key={unit.label}
+                                className={`px-1 py-5 ${index > 0 ? 'border-l border-ati-cream/15' : ''}`}
+                            >
+                                <div className="font-heading text-[clamp(1.75rem,7vw,2.75rem)] font-bold leading-none tabular-nums text-ati-gold-light">
+                                    {unit.padded ? pad(unit.value) : unit.value}
+                                </div>
+                                <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ati-cream/55">
+                                    {unit.label}
+                                </div>
                             </div>
-                            <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ati-cream/55">
-                                {unit.label}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
 
-                {/* Kutipan */}
-                <blockquote data-tampil className="mt-16">
-                    <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
-                        &ldquo;Excellence is not a destination; it is a continuous journey that never
-                        ends.&rdquo;
+                    {/* Kutipan */}
+                    <blockquote data-tampil className="mt-16">
+                        <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
+                            &ldquo;Excellence is not a destination; it is a continuous journey that never
+                            ends.&rdquo;
+                        </p>
+                        <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
+                    </blockquote>
+                </section>
+
+                <AwardsEventSection kode={tamu.code} />
+                {penerima && <PanduanPenerimaSection kategori={kategori} />}
+                <AwardsScheduleSection />
+                <RsvpSection kode={tamu.code} rsvp={tamu.rsvp} />
+                <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
+
+                <footer className="border-t border-ati-cream/15 px-6 py-14 text-center">
+                    <AtiLogo className="mx-auto h-12 w-auto" />
+                    <p className="mt-6 font-heading text-2xl font-semibold tracking-[-0.02em] text-ati-cream">
+                        {acara?.nama} {acara?.tahun}
                     </p>
-                    <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
-                </blockquote>
-            </section>
-
-            <AwardsEventSection kode={tamu.code} />
-            {penerima && <PanduanPenerimaSection kategori={kategori} />}
-            <AwardsScheduleSection />
-
-            <RsvpSection kode={tamu.code} rsvp={tamu.rsvp} />
-
-            <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
-
-            <footer className="border-t border-ati-cream/15 px-6 py-14 text-center">
-                <AtiLogo className="mx-auto h-12 w-auto" />
-
-                <p className="mt-6 font-heading text-2xl font-semibold tracking-[-0.02em] text-ati-cream">
-                    {acara?.nama} {acara?.tahun}
-                </p>
-
-                <p className="mt-2 text-ati-cream/65">
-                    Terima kasih atas kehadiran Anda dalam malam penghargaan ini
-                </p>
-
-                <p className="mt-6 text-xs text-ati-cream/40">
-                    © {acara?.tahun} All Rights Reserved
-                </p>
-            </footer>
-            </>
-            )}
+                    <p className="mt-2 text-ati-cream/65">
+                        Terima kasih atas kehadiran Anda dalam malam penghargaan ini
+                    </p>
+                    <p className="mt-6 text-xs text-ati-cream/40">
+                        © {acara?.tahun} All Rights Reserved
+                    </p>
+                </footer>
+            </div>
         </div>
     )
 }

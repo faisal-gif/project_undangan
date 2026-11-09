@@ -331,19 +331,6 @@ body:has(.ati-guest) {
     filter: none;
 }
 
-/* Sampul menjauh perlahan saat undangan dibuka. */
-.ati-sampul-tutup {
-    animation: atiSampulTutup 0.7s cubic-bezier(0.7, 0, 0.84, 0) forwards;
-}
-
-@keyframes atiSampulTutup {
-    to {
-        opacity: 0;
-        transform: scale(1.06);
-        filter: blur(10px);
-    }
-}
-
 /* Foto panggung bernapas pelan, bukan diam seperti gambar cetak. */
 .ati-bernapas {
     animation: atiBernapas 28s ease-in-out infinite alternate;
@@ -368,7 +355,6 @@ body:has(.ati-guest) {
         transition: none !important;
     }
 
-    .ati-sampul-tutup,
     .ati-bernapas {
         animation: none !important;
     }
