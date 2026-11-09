@@ -18,14 +18,14 @@ export const QRCodeSection = ({ guestName, guestCode }) => {
   return (
     <section className="border-t border-ati-cream/15 px-6 py-20 lg:py-24">
       <div className="mx-auto max-w-4xl">
-        <h2 className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
+        <h2 data-tampil className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
           E-Ticket Anda
         </h2>
         <p className="mt-3 max-w-[52ch] text-ati-cream/65">
           Tunjukkan QR code ini dari layar ponsel Anda saat registrasi.
         </p>
 
-        <div className="mt-8 grid gap-10 sm:grid-cols-[auto_1fr] sm:gap-12">
+        <div data-tampil className="mt-8 grid gap-10 sm:grid-cols-[auto_1fr] sm:gap-12">
           {/* Latar putih wajib: pemindai butuh kontras penuh. */}
           <div className="mx-auto w-full max-w-[17rem] bg-white p-5 sm:mx-0">
             <img

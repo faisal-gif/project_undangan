@@ -19,6 +19,7 @@ class Acara extends Model
         'alamat',
         'peta_url',
         'video_url',
+        'musik_url',
         'aktif',
     ];
 
@@ -112,6 +113,37 @@ class Acara extends Model
             'alamat' => $this->alamat,
             'peta_url' => $this->peta_url,
             'video_embed' => $this->videoEmbed(),
+            'musik_url' => $this->musik_url,
+        ];
+    }
+
+    /**
+     * Bentuk untuk /api/v1/acara: sama dengan toShare() ditambah tiga angka
+     * siap pakai, supaya situs pemakai tidak menghitung hitung mundurnya
+     * sendiri. Memakai toShare() apa adanya agar situs ini dan API tidak
+     * pernah bercerita beda.
+     */
+    public function toApi(): array
+    {
+        $sekarang = now();
+
+        // Selisih dari cap waktu Unix: tidak bergantung zona waktu dan tidak
+        // ikut berubah kalau Carbon mengubah arti diffInSeconds().
+        $keMulai = $this->mulai->getTimestamp() - $sekarang->getTimestamp();
+        // ponytail: selesai kosong dianggap berakhir tepat di jam mulai. Beri
+        // durasi bawaan di sini kalau nanti ada edisi tanpa jam selesai.
+        $keSelesai = ($this->selesai ?? $this->mulai)->getTimestamp() - $sekarang->getTimestamp();
+
+        return $this->toShare() + [
+            'status' => match (true) {
+                $keMulai > 0 => 'akan datang',
+                $keSelesai >= 0 => 'berlangsung',
+                default => 'selesai',
+            },
+            'detik_tersisa' => max(0, $keMulai),
+            // Jam server saat balasan dibuat, supaya pemakai bisa mengoreksi
+            // detik_tersisa yang sudah menua di dalam cache.
+            'sekarang' => $sekarang->timezone(self::ZONA)->toIso8601String(),
         ];
     }
 

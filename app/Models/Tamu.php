@@ -10,9 +10,30 @@ class Tamu extends Model
 {
     protected $guarded = [];
 
+    /**
+     * Samakan dengan nilai bawaan kolomnya, supaya model yang baru dibuat
+     * sudah berjenis "hadir" di memori - bukan null sampai dimuat ulang.
+     */
+    protected $attributes = [
+        'jenis' => 'hadir',
+        'rsvp' => 'belum',
+    ];
+
+    protected $casts = [
+        'rsvp_pada' => 'datetime',
+    ];
+
     public function acara(): BelongsTo
     {
         return $this->belongsTo(Acara::class);
+    }
+
+    /**
+     * Tamu ini penerima penghargaan, bukan sekadar hadir.
+     */
+    public function penerima(): bool
+    {
+        return $this->jenis === 'penerima';
     }
 
     /**

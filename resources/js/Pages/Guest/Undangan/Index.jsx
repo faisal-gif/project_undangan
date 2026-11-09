@@ -1,18 +1,60 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import AwardHeroSection from './Partials/AwardHeroSection';
 import AtiLogo from '@/Components/AtiLogo';
 import useCountdown from '@/useCountdown';
 import { Head, usePage } from '@inertiajs/react';
 import { AwardsEventSection } from './Partials/AwardsEventSection';
 import { AwardsScheduleSection } from './Partials/AwardsScheduleSection';
+import { PanduanPenerimaSection } from './Partials/PanduanPenerimaSection';
 import { QRCodeSection } from './Partials/QRCodeSectionProps';
+import { MusikLatar } from './Partials/MusikLatar';
+import { Ornamen } from './Partials/Ornamen';
+import { RsvpSection } from './Partials/RsvpSection';
 
 const pad = (value) => String(value).padStart(2, '0');
 
 function Index({ tamu }) {
     const [isInvitationOpen, setIsInvitationOpen] = useState(false);
+    // Sampul menjauh dulu sebentar sebelum isinya muncul.
+    const [menutupSampul, setMenutupSampul] = useState(false);
+    const isi = useRef(null);
     const { acara } = usePage().props;
     const timeLeft = useCountdown(acara?.mulai_iso);
+
+    // Undangan punya dua versi: tamu yang hadir, dan penerima penghargaan.
+    const penerima = tamu.jenis === 'penerima';
+    const kategori = tamu.kategori_penghargaan;
+
+    const bukaUndangan = () => {
+        setMenutupSampul(true);
+        setTimeout(() => setIsInvitationOpen(true), 650);
+    };
+
+    // Tiap bagian muncul saat masuk layar. Kalau pengamatnya tidak tersedia,
+    // semuanya langsung ditampilkan - jangan sampai ada yang tak terbaca.
+    useEffect(() => {
+        if (!isInvitationOpen) return;
+
+        const sasaran = isi.current?.querySelectorAll('[data-tampil]') ?? [];
+
+        if (typeof IntersectionObserver === 'undefined') {
+            sasaran.forEach((el) => el.classList.add('tampil'));
+            return;
+        }
+
+        const pengamat = new IntersectionObserver(
+            (entri) => entri.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('tampil');
+                    pengamat.unobserve(e.target);
+                }
+            }),
+            { rootMargin: '0px 0px -12% 0px' }
+        );
+
+        sasaran.forEach((el) => pengamat.observe(el));
+        return () => pengamat.disconnect();
+    }, [isInvitationOpen]);
 
     const units = [
         { value: timeLeft.days, label: 'Hari', padded: false },
@@ -25,33 +67,55 @@ function Index({ tamu }) {
         return (
             <>
                 <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
-                <AwardHeroSection guestName={tamu.nama} jumlah_orang={tamu.jumlah_orang} lembaga={tamu.lembaga} onOpenInvitation={() => setIsInvitationOpen(true)} />
+                <AwardHeroSection
+                    guestName={tamu.nama}
+                    jumlah_orang={tamu.jumlah_orang}
+                    lembaga={tamu.lembaga}
+                    penerima={penerima}
+                    kategori={kategori}
+                    menutup={menutupSampul}
+                    onOpenInvitation={bukaUndangan}
+                />
+                <MusikLatar src={acara?.musik_url} mainkan={menutupSampul} />
             </>
         );
     }
 
     return (
-        <div className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
+        <div ref={isi} className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
             <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
+            <MusikLatar src={acara?.musik_url} mainkan />
 
             {/* Pembuka */}
             <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
-                <AtiLogo className="mx-auto h-16 w-auto" />
+                <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
 
-                <h2 className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
+                <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
                     Anugerah
                     <br />
                     <span className="text-ati-gold-light">TIMES Indonesia</span>
                 </h2>
 
-                <p className="mt-5 font-heading text-xl text-ati-cream/80">
+                <Ornamen data-tampil className="mt-7" />
+
+                <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
                     {acara?.tanggal_label}
                 </p>
 
-                {/* Hitung mundur */}
-                <p className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
+                {penerima && (
+                    <p data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8 text-lg leading-[1.6] text-ati-cream/85">
+                        Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
+                        <span className="text-ati-gold-light">
+                            {kategori || `${acara?.nama} ${acara?.tahun}`}
+                        </span>
+                        . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
+                    </p>
+                )}
 
-                <div className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
+                {/* Hitung mundur */}
+                <p data-tampil className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
+
+                <div data-tampil className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
                     {units.map((unit, index) => (
                         <div
                             key={unit.label}
@@ -68,7 +132,7 @@ function Index({ tamu }) {
                 </div>
 
                 {/* Kutipan */}
-                <blockquote className="mt-16">
+                <blockquote data-tampil className="mt-16">
                     <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
                         &ldquo;Excellence is not a destination; it is a continuous journey that never
                         ends.&rdquo;
@@ -77,8 +141,11 @@ function Index({ tamu }) {
                 </blockquote>
             </section>
 
-            <AwardsEventSection />
+            <AwardsEventSection kode={tamu.code} />
+            {penerima && <PanduanPenerimaSection kategori={kategori} />}
             <AwardsScheduleSection />
+
+            <RsvpSection kode={tamu.code} rsvp={tamu.rsvp} />
 
             <QRCodeSection guestCode={tamu.code} guestName={tamu.nama} />
 

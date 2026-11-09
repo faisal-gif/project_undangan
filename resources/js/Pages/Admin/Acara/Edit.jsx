@@ -14,6 +14,7 @@ const kosong = {
     alamat: "",
     peta_url: "",
     video_url: "",
+    musik_url: "",
 };
 
 /**
@@ -53,6 +54,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 alamat: acara.alamat || "",
                 peta_url: acara.peta_url || "",
                 video_url: acara.video_url || "",
+                musik_url: acara.musik_url || "",
             }
     );
 
@@ -163,6 +165,22 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                     Tampil di halaman depan. Tempel tautan biasa dari YouTube; kosongkan untuk menyembunyikan video.
                 </p>
                 <InputError message={errors.video_url} className="mt-2" />
+            </div>
+
+            <div>
+                <InputLabel htmlFor="musik_url" value="Musik latar undangan" />
+                <TextInput
+                    id="musik_url"
+                    className="mt-1 block w-full"
+                    value={data.musik_url}
+                    onChange={(e) => setData("musik_url", e.target.value)}
+                    placeholder="/musik/undangan.mp3"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                    Alamat berkas audio, mis. taruh di folder public lalu isi /musik/undangan.mp3.
+                    Kosongkan untuk mematikan musik. Musik baru berbunyi setelah tamu menekan "Buka Undangan".
+                </p>
+                <InputError message={errors.musik_url} className="mt-2" />
             </div>
 
             <div className="flex flex-wrap items-center gap-4">

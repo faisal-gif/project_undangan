@@ -147,6 +147,9 @@ class TamuController extends Controller
                 'alamat' => $asal->alamat,
                 'pic' => $asal->pic,
                 'jumlah_orang' => $asal->jumlah_orang,
+                // Penerima penghargaan ditentukan ulang tiap edisi, jadi
+                // salinan selalu dimulai sebagai tamu biasa.
+                'jenis' => 'hadir',
                 'code' => $this->kodeUnik(),
                 'status' => 'belum',
             ]);
@@ -164,6 +167,15 @@ class TamuController extends Controller
         $pesan .= ' Jalankan "Generate Qr Code" untuk membuat QR-nya.';
 
         return redirect()->route('admin.tamu.index')->with('success', $pesan);
+    }
+
+    /**
+     * Kategori hanya berarti untuk penerima penghargaan; tamu biasa selalu
+     * dikosongkan supaya sisa data lama tidak muncul di undangannya.
+     */
+    private function kategoriBila(Request $request): ?string
+    {
+        return $request->jenis === 'penerima' ? $request->kategori_penghargaan : null;
     }
 
     /**
@@ -221,6 +233,11 @@ class TamuController extends Controller
             'lembaga' => 'nullable|string|max:255',
             'jumlah_orang' => 'nullable|integer|min:1',
             'pic' => 'nullable|string|max:255',
+            'jenis' => 'required|in:hadir,penerima',
+            'kategori_penghargaan' => 'nullable|string|max:255',
+        ], [
+            'jenis.required' => 'Pilih jenis undangannya.',
+            'jenis.in' => 'Jenis undangan tidak dikenal.',
         ]);
 
         $tamu = Tamu::create([
@@ -231,6 +248,8 @@ class TamuController extends Controller
             'lembaga' => $request->lembaga,
             'pic' => $request->pic,
             'jumlah_orang' => $request->jumlah_orang,
+            'jenis' => $request->jenis,
+            'kategori_penghargaan' => $this->kategoriBila($request),
             'code' => $this->kodeUnik(),
         ]);
 
@@ -274,6 +293,11 @@ class TamuController extends Controller
             'lembaga' => 'nullable|string|max:255',
             'jumlah_orang' => 'nullable|integer|min:1',
             'pic' => 'nullable|string|max:255',
+            'jenis' => 'required|in:hadir,penerima',
+            'kategori_penghargaan' => 'nullable|string|max:255',
+        ], [
+            'jenis.required' => 'Pilih jenis undangannya.',
+            'jenis.in' => 'Jenis undangan tidak dikenal.',
         ]);
 
         $tamu->update([
@@ -282,6 +306,8 @@ class TamuController extends Controller
             'lembaga' => $request->lembaga,
             'jumlah_orang' => $request->jumlah_orang,
             'pic' => $request->pic,
+            'jenis' => $request->jenis,
+            'kategori_penghargaan' => $this->kategoriBila($request),
         ]);
 
         return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil diperbarui.');

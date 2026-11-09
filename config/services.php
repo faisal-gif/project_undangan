@@ -27,6 +27,12 @@ return [
         'key' => env('TIN_API_KEY'),
     ],
 
+    // Kunci untuk API baca-saja milik kita sendiri (/api/v1/acara), dipakai
+    // situs lain. Tanpa nilai bawaan: kosong berarti API tertutup.
+    'ati_api' => [
+        'key' => env('ATI_API_KEY'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

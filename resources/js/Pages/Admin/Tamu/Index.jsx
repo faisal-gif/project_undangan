@@ -32,6 +32,18 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
         router.get(route("admin.tamu.index", { acara: id, search }), {}, { preserveState: false });
     };
 
+    // Konfirmasi dari tamu lewat undangannya; berbeda dari status kehadiran
+    // yang baru terisi saat QR dipindai di pintu masuk.
+    const getRsvpBadge = (rsvp) => {
+        if (rsvp === "hadir") {
+            return <span className="badge badge-success text-xs p-3">Hadir</span>;
+        }
+        if (rsvp === "berhalangan") {
+            return <span className="badge badge-error text-xs p-3">Berhalangan</span>;
+        }
+        return <span className="badge badge-ghost text-xs p-3">Belum</span>;
+    };
+
     const getStatusBadge = (status) => {
         if (status === "datang") {
             return <span className="badge badge-success text-xs p-3">Datang</span>;
@@ -173,6 +185,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                             <th className="py-2 px-4 border-b">Lembaga</th>
                                             <th className="py-2 px-4 border-b">Jumlah Orang</th>
                                             <th className="py-2 px-4 border-b">PIC</th>
+                                            <th className="py-2 px-4 border-b">Konfirmasi</th>
                                             <th className="py-2 px-4 border-b">Status</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
                                         </tr>
@@ -186,6 +199,9 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                                 <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
                                                 <td className="py-2 px-4 border-b"><span className="badge badge-primary badge-outline p-3">{tamu.pic}</span></td>
                                                 <td className="py-2 border-b w-40">
+                                                    {getRsvpBadge(tamu.rsvp)}
+                                                </td>
+                                                <td className="py-2 px-4 border-b">
                                                     {getStatusBadge(tamu.status)}
                                                 </td>
                                                 <td className="flex items-center gap-2">

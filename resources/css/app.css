@@ -310,3 +310,66 @@ body:has(.ati-guest) {
         animation: none !important;
     }
 }
+
+/* 🎭 Undangan: gerak seremonial */
+
+/* Muncul saat masuk layar. Kelas .tampil dipasang oleh pengamat di
+   Guest/Undangan/Index.jsx; tanpa JavaScript semuanya tetap terlihat. */
+.ati-guest [data-tampil] {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(5px);
+    transition:
+        opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ati-guest [data-tampil].tampil {
+    opacity: 1;
+    transform: none;
+    filter: none;
+}
+
+/* Sampul menjauh perlahan saat undangan dibuka. */
+.ati-sampul-tutup {
+    animation: atiSampulTutup 0.7s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes atiSampulTutup {
+    to {
+        opacity: 0;
+        transform: scale(1.06);
+        filter: blur(10px);
+    }
+}
+
+/* Foto panggung bernapas pelan, bukan diam seperti gambar cetak. */
+.ati-bernapas {
+    animation: atiBernapas 28s ease-in-out infinite alternate;
+}
+
+@keyframes atiBernapas {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.08);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ati-guest [data-tampil] {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        transition: none !important;
+    }
+
+    .ati-sampul-tutup,
+    .ati-bernapas {
+        animation: none !important;
+    }
+}

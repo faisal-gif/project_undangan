@@ -25,6 +25,7 @@ class AcaraController extends Controller
                 'alamat' => $acara->alamat,
                 'peta_url' => $acara->peta_url,
                 'video_url' => $acara->video_url,
+                'musik_url' => $acara->musik_url,
                 'aktif' => $acara->aktif,
             ] : null,
             'acaras' => Acara::withCount('tamus')->orderByDesc('mulai')->get()
@@ -78,6 +79,7 @@ class AcaraController extends Controller
             'alamat' => 'nullable|string|max:1000',
             'peta_url' => 'nullable|url|max:255',
             'video_url' => 'nullable|string|max:255',
+            'musik_url' => 'nullable|string|max:255',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
             'mulai.required' => 'Tanggal dan jam mulai wajib diisi.',

@@ -9,6 +9,8 @@ function Create({ acaraAktif }) {
         alamat: "",
         jumlah_orang: "",
         pic: "",
+        jenis: "hadir",
+        kategori_penghargaan: "",
     });
 
     const handleSubmit = (e) => {
@@ -124,6 +126,56 @@ function Create({ acaraAktif }) {
                                             </p>
                                         )}
                                     </div>
+
+                                    <div className="w-full col-span-1">
+                                        <label
+                                            htmlFor="jenis"
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            Jenis Undangan
+                                        </label>
+                                        <select
+                                            id="jenis"
+                                            value={data.jenis}
+                                            onChange={(e) => setData("jenis", e.target.value)}
+                                            className="mt-2 select select-bordered w-full"
+                                        >
+                                            <option value="hadir">Tamu undangan</option>
+                                            <option value="penerima">Penerima penghargaan</option>
+                                        </select>
+                                        {errors.jenis && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.jenis}</p>
+                                        )}
+                                    </div>
+
+                                    {data.jenis === "penerima" && (
+                                        <div className="w-full col-span-1">
+                                            <label
+                                                htmlFor="kategori_penghargaan"
+                                                className="block text-sm font-medium text-gray-700"
+                                            >
+                                                Kategori Penghargaan
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="kategori_penghargaan"
+                                                value={data.kategori_penghargaan}
+                                                onChange={(e) =>
+                                                    setData("kategori_penghargaan", e.target.value)
+                                                }
+                                                placeholder="Positive News Maker"
+                                                className="mt-2 input input-bordered w-full"
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                Boleh dikosongkan; undangan tetap menyebutnya sebagai penerima.
+                                            </p>
+                                            {errors.kategori_penghargaan && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.kategori_penghargaan}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
 
                                 </div>
 

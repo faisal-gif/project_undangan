@@ -1,6 +1,6 @@
 import { usePage } from "@inertiajs/react";
 
-export const AwardsEventSection = () => {
+export const AwardsEventSection = ({ kode }) => {
     const { acara } = usePage().props;
     const jamMulai = acara?.jam_label?.includes(" - ")
         ? acara.jam_label.split(" - ")[0] + " WIB"
@@ -30,11 +30,11 @@ export const AwardsEventSection = () => {
     return (
         <section className="border-t border-ati-cream/15 px-6 py-20 lg:py-24">
             <div className="mx-auto max-w-4xl">
-                <h2 className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
+                <h2 data-tampil className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
                     Informasi Acara
                 </h2>
 
-                <dl className="mt-8 sm:grid sm:grid-cols-2 sm:gap-x-12">
+                <dl data-tampil className="mt-8 sm:grid sm:grid-cols-2 sm:gap-x-12">
                     {baris.map((item) => (
                         <div key={item.label} className="border-t border-ati-cream/15 py-6">
                             <dt className="font-heading text-sm text-ati-gold">{item.label}</dt>
@@ -50,17 +50,28 @@ export const AwardsEventSection = () => {
                     ))}
                 </dl>
 
-                {acara?.peta_url && (
-                    <a
-                        href={acara.peta_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-8 inline-flex items-baseline gap-3 bg-ati-gold px-7 py-3 text-base font-semibold text-ati-ink transition-colors hover:bg-ati-gold-light"
-                    >
-                        Lihat Peta Lokasi
-                        <span aria-hidden="true">&rarr;</span>
-                    </a>
-                )}
+                <div data-tampil className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+                    {acara?.peta_url && (
+                        <a
+                            href={acara.peta_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-baseline gap-3 bg-ati-gold px-7 py-3 text-base font-semibold text-ati-ink transition-colors hover:bg-ati-gold-light"
+                        >
+                            Lihat Peta Lokasi
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    )}
+
+                    {kode && (
+                        <a
+                            href={route('undangan.kalender', kode)}
+                            className="font-semibold text-ati-cream underline decoration-ati-gold decoration-1 underline-offset-[6px] transition-colors hover:text-ati-gold-light"
+                        >
+                            Tambah ke kalender
+                        </a>
+                    )}
+                </div>
             </div>
         </section>
     );

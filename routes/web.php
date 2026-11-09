@@ -3,6 +3,7 @@
 use App\Http\Controllers\AcaraController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UndanganController;
 use App\Http\Controllers\TamuController;
 use App\Http\Controllers\WinnersController;
 use Illuminate\Foundation\Application;
@@ -13,6 +14,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/news', [HomeController::class, 'news'])->name('news');
 Route::get('/winners', [HomeController::class, 'winners'])->name('winners');
 Route::get('/widget', [HomeController::class, 'widget'])->name('widget');
+// Tindakan tamu dari halaman undangannya sendiri. Wajib sebelum rute umum di
+// bawah: {nama?} akan menelan "kalender.ics" sebagai nama tamu.
+Route::get('/undangan/{kode}/kalender.ics', [UndanganController::class, 'kalender'])->name('undangan.kalender');
+Route::post('/undangan/{kode}/rsvp', [UndanganController::class, 'rsvp'])->name('undangan.rsvp');
 // Dikunci kode acak; segmen nama hanya hiasan agar tautannya terasa personal.
 Route::get('/undangan/{kode}/{nama?}', [HomeController::class, 'undangan'])->name('undangan');
 // Gambar QR tamu, dibuat saat diminta. Dikunci kode acak, bukan nomor id.
