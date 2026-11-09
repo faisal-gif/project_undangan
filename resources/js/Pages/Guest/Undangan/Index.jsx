@@ -14,8 +14,11 @@ import { RsvpSection } from './Partials/RsvpSection';
 const pad = (value) => String(value).padStart(2, '0');
 
 function Index({ tamu }) {
-    const [isInvitationOpen, setIsInvitationOpen] = useState(false);
-    // Sampul menjauh dulu sebentar sebelum isinya muncul.
+    // Isi dipasang lebih dulu DI BAWAH sampul, baru sampulnya menjauh. Kalau
+    // urutannya dibalik, ada satu kedipan layar kosong di sela keduanya:
+    // semua bagian isi memang mulai dari keadaan tak terlihat.
+    const [dibuka, setDibuka] = useState(false);
+    const [sampulAda, setSampulAda] = useState(true);
     const [menutupSampul, setMenutupSampul] = useState(false);
     const isi = useRef(null);
     const { acara } = usePage().props;
@@ -26,14 +29,21 @@ function Index({ tamu }) {
     const kategori = tamu.kategori_penghargaan;
 
     const bukaUndangan = () => {
+        if (menutupSampul) return;
+
+        setDibuka(true);
         setMenutupSampul(true);
-        setTimeout(() => setIsInvitationOpen(true), 650);
+        window.scrollTo(0, 0);
+
+        // Sedikit lebih lama dari animasi 0,7 detik, supaya sampul tidak
+        // dicabut saat masih setengah terlihat.
+        setTimeout(() => setSampulAda(false), 780);
     };
 
     // Tiap bagian muncul saat masuk layar. Kalau pengamatnya tidak tersedia,
     // semuanya langsung ditampilkan - jangan sampai ada yang tak terbaca.
     useEffect(() => {
-        if (!isInvitationOpen) return;
+        if (!dibuka) return;
 
         const sasaran = isi.current?.querySelectorAll('[data-tampil]') ?? [];
 
@@ -41,6 +51,18 @@ function Index({ tamu }) {
             sasaran.forEach((el) => el.classList.add('tampil'));
             return;
         }
+
+        // Yang sudah berada di layar ditampilkan saat itu juga. Tanpa ini,
+        // isi bergantung pada pengamat yang bisa tertunda - dan layar
+        // pertama sempat kosong sebelum dia sempat berjalan.
+        const sisa = [];
+        sasaran.forEach((el) => {
+            if (el.getBoundingClientRect().top < window.innerHeight * 1.1) {
+                el.classList.add('tampil');
+            } else {
+                sisa.push(el);
+            }
+        });
 
         const pengamat = new IntersectionObserver(
             (entri) => entri.forEach((e) => {
@@ -52,9 +74,9 @@ function Index({ tamu }) {
             { rootMargin: '0px 0px -12% 0px' }
         );
 
-        sasaran.forEach((el) => pengamat.observe(el));
+        sisa.forEach((el) => pengamat.observe(el));
         return () => pengamat.disconnect();
-    }, [isInvitationOpen]);
+    }, [dibuka]);
 
     const units = [
         { value: timeLeft.days, label: 'Hari', padded: false },
@@ -63,29 +85,30 @@ function Index({ tamu }) {
         { value: timeLeft.seconds, label: 'Detik', padded: true },
     ];
 
-    if (!isInvitationOpen) {
-        return (
-            <>
-                <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
-                <AwardHeroSection
-                    guestName={tamu.nama}
-                    jumlah_orang={tamu.jumlah_orang}
-                    lembaga={tamu.lembaga}
-                    penerima={penerima}
-                    kategori={kategori}
-                    menutup={menutupSampul}
-                    onOpenInvitation={bukaUndangan}
-                />
-                <MusikLatar src={acara?.musik_url} mainkan={menutupSampul} />
-            </>
-        );
-    }
-
     return (
         <div ref={isi} className="ati-guest min-h-screen bg-ati-ink font-sans text-ati-cream">
             <Head title={`Undangan Kepada Yth. ${tamu.nama}`} />
-            <MusikLatar src={acara?.musik_url} mainkan />
 
+            {/* Satu-satunya pemutar: kalau dipasang dua kali, tombolnya
+                berkedip dan lagunya mengulang dari awal saat sampul dilepas. */}
+            <MusikLatar src={acara?.musik_url} mainkan={menutupSampul} />
+
+            {sampulAda && (
+                <div className={`fixed inset-0 z-40 ${menutupSampul ? 'pointer-events-none' : ''}`}>
+                    <AwardHeroSection
+                        guestName={tamu.nama}
+                        jumlah_orang={tamu.jumlah_orang}
+                        lembaga={tamu.lembaga}
+                        penerima={penerima}
+                        kategori={kategori}
+                        menutup={menutupSampul}
+                        onOpenInvitation={bukaUndangan}
+                    />
+                </div>
+            )}
+
+            {dibuka && (
+            <>
             {/* Pembuka */}
             <section className="mx-auto max-w-3xl px-6 pb-20 pt-20 text-center">
                 <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
@@ -164,6 +187,8 @@ function Index({ tamu }) {
                     © {acara?.tahun} All Rights Reserved
                 </p>
             </footer>
+            </>
+            )}
         </div>
     )
 }
