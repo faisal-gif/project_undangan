@@ -11,6 +11,7 @@ function Create({ acaraAktif }) {
         pic: "",
         jenis: "hadir",
         kategori_penghargaan: "",
+        sub_kategori: "",
     });
 
     const handleSubmit = (e) => {
@@ -172,6 +173,35 @@ function Create({ acaraAktif }) {
                                             {errors.kategori_penghargaan && (
                                                 <p className="text-red-500 text-xs mt-1">
                                                     {errors.kategori_penghargaan}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {data.jenis === "penerima" && (
+                                        <div className="w-full col-span-1">
+                                            <label
+                                                htmlFor="sub_kategori"
+                                                className="block text-sm font-medium text-gray-700"
+                                            >
+                                                Nama Penghargaan
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="sub_kategori"
+                                                value={data.sub_kategori}
+                                                onChange={(e) =>
+                                                    setData("sub_kategori", e.target.value)
+                                                }
+                                                placeholder="Best Innovation in Basic Education Transformation"
+                                                className="mt-2 input input-bordered w-full"
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                Penghargaan spesifik yang diterima, tampil di bawah kategorinya pada undangan.
+                                            </p>
+                                            {errors.sub_kategori && (
+                                                <p className="text-red-500 text-xs mt-1">
+                                                    {errors.sub_kategori}
                                                 </p>
                                             )}
                                         </div>

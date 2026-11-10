@@ -170,12 +170,20 @@ class TamuController extends Controller
     }
 
     /**
-     * Kategori hanya berarti untuk penerima penghargaan; tamu biasa selalu
-     * dikosongkan supaya sisa data lama tidak muncul di undangannya.
+     * Kategori dan sub kategori hanya berarti untuk penerima penghargaan; tamu
+     * biasa selalu dikosongkan supaya sisa data lama tidak muncul di
+     * undangannya.
      */
-    private function kategoriBila(Request $request): ?string
+    private function penghargaanBila(Request $request): array
     {
-        return $request->jenis === 'penerima' ? $request->kategori_penghargaan : null;
+        if ($request->jenis !== 'penerima') {
+            return ['kategori_penghargaan' => null, 'sub_kategori' => null];
+        }
+
+        return [
+            'kategori_penghargaan' => $request->kategori_penghargaan,
+            'sub_kategori' => $request->sub_kategori,
+        ];
     }
 
     /**
@@ -235,6 +243,7 @@ class TamuController extends Controller
             'pic' => 'nullable|string|max:255',
             'jenis' => 'required|in:hadir,penerima',
             'kategori_penghargaan' => 'nullable|string|max:255',
+            'sub_kategori' => 'nullable|string|max:255',
         ], [
             'jenis.required' => 'Pilih jenis undangannya.',
             'jenis.in' => 'Jenis undangan tidak dikenal.',
@@ -249,9 +258,8 @@ class TamuController extends Controller
             'pic' => $request->pic,
             'jumlah_orang' => $request->jumlah_orang,
             'jenis' => $request->jenis,
-            'kategori_penghargaan' => $this->kategoriBila($request),
             'code' => $this->kodeUnik(),
-        ]);
+        ] + $this->penghargaanBila($request));
 
         return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil ditambahkan.');
     }
@@ -295,6 +303,7 @@ class TamuController extends Controller
             'pic' => 'nullable|string|max:255',
             'jenis' => 'required|in:hadir,penerima',
             'kategori_penghargaan' => 'nullable|string|max:255',
+            'sub_kategori' => 'nullable|string|max:255',
         ], [
             'jenis.required' => 'Pilih jenis undangannya.',
             'jenis.in' => 'Jenis undangan tidak dikenal.',
@@ -307,7 +316,7 @@ class TamuController extends Controller
             'jumlah_orang' => $request->jumlah_orang,
             'pic' => $request->pic,
             'jenis' => $request->jenis,
-            'kategori_penghargaan' => $this->kategoriBila($request),
+            ...$this->penghargaanBila($request),
         ]);
 
         return redirect()->route('admin.tamu.index')->with('success', 'Tamu berhasil diperbarui.');

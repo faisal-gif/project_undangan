@@ -39,7 +39,7 @@ const Tirai = ({ kanan, menutup, diam }) => (
     </motion.div>
 )
 
-function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori, menutup, onOpenInvitation }) {
+function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori, subKategori, menutup, onOpenInvitation }) {
     const { acara } = usePage().props
     const diam = useReducedMotion()
 
@@ -108,6 +108,15 @@ function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori
 
                     {penerima && kategori && (
                         <p className="mt-4 font-heading text-lg italic text-ati-gold-light">{kategori}</p>
+                    )}
+
+                    {/* Nama penghargaan yang spesifik, di bawah kategorinya:
+                        lebih kecil dan lebih tenang, supaya nama tamu tetap
+                        yang terbesar di bingkai ini. */}
+                    {penerima && subKategori && (
+                        <p className="mx-auto mt-2 max-w-[38ch] text-sm leading-[1.5] text-ati-cream/70">
+                            {subKategori}
+                        </p>
                     )}
                 </div>
 

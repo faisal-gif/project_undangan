@@ -22,10 +22,11 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        // Data nyata dari produksi; keduanya aman dijalankan berulang.
+        // Data nyata dari produksi; semuanya aman dijalankan berulang.
         $this->call([
             WinnersSeeder::class,
             TamuSeeder::class,
+            PemenangUndanganSeeder::class,
         ]);
     }
 }

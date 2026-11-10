@@ -28,6 +28,7 @@ function Index({ tamu }) {
     // Undangan punya dua versi: tamu yang hadir, dan penerima penghargaan.
     const penerima = tamu.jenis === 'penerima';
     const kategori = tamu.kategori_penghargaan;
+    const subKategori = tamu.sub_kategori;
 
     const bukaUndangan = () => {
         if (menutupSampul) return;
@@ -103,6 +104,7 @@ function Index({ tamu }) {
                         lembaga={tamu.lembaga}
                         penerima={penerima}
                         kategori={kategori}
+                        subKategori={subKategori}
                         menutup={menutupSampul}
                         onOpenInvitation={bukaUndangan}
                     />
@@ -151,13 +153,24 @@ function Index({ tamu }) {
                     </p>
 
                     {penerima && (
-                        <p data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8 text-lg leading-[1.6] text-ati-cream/85">
-                            Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
-                            <span className="text-ati-gold-light">
-                                {kategori || `${acara?.nama} ${acara?.tahun}`}
-                            </span>
-                            . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
-                        </p>
+                        <div data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8">
+                            <p className="text-lg leading-[1.6] text-ati-cream/85">
+                                Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
+                                <span className="text-ati-gold-light">
+                                    {kategori || `${acara?.nama} ${acara?.tahun}`}
+                                </span>
+                                . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
+                            </p>
+
+                            {/* Nama penghargaannya sendiri, diberi ruang terpisah
+                                dan bingkai emas tipis: inilah yang sebenarnya
+                                diterima, bukan sekadar kategorinya. */}
+                            {subKategori && (
+                                <p className="mt-6 border-y border-ati-gold/35 px-5 py-4 font-heading text-[clamp(1.05rem,2.4vw,1.35rem)] italic leading-snug text-ati-gold-light">
+                                    {subKategori}
+                                </p>
+                            )}
+                        </div>
                     )}
 
                     {/* Hitung mundur */}
