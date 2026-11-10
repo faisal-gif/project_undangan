@@ -32,7 +32,7 @@ export const PanduanPenerimaSection = ({ kategori }) => {
                 </h2>
                 <p className="mt-3 max-w-[58ch] text-ati-cream/65">
                     Beberapa hal yang perlu Bapak/Ibu ketahui sebagai penerima
-                    {kategori ? ` ${kategori}` : " penghargaan"} pada malam ini.
+                    Anugerah TIMES Indonesia 2026 pada malam ini.
                 </p>
 
                 <ol data-tampil className="mt-8 grid gap-x-12 sm:grid-cols-2">
