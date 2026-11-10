@@ -140,64 +140,62 @@ function Index({ tamu }) {
                     )}
 
                     <div className="mx-auto max-w-3xl text-center">
-                    <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
-                    <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
-                        Anugerah
-                        <br />
-                        <span className="text-ati-gold-light">TIMES Indonesia</span>
-                    </h2>
-                    <Ornamen data-tampil className="mt-7" />
+                        <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
+                        <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
+                            Anugerah
+                            <br />
+                            <span className="text-ati-gold-light">TIMES Indonesia</span>
+                        </h2>
+                        <Ornamen data-tampil className="mt-7" />
 
-                    <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
-                        {acara?.tanggal_label}
-                    </p>
+                        <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
+                            {acara?.tanggal_label}
+                        </p>
 
-                    {penerima && (
-                        <div data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8">
-                            <p className="text-lg leading-[1.6] text-ati-cream/85">
-                                Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
-                                <span className="text-ati-gold-light">
-                                    {kategori || `${acara?.nama} ${acara?.tahun}`}
-                                </span>
-                                . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
-                            </p>
+                        {penerima && (
+                            <div data-tampil className="mx-auto mt-8 max-w-[52ch] border-t border-ati-cream/20 pt-8">
+                                <p className="text-lg leading-[1.6] text-ati-cream/85">
+                                    Dengan bangga kami mengabarkan bahwa Bapak/Ibu terpilih sebagai penerima{' '}
+                                    Anugerah TIMES Indonesia 2026
+                                    . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
+                                </p>
 
-                            {/* Nama penghargaannya sendiri, diberi ruang terpisah
+                                {/* Nama penghargaannya sendiri, diberi ruang terpisah
                                 dan bingkai emas tipis: inilah yang sebenarnya
                                 diterima, bukan sekadar kategorinya. */}
-                            {subKategori && (
-                                <p className="mt-6 border-y border-ati-gold/35 px-5 py-4 font-heading text-[clamp(1.05rem,2.4vw,1.35rem)] italic leading-snug text-ati-gold-light">
-                                    {subKategori}
-                                </p>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Hitung mundur */}
-                    <p data-tampil className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
-                    <div data-tampil className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
-                        {units.map((unit, index) => (
-                            <div
-                                key={unit.label}
-                                className={`px-1 py-5 ${index > 0 ? 'border-l border-ati-cream/15' : ''}`}
-                            >
-                                <div className="font-heading text-[clamp(1.75rem,7vw,2.75rem)] font-bold leading-none tabular-nums text-ati-gold-light">
-                                    {unit.padded ? pad(unit.value) : unit.value}
-                                </div>
-                                <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ati-cream/55">
-                                    {unit.label}
-                                </div>
+                                {subKategori && (
+                                    <p className="mt-6 border-y border-ati-gold/35 px-5 py-4 font-heading text-[clamp(1.05rem,2.4vw,1.35rem)] italic leading-snug text-ati-gold-light">
+                                        {subKategori}
+                                    </p>
+                                )}
                             </div>
-                        ))}
-                    </div>
+                        )}
 
-                    {/* Kutipan */}
-                    <blockquote data-tampil className="mt-16">
-                        <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
-                            &ldquo;Excellence is not a destination; it is a continuous journey that never
-                            ends.&rdquo;
-                        </p>
-                        <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
+                        {/* Hitung mundur */}
+                        <p data-tampil className="mt-14 text-sm text-ati-cream/55">Menghitung Hari</p>
+                        <div data-tampil className="mt-4 grid grid-cols-4 border-y border-ati-cream/15">
+                            {units.map((unit, index) => (
+                                <div
+                                    key={unit.label}
+                                    className={`px-1 py-5 ${index > 0 ? 'border-l border-ati-cream/15' : ''}`}
+                                >
+                                    <div className="font-heading text-[clamp(1.75rem,7vw,2.75rem)] font-bold leading-none tabular-nums text-ati-gold-light">
+                                        {unit.padded ? pad(unit.value) : unit.value}
+                                    </div>
+                                    <div className="mt-2 text-[11px] uppercase tracking-[0.18em] text-ati-cream/55">
+                                        {unit.label}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Kutipan */}
+                        <blockquote data-tampil className="mt-16">
+                            <p className="font-heading text-[clamp(1.25rem,3.6vw,1.75rem)] italic leading-[1.45] text-ati-cream/85">
+                                &ldquo;Excellence is not a destination; it is a continuous journey that never
+                                ends.&rdquo;
+                            </p>
+                            <footer className="mt-4 text-sm text-ati-gold">&mdash; Brian Tracy</footer>
                         </blockquote>
                     </div>
                 </section>

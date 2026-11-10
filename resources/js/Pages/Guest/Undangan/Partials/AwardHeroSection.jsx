@@ -106,10 +106,6 @@ function AwardHeroSection({ guestName, lembaga, jumlah_orang, penerima, kategori
 
                     {lembaga && <p className="mt-2 text-ati-cream/70">{lembaga}</p>}
 
-                    {penerima && kategori && (
-                        <p className="mt-4 font-heading text-lg italic text-ati-gold-light">{kategori}</p>
-                    )}
-
                     {/* Nama penghargaan yang spesifik, di bawah kategorinya:
                         lebih kecil dan lebih tenang, supaya nama tamu tetap
                         yang terbesar di bingkai ini. */}
