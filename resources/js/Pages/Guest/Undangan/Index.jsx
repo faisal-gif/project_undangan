@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import AwardHeroSection from './Partials/AwardHeroSection';
 import AtiLogo from '@/Components/AtiLogo';
+import PialaTiga from '@/Components/PialaTiga';
 import useCountdown from '@/useCountdown';
 import { Head, usePage } from '@inertiajs/react';
 import { AwardsEventSection } from './Partials/AwardsEventSection';
@@ -112,7 +113,30 @@ function Index({ tamu }) {
                 karena yang menyingkap isi adalah tirai di atasnya, bukan pudar. */}
             <div className={`ati-isi ${dibuka ? '' : 'opacity-0 pointer-events-none'}`}>
                 {/* Pembuka */}
-                <section className="ati-damask px-6 pb-20 pt-20">
+                <section className="relative overflow-hidden px-6 pb-20 pt-20">
+                    {/* Sepasang piala mengapit judul, jatuh bergantian.
+                        Disembunyikan di bawah lg: di layar sempit tidak ada
+                        ruang di samping judul, dan memaksakannya hanya
+                        menindih teks. */}
+                    {dibuka && (
+                        <>
+                            <PialaTiga
+                                sumber="/piala1baru.glb"
+                                className="pointer-events-none absolute left-0 top-16 hidden w-[20%] max-w-[230px] lg:block"
+                                tinggi="330px"
+                                interaktif={false}
+                            />
+                            <PialaTiga
+                                sumber="/piala2baru.glb"
+                                alt="Piala Anugerah TIMES Indonesia, penghargaan kedua"
+                                className="pointer-events-none absolute right-0 top-16 hidden w-[20%] max-w-[230px] lg:block"
+                                tinggi="330px"
+                                tunda={0.25}
+                                interaktif={false}
+                            />
+                        </>
+                    )}
+
                     <div className="mx-auto max-w-3xl text-center">
                     <AtiLogo data-tampil className="mx-auto h-16 w-auto" />
                     <h2 data-tampil className="mt-8 font-heading text-[clamp(2.25rem,7vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em] text-ati-cream">
@@ -121,6 +145,7 @@ function Index({ tamu }) {
                         <span className="text-ati-gold-light">TIMES Indonesia</span>
                     </h2>
                     <Ornamen data-tampil className="mt-7" />
+
                     <p data-tampil className="mt-7 font-heading text-xl text-ati-cream/80">
                         {acara?.tanggal_label}
                     </p>

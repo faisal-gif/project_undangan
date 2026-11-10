@@ -268,8 +268,18 @@
    kedua versi tanpa dua panel sewarna bersebelahan. */
 .ati-isi > section:nth-of-type(even) {
     background:
-        radial-gradient(ellipse 120% 85% at 50% 0%, rgba(122, 15, 31, 0.26) 0%, transparent 62%),
-        linear-gradient(180deg, #1a0810 0%, #230a13 48%, #12060a 100%);
+        radial-gradient(ellipse 120% 85% at 50% 0%, rgba(122, 15, 31, 0.3) 0%, transparent 62%),
+        linear-gradient(180deg, rgba(26, 8, 16, 0.82) 0%, rgba(35, 10, 19, 0.8) 48%, rgba(18, 6, 10, 0.88) 100%);
+}
+
+/* Bagian gelap tetap butuh selubungnya sendiri. Tanpa ini fotonya tembus
+   penuh dan judul bagian jatuh tepat di atas sorot lampu - silau dan belang. */
+.ati-isi > section:nth-of-type(odd),
+.ati-isi > footer {
+    background: linear-gradient(180deg,
+            rgba(18, 6, 10, 0.91) 0%,
+            rgba(18, 6, 10, 0.85) 50%,
+            rgba(18, 6, 10, 0.91) 100%);
 }
 
 /* Pembuka dan kartu QR adalah dua panggung undangan ini: yang satu menyebut
@@ -277,35 +287,76 @@
 .ati-isi > section:first-of-type,
 .ati-isi > section:last-of-type {
     background:
-        radial-gradient(ellipse 62% 48% at 50% -8%, rgba(214, 162, 73, 0.17) 0%, transparent 64%),
-        radial-gradient(ellipse 110% 55% at 50% 112%, rgba(122, 15, 31, 0.24) 0%, transparent 70%),
-        #12060a;
+        radial-gradient(ellipse 62% 48% at 50% -8%, rgba(214, 162, 73, 0.2) 0%, transparent 64%),
+        radial-gradient(ellipse 110% 55% at 50% 112%, rgba(122, 15, 31, 0.26) 0%, transparent 70%),
+        rgba(18, 6, 10, 0.8);
+}
+
+/* Foto balairung tetap diam di belakang seluruh undangan sementara isinya
+   bergulir, jadi halaman punya kedalaman - bukan teks yang melayang di atas
+   kehitaman rata. Semua panel bagian di atas sengaja tembus pandang sedikit
+   supaya foto ini terbaca samar menembusnya.
+
+   Dipasang sebagai elemen position:fixed, bukan background-attachment:fixed,
+   karena Safari iOS tidak menangani attachment itu dengan benar. */
+.ati-isi {
+    position: relative;
+    isolation: isolate;
+}
+
+.ati-isi::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.3;
+    background: url("/bg-ati.jpg") center / cover no-repeat;
+}
+
+/* Bingkai terukir di tepi layar, seperti pias pada undangan cetak: dua benang
+   emas yang dipisahkan jarak gelap. Ikut bergulir? Tidak - dia diam membingkai
+   layar, jadi seluruh undangan terasa berada di dalam satu kartu. */
+.ati-isi::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow:
+        inset 0 0 0 13px #12060a,
+        inset 0 0 0 14px rgba(214, 162, 73, 0.5),
+        inset 0 0 0 18px #12060a,
+        inset 0 0 0 19px rgba(214, 162, 73, 0.22);
 }
 
 /* Ornamen damask emas yang nyaris tak terlihat - baru terbaca saat layar
    dilihat dari dekat, seperti cetakan emboss pada kertas undangan. Ditopengi
    di tepi supaya ubinannya tidak terpotong kaku. */
-.ati-damask {
+.ati-isi > section {
     position: relative;
 }
 
-.ati-damask::before {
+.ati-isi > section::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: -1;
     pointer-events: none;
-    opacity: 0.06;
-    background-size: 132px 132px;
+    opacity: 0.09;
+    background-size: 148px 148px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='132'%3E%3Cg fill='none' stroke='%23D6A249' stroke-width='1.1'%3E%3Cpath d='M66 6 126 66 66 126 6 66Z'/%3E%3Ccircle cx='66' cy='66' r='21'/%3E%3Cpath d='M66 45v-14M66 101v-14M45 66H31M101 66h-14'/%3E%3C/g%3E%3Cg fill='%23D6A249'%3E%3Ccircle cx='66' cy='66' r='2.4'/%3E%3Ccircle cx='0' cy='66' r='2'/%3E%3Ccircle cx='132' cy='66' r='2'/%3E%3Ccircle cx='66' cy='0' r='2'/%3E%3Ccircle cx='66' cy='132' r='2'/%3E%3C/g%3E%3C/svg%3E");
     -webkit-mask-image: radial-gradient(ellipse 78% 68% at 50% 50%, #000 18%, transparent 76%);
     mask-image: radial-gradient(ellipse 78% 68% at 50% 50%, #000 18%, transparent 76%);
 }
 
-/* Isi bagian harus berada di atas ornamennya. */
-.ati-damask > * {
-    position: relative;
-    z-index: 1;
+/* Isi bagian harus berada di atas ornamennya. Dulu ini dikerjakan dengan
+   memaksa setiap anak langsung menjadi position:relative, tapi itu ikut
+   melumpuhkan anak yang memang perlu absolut - piala di pojok, misalnya.
+   isolation menahan ornamen ber-z-index negatif tetap di dalam bagian ini,
+   jadi ia naik di atas latar tapi tetap di bawah seluruh isi. */
+.ati-isi > section {
+    isolation: isolate;
 }
 
 /* Garis pemisah antar bagian: benang emas yang memudar di kedua ujung,

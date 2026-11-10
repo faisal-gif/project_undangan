@@ -1,4 +1,5 @@
 import CountUp from "@/Components/CountUp";
+import PialaTiga from "@/Components/PialaTiga";
 import useCountdown from "@/useCountdown";
 import { Link, usePage } from "@inertiajs/react";
 
@@ -40,7 +41,25 @@ const GuestHero = () => {
           }}
         />
 
-        <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-32">
+        {/* Piala berdiri di sisi kanan panggung, di ruang yang sebelumnya
+            kosong - bukan menindih judul. Di layar sempit ia menepi ke bawah
+            judul lewat urutan biasa. */}
+        {/* Satu piala saja di sini. Dua piala berdampingan membuat hero sesak
+            dan memaksa kolom teksnya menyempit; pasangannya tampil di undangan,
+            tempat yang memang berbicara soal penghargaan.
+
+            Tidak bisa diklik: ini latar, bukan kendali - tombol di kirinya
+            tidak boleh kehilangan sentuhan. */}
+        <PialaTiga
+          sumber="/piala1baru.glb"
+          className="pointer-events-none absolute bottom-0 right-0 hidden w-[36%] max-w-[460px] lg:block"
+          tinggi="84%"
+          interaktif={false}
+        />
+
+        {/* lg:pr-[38%]: ruang aman untuk piala di kanan. Tanpa ini tombol
+            "Peraih" jatuh menindih alas pialanya. */}
+        <div className="relative mx-auto w-full max-w-6xl px-6 pb-16 pt-32 lg:pr-[38%]">
           <h1 className="ati-reveal max-w-[16ch] font-heading text-[clamp(3rem,7.4vw,5.75rem)] font-bold leading-[0.88] tracking-[-0.045em] text-ati-cream">
             Anugerah{" "}
             <span className="text-ati-gold-light">TIMES Indonesia</span>

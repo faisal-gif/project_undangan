@@ -1,4 +1,5 @@
 import Modal from "@/Components/Modal";
+import PialaTiga from "@/Components/PialaTiga";
 import { Crown, Users, Star, X } from "lucide-react";
 import { useState } from "react";
 
@@ -40,6 +41,16 @@ const GuestFeatures = () => {
             Mengapresiasi keteladanan dan menginspirasi generasi penerus untuk
             terus berkarya dan membawa perubahan positif.
           </p>
+
+          {/* Piala kedua berdiri di ruang kosong bawah kolom ini, jadi hero di
+              atas cukup memikul satu saja. Di sini ia boleh diputar dengan
+              seret jari - letaknya di dalam isi, bukan latar. */}
+          <PialaTiga
+            sumber="/piala2baru.glb"
+            alt="Piala Anugerah TIMES Indonesia, penghargaan kedua"
+            className="mt-10 hidden w-full max-w-[20rem] lg:block"
+            tinggi="340px"
+          />
         </div>
 
         <ul>

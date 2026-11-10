@@ -1,3 +1,4 @@
+import PialaTiga from '@/Components/PialaTiga';
 import { usePage } from "@inertiajs/react";
 
 export const AwardsEventSection = ({ kode }) => {
@@ -28,7 +29,15 @@ export const AwardsEventSection = ({ kode }) => {
     ];
 
     return (
-        <section className="ati-rule px-6 py-20 lg:py-24">
+        <section className="ati-rule relative overflow-hidden px-6 py-20 lg:py-24 lg:pb-64">
+            {/* Pojok kanan bawah. lg:pb-52 di atas menyediakan ruang kosong
+                untuknya - tanpa itu pialanya mendarat di atas tombol peta. */}
+            <PialaTiga
+                sumber="/piala1baru.glb"
+                className="pointer-events-none absolute bottom-0 right-4 hidden w-[24%] max-w-[270px] lg:block"
+                tinggi="240px"
+                interaktif={false}
+            />
             <div className="mx-auto max-w-4xl">
                 <h2 data-tampil className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
                     Informasi Acara

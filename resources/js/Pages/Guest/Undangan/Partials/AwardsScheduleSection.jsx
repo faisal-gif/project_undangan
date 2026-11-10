@@ -1,3 +1,4 @@
+import PialaTiga from "@/Components/PialaTiga";
 const schedule = [
   { time: "18:00", title: "Registrasi & Welcome Drink", description: "Check-in tamu undangan" },
   { time: "19:00", title: "Opening Ceremony & Penampilan Musik Pembuka", description: "Sambutan dari Master of Ceremony" },
@@ -9,14 +10,22 @@ const schedule = [
 
 export const AwardsScheduleSection = () => {
   return (
-    <section className="ati-rule px-6 py-20 lg:py-24">
+    <section className="ati-rule relative overflow-hidden px-6 py-20 lg:py-24 lg:pb-64">
+      {/* Pojok kiri bawah, menyeimbangkan piala kanan di bagian sebelumnya. */}
+      <PialaTiga
+        sumber="/piala2baru.glb"
+        alt="Piala Anugerah TIMES Indonesia, penghargaan kedua"
+        className="pointer-events-none absolute bottom-0 left-4 hidden w-[24%] max-w-[270px] lg:block"
+        tinggi="240px"
+        interaktif={false}
+      />
       <div className="mx-auto max-w-4xl">
         <h2 data-tampil className="font-heading text-[clamp(1.9rem,4vw,2.75rem)] font-bold tracking-[-0.035em] text-ati-cream">
           Rundown Acara
         </h2>
         <p className="mt-3 text-ati-cream/65">Jadwal acara pemberian penghargaan</p>
 
-        <ol data-tampil className="mt-8">
+        <ol data-tampil className="mt-10">
           {schedule.map((item) => (
             <li
               key={item.time + item.title}

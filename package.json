@@ -24,6 +24,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "@google/model-viewer": "^4.4.0",
         "html5-qrcode": "^2.3.8",
         "lucide-react": "^0.539.0",
         "matter-js": "^0.20.0",

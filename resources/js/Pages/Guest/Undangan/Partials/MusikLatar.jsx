@@ -49,7 +49,7 @@ export const MusikLatar = ({ src, mainkan }) => {
                 onClick={alihkan}
                 aria-pressed={berbunyi}
                 aria-label={berbunyi ? 'Matikan musik' : 'Nyalakan musik'}
-                className="fixed right-4 top-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-ati-gold/40 bg-ati-ink/85 text-ati-gold-light backdrop-blur-md transition-colors hover:border-ati-gold hover:text-ati-cream"
+                className="fixed right-7 top-7 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-ati-gold/40 bg-ati-ink/85 text-ati-gold-light backdrop-blur-md transition-colors hover:border-ati-gold hover:text-ati-cream"
             >
                 {/* Ikon digambar sendiri agar setebal garis lain di halaman ini. */}
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
