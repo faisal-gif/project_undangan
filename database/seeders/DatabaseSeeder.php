@@ -13,14 +13,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        // firstOrCreate, bukan create: seeder ini dijalankan berulang di atas
+        // basis data yang sudah berisi. Kata sandi yang ada tidak ditimpa -
+        // hanya dipakai saat akun admin memang belum ada.
+        User::firstOrCreate(
+            ['email' => 'admin@times.com'],
+            [
+                'name' => 'Admin',
+                'role' => 'admin',
+                'password' => bcrypt('password'),
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@times.com',
-            'role' => 'admin',
-            'password' => bcrypt('password'),
-        ]);
+        // Sepuluh pengguna contoh hanya untuk basis data yang masih kosong.
+        // Tanpa penjaga ini, tiap kali seeder dijalankan akan menumpuk sepuluh
+        // akun palsu lagi di daftar pengguna yang sebenarnya.
+        if (User::count() <= 1) {
+            User::factory(10)->create();
+        }
 
         // Data nyata dari produksi; semuanya aman dijalankan berulang.
         $this->call([
