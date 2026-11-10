@@ -160,14 +160,7 @@ function Index({ tamu }) {
                                     . Kehadiran Bapak/Ibu kami nantikan pada malam penganugerahan.
                                 </p>
 
-                                {/* Nama penghargaannya sendiri, diberi ruang terpisah
-                                dan bingkai emas tipis: inilah yang sebenarnya
-                                diterima, bukan sekadar kategorinya. */}
-                                {subKategori && (
-                                    <p className="mt-6 border-y border-ati-gold/35 px-5 py-4 font-heading text-[clamp(1.05rem,2.4vw,1.35rem)] italic leading-snug text-ati-gold-light">
-                                        {subKategori}
-                                    </p>
-                                )}
+                              
                             </div>
                         )}
 
