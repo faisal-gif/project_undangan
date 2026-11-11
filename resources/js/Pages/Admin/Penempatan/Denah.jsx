@@ -16,8 +16,10 @@ import { useEffect, useRef, useState } from "react";
  * layar sama dengan yang dilihat tamu di lapangan.
  */
 
-const JARI_MEJA = 46;
-const JARI_KURSI = 9;
+// Kursi dibesarkan terhadap mejanya supaya nomornya masih terbaca saat denah
+// dilihat dari jarak beberapa meter di monitor penerima tamu.
+const JARI_MEJA = 44;
+const JARI_KURSI = 13;
 const ORBIT = JARI_MEJA + JARI_KURSI + 5;
 const KOTAK = (ORBIT + JARI_KURSI + 2) * 2;
 
@@ -28,11 +30,32 @@ const LANTAI_LEBAR = 84;
 const LANTAI_TINGGI = 84;
 
 /** Batas ukuran gambar meja, supaya tetap terbaca tanpa jadi raksasa. */
-const MEJA_MIN = 34;
-const MEJA_MAKS = 150;
+const MEJA_MIN = 40;
+const MEJA_MAKS = 230;
 
-/** Tinggi lantai: selalu muat satu layar, tidak pernah digulir. */
-const LANTAI_TINGGI_PX = 460;
+/** Bagian sel yang dipakai gambar meja; sisanya jadi jarak antar meja. */
+const ISI_SEL = 0.93;
+
+/**
+ * Ukuran lantai per orientasi - selalu muat satu layar, tidak pernah digulir.
+ * Melebar untuk ballroom biasa, memanjang untuk ruangan yang lebih dalam
+ * daripada lebar. Rasionya harus sama dengan RASIO_LANTAI di App\Models\Acara,
+ * yang dipakai menghitung jumlah kolom grid.
+ */
+const LANTAI = {
+    landscape: { vh: 0.64, min: 440, maks: 820, rasio: 1.95 },
+    potret: { vh: 0.76, min: 540, maks: 1000, rasio: 0.72 },
+};
+
+/**
+ * Tinggi lantai mengikuti tinggi layar, bukan angka tetap.
+ *
+ * Denah ini juga tampil di monitor besar sebelah penerima tamu; tinggi yang
+ * dipatok membuat separuh layar terbuang dan mejanya kecil tanpa alasan.
+ */
+function tinggiLantai(bentuk, tinggiLayar) {
+    return Math.max(bentuk.min, Math.min(bentuk.maks, (tinggiLayar || 900) * bentuk.vh));
+}
 
 /**
  * Ukuran meja diambil dari sisi sel yang terkecil, lebar maupun tinggi.
@@ -45,11 +68,11 @@ const LANTAI_TINGGI_PX = 460;
  * memang pilihan admin lewat "meja per baris", dan bisa dibesarkan kembali
  * dengan menambah meja per baris.
  */
-function ukuranMeja(lebarLantai, kolom, baris) {
+function ukuranMeja(lebarLantai, tinggiLantai, kolom, baris) {
     const selLebar = ((LANTAI_LEBAR / 100) * lebarLantai) / Math.max(1, kolom);
-    const selTinggi = ((LANTAI_TINGGI / 100) * LANTAI_TINGGI_PX) / Math.max(1, baris);
+    const selTinggi = ((LANTAI_TINGGI / 100) * tinggiLantai) / Math.max(1, baris);
 
-    return Math.max(MEJA_MIN, Math.min(MEJA_MAKS, Math.min(selLebar, selTinggi) * 0.86));
+    return Math.max(MEJA_MIN, Math.min(MEJA_MAKS, Math.min(selLebar, selTinggi) * ISI_SEL));
 }
 
 function posisiKursi(index, total) {
@@ -100,9 +123,9 @@ function MejaBundar({ meja, ukuran }) {
                         </circle>
                         <text
                             x={x}
-                            y={y + 3.5}
+                            y={y + 4}
                             textAnchor="middle"
-                            className={`text-[9px] ${k.tamu ? "fill-white" : "fill-gray-400"}`}
+                            className={`text-[11px] font-semibold ${k.tamu ? "fill-white" : "fill-gray-500"}`}
                         >
                             {k.nomor}
                         </text>
@@ -117,24 +140,35 @@ function MejaBundar({ meja, ukuran }) {
  * Ruangan beserta isinya. Dipakai mode admin dan mode monitor; bedanya hanya
  * boleh-tidaknya digeser.
  */
-function Ruangan({ mejas, letak, kolom, baris, aturUlang, onGeser, onPilih, disorot }) {
+function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, onGeser, onPilih, disorot }) {
     const ruang = useRef(null);
     const menyeret = useRef(null);
+    const bentuk = LANTAI[orientasi] ?? LANTAI.landscape;
     const [ukuran, setUkuran] = useState(90);
+    const [tinggi, setTinggi] = useState(bentuk.min);
 
     useEffect(() => {
         const el = ruang.current;
         if (!el) return;
 
-        const hitung = () => setUkuran(ukuranMeja(el.getBoundingClientRect().width, kolom, baris));
+        const hitung = () => {
+            const t = tinggiLantai(bentuk, window.innerHeight);
+
+            setTinggi(t);
+            setUkuran(ukuranMeja(el.getBoundingClientRect().width, t, kolom, baris));
+        };
 
         hitung();
 
         const pengamat = new ResizeObserver(hitung);
         pengamat.observe(el);
+        window.addEventListener("resize", hitung);
 
-        return () => pengamat.disconnect();
-    }, [kolom, baris]);
+        return () => {
+            pengamat.disconnect();
+            window.removeEventListener("resize", hitung);
+        };
+    }, [kolom, baris, bentuk]);
 
     // Pointer event, bukan drag-and-drop HTML5: yang terakhir itu tidak
     // bekerja di layar sentuh, dan denah ini kemungkinan diatur dari tablet.
@@ -172,7 +206,10 @@ function Ruangan({ mejas, letak, kolom, baris, aturUlang, onGeser, onPilih, diso
     // tumbuh. Kalau keduanya ikut dipersen, ruangan yang panjang akan
     // meregangkan panggung dan menyisakan ratusan piksel kosong di atas meja.
     return (
-        <div className="mx-auto w-full overflow-hidden rounded-lg border border-gray-300 bg-gray-50">
+        <div
+            className="mx-auto w-full overflow-hidden rounded-lg border border-gray-300 bg-gray-50"
+            style={{ maxWidth: tinggi * bentuk.rasio }}
+        >
             <div className="space-y-1.5 p-3">
                 <div className="mx-auto w-3/4 rounded border border-gray-300 bg-white/70 py-0.5 text-center text-[0.6rem] tracking-[0.3em] text-gray-500">
                     VIDEOTRON
@@ -187,7 +224,7 @@ function Ruangan({ mejas, letak, kolom, baris, aturUlang, onGeser, onPilih, diso
                 </div>
             </div>
 
-            <div ref={ruang} className="relative" style={{ height: LANTAI_TINGGI_PX }}>
+            <div ref={ruang} className="relative" style={{ height: tinggi }}>
             {mejas.map((m) => {
                 const titik = letak[m.nomor] ?? { x: 50, y: 50 };
 
@@ -222,12 +259,23 @@ function Ruangan({ mejas, letak, kolom, baris, aturUlang, onGeser, onPilih, diso
     );
 }
 
-export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, meja_per_baris, layar = false }) {
+export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, meja_per_baris, orientasi, layar = false }) {
     const [letak, setLetak] = useState(letakAwal ?? {});
     const [aturUlang, setAturUlang] = useState(false);
     const [belumDisimpan, setBelumDisimpan] = useState(false);
     const [dilihat, setDilihat] = useState(null);
     const [perBaris, setPerBaris] = useState(meja_per_baris ?? "");
+
+    const ubahBentuk = (ubahan) =>
+        router.post(
+            route("admin.penempatan.denah.grid"),
+            {
+                meja_per_baris: perBaris === "" ? null : Number(perBaris),
+                orientasi,
+                ...ubahan,
+            },
+            { preserveScroll: true }
+        );
 
     // Monitor di sebelah penerima tamu harus ikut berubah saat panitia
     // menempatkan tamu dari ruangan lain, tanpa ada yang menyegarkannya.
@@ -305,7 +353,7 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                             <strong>{terisi}</strong>/{acara.jumlah_kursi} kursi terisi
                         </p>
                     </div>
-                    <Ruangan mejas={mejas} letak={letak} kolom={kolom} baris={baris} aturUlang={false} />
+                    <Ruangan mejas={mejas} letak={letak} kolom={kolom} baris={baris} orientasi={orientasi} aturUlang={false} />
                 </div>
             </>
         );
@@ -355,6 +403,24 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                     </>
                                 ) : (
                                     <>
+                                        <div className="join">
+                                            {[
+                                                ["landscape", "Melebar"],
+                                                ["potret", "Memanjang"],
+                                            ].map(([nilai, label]) => (
+                                                <button
+                                                    key={nilai}
+                                                    type="button"
+                                                    onClick={() => ubahBentuk({ orientasi: nilai })}
+                                                    className={`btn btn-sm join-item ${
+                                                        orientasi === nilai ? "btn-neutral" : "btn-ghost"
+                                                    }`}
+                                                >
+                                                    {label}
+                                                </button>
+                                            ))}
+                                        </div>
+
                                         <button
                                             type="button"
                                             onClick={() => setAturUlang(true)}
@@ -396,6 +462,7 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                 letak={letak}
                                 kolom={kolom}
                                 baris={baris}
+                                orientasi={orientasi}
                                 aturUlang={aturUlang}
                                 onGeser={geser}
                                 onPilih={(m) => setDilihat(dilihat?.nomor === m.nomor ? null : m)}
@@ -441,13 +508,7 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                     </label>
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            router.post(
-                                                route("admin.penempatan.denah.grid"),
-                                                { meja_per_baris: perBaris === "" ? null : Number(perBaris) },
-                                                { preserveScroll: true }
-                                            )
-                                        }
+                                        onClick={() => ubahBentuk({})}
                                         className="btn btn-xs btn-neutral"
                                     >
                                         Terapkan

@@ -207,4 +207,57 @@ class PenempatanKursiTest extends TestCase
 
         $this->assertNull($this->acara->fresh()->denah);
     }
+
+    public function test_orientasi_menentukan_jumlah_kolom_grid(): void
+    {
+        $this->acara->update(['jumlah_kursi' => 144, 'meja_per_baris' => null]);
+
+        $this->acara->update(['orientasi_denah' => Acara::DENAH_LANDSCAPE]);
+        $melebar = $this->acara->fresh()->kolomGrid();
+
+        $this->acara->update(['orientasi_denah' => Acara::DENAH_POTRET]);
+        $memanjang = $this->acara->fresh()->kolomGrid();
+
+        // Ruangan memanjang harus punya baris yang lebih pendek.
+        $this->assertGreaterThan($memanjang, $melebar);
+    }
+
+    public function test_orientasi_bisa_diubah_dan_menghapus_letak_lama(): void
+    {
+        $this->acara->update(['denah' => ['1' => ['x' => 10, 'y' => 10]]]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.denah.grid'), ['orientasi' => Acara::DENAH_POTRET])
+            ->assertRedirect();
+
+        $segar = $this->acara->fresh();
+
+        $this->assertSame(Acara::DENAH_POTRET, $segar->orientasiDenah());
+        $this->assertNull($segar->denah);
+    }
+
+    public function test_mengubah_orientasi_tidak_menghapus_meja_per_baris(): void
+    {
+        $this->acara->update(['meja_per_baris' => 4]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.denah.grid'), ['orientasi' => Acara::DENAH_POTRET]);
+
+        $this->assertSame(4, (int) $this->acara->fresh()->meja_per_baris);
+    }
+
+    public function test_orientasi_asing_ditolak(): void
+    {
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.denah.grid'), ['orientasi' => 'diagonal'])
+            ->assertSessionHasErrors('orientasi');
+    }
+
+    public function test_denah_membawa_orientasi(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.penempatan.denah'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('orientasi', Acara::DENAH_LANDSCAPE));
+    }
 }

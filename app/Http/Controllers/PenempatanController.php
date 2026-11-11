@@ -77,6 +77,8 @@ class PenempatanController extends Controller
             'kolom' => $acara->kolomGrid(),
             'baris' => $acara->barisGrid(),
             'meja_per_baris' => $acara->meja_per_baris,
+            'orientasi' => $acara->orientasiDenah(),
+            'rasio_lantai' => $acara->rasioLantai(),
         ]);
     }
 
@@ -119,11 +121,7 @@ class PenempatanController extends Controller
     }
 
     /**
-     * Ubah berapa meja dalam satu baris.
-     *
-     * Letak yang sudah disimpan sengaja ikut dihapus: grid baru tidak ada
-     * gunanya kalau meja tetap berada di tempat lamanya. Admin yang ingin
-     * mempertahankan susunan geserannya cukup tidak menyentuh pengaturan ini.
+     * Ubah bentuk denah: orientasi ruangan dan berapa meja dalam satu baris.
      */
     public function aturGrid(Request $request)
     {
@@ -132,14 +130,29 @@ class PenempatanController extends Controller
 
         $data = $request->validate([
             'meja_per_baris' => 'nullable|integer|min:1|max:50',
+            'orientasi' => 'nullable|in:' . Acara::DENAH_LANDSCAPE . ',' . Acara::DENAH_POTRET,
         ]);
 
-        $acara->update([
-            'meja_per_baris' => $data['meja_per_baris'] ?: null,
-            'denah' => null,
-        ]);
+        // Letak geseran ikut dihapus. Koordinat yang disusun di ruangan
+        // melebar tidak berarti apa-apa di ruangan memanjang, dan grid baru
+        // tidak ada gunanya kalau meja tetap di tempat lamanya.
+        // Hanya medan yang benar-benar dikirim yang diubah. Aturan "nullable"
+        // tidak menambahkan kunci bila medannya tidak ada, jadi membacanya
+        // langsung akan menabrak - dan menganggapnya null akan diam-diam
+        // menghapus pengaturan yang tidak sedang disentuh.
+        $ubahan = ['denah' => null];
 
-        return back()->with('success', 'Susunan grid diperbarui.');
+        if (array_key_exists('meja_per_baris', $data)) {
+            $ubahan['meja_per_baris'] = $data['meja_per_baris'] ?: null;
+        }
+
+        if (array_key_exists('orientasi', $data) && $data['orientasi']) {
+            $ubahan['orientasi_denah'] = $data['orientasi'];
+        }
+
+        $acara->update($ubahan);
+
+        return back()->with('success', 'Susunan denah diperbarui.');
     }
 
     /**

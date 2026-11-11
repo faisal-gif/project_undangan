@@ -19,6 +19,19 @@ class Acara extends Model
      *
      * Hanya untuk grid; meja yang digeser admin boleh ke mana saja.
      */
+    public const DENAH_LANDSCAPE = 'landscape';
+    public const DENAH_POTRET = 'potret';
+
+    /**
+     * Perbandingan lebar dibagi tinggi lantai untuk tiap orientasi. Dipakai
+     * bersama oleh perhitungan kolom grid di sini dan ukuran lantai di layar,
+     * jadi keduanya tidak bisa berselisih.
+     */
+    public const RASIO_LANTAI = [
+        self::DENAH_LANDSCAPE => 1.95,
+        self::DENAH_POTRET => 0.72,
+    ];
+
     private const LANTAI_KIRI = 8;
     private const LANTAI_KANAN = 92;
     private const LANTAI_ATAS = 8;
@@ -36,6 +49,7 @@ class Acara extends Model
         'jumlah_kursi',
         'kursi_per_meja',
         'meja_per_baris',
+        'orientasi_denah',
         'denah',
         'aktif',
     ];
@@ -207,9 +221,21 @@ class Acara extends Model
             return min($jumlah, (int) $this->meja_per_baris);
         }
 
-        // Lantai dianggap sekitar 4:3; kolom dipilih supaya barisnya tidak
-        // jauh lebih banyak daripada kolomnya.
-        return max(1, (int) ceil(sqrt($jumlah * 4 / 3)));
+        // Kolom mengikuti bentuk lantai: ruangan melebar butuh baris yang
+        // panjang, ruangan memanjang butuh yang pendek.
+        return max(1, (int) ceil(sqrt($jumlah * $this->rasioLantai())));
+    }
+
+    public function orientasiDenah(): string
+    {
+        return $this->orientasi_denah === self::DENAH_POTRET
+            ? self::DENAH_POTRET
+            : self::DENAH_LANDSCAPE;
+    }
+
+    public function rasioLantai(): float
+    {
+        return self::RASIO_LANTAI[$this->orientasiDenah()];
     }
 
     public function barisGrid(): int
