@@ -186,7 +186,11 @@ class HomeController extends Controller
         }
 
         return Inertia::render('Guest/Undangan/Index', [
-            'tamu' => $tamu,
+            // Tempat duduk sengaja tidak ikut dikirim. Penerima tamu yang
+            // mengarahkan tamu ke mejanya saat QR dipindai; kalau nilainya
+            // ikut ke halaman ini, tamu bisa membacanya dari sumber halaman
+            // walau tidak ditampilkan di mana pun.
+            'tamu' => $tamu->makeHidden(['meja', 'kursi']),
         ])->withViewData($this->meta(
             'Undangan untuk ' . $tamu->nama,
             'Kami menantikan kehadiran Anda di malam ' . $this->namaAcara() . '.',

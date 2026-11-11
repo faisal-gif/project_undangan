@@ -8,6 +8,7 @@ use App\Models\Acara;
 use App\Models\EmailLog;
 use App\Models\Tamu;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -187,6 +188,80 @@ class TamuController extends Controller
     }
 
     /**
+     * Satu kursi tidak boleh ditempati dua tamu.
+     *
+     * Dibandingkan per nomor, bukan per teks: "3, 4" dan "4" tetap terdeteksi
+     * bentrok di kursi 4. Nama meja disamakan huruf besar-kecilnya supaya
+     * "VIP 1" dan "vip 1" dianggap meja yang sama.
+     *
+     * Hanya memeriksa bila meja dan kursi sama-sama terisi - penempatan yang
+     * baru setengah jadi memang belum bisa dinilai bentrok.
+     */
+    private function pastikanKursiKosong(Request $request, ?int $acaraId, ?Tamu $kecuali = null): void
+    {
+        $meja = trim((string) $request->meja);
+        $diminta = Tamu::pecahKursi($request->kursi);
+
+        if ($meja === '' || ! $diminta || ! $acaraId) {
+            return;
+        }
+
+        // Batasnya diambil dari tata letak acara, bukan angka tetap: admin bisa
+        // mengubah isi per meja di pengaturan, dan pemeriksaan ini harus ikut.
+        $acara = Acara::find($acaraId);
+        $perMeja = $acara?->kursiPerMeja() ?? 6;
+
+        $diluar = array_filter(
+            $diminta,
+            fn ($k) => ! ctype_digit($k) || (int) $k < 1 || (int) $k > $perMeja
+        );
+
+        if ($diluar) {
+            throw ValidationException::withMessages([
+                'kursi' => 'Nomor kursi ' . implode(', ', $diluar) . ' tidak ada. '
+                    . 'Tiap meja hanya punya kursi 1 sampai ' . $perMeja . '.',
+            ]);
+        }
+
+        // Nomor meja juga dibatasi, tapi hanya bila tata letaknya sudah diatur.
+        if ($acara && $acara->jumlahMeja() > 0 && ctype_digit($meja)
+            && ((int) $meja < 1 || (int) $meja > $acara->jumlahMeja())) {
+            throw ValidationException::withMessages([
+                'meja' => 'Meja ' . $meja . ' tidak ada. Acara ini punya '
+                    . $acara->jumlahMeja() . ' meja.',
+            ]);
+        }
+
+        // Jumlah kursi harus sebanyak orang yang diundang - kalau kurang, ada
+        // yang berdiri; kalau lebih, satu kursi terbuang padahal masih ada
+        // tamu lain yang membutuhkannya.
+        $orang = (int) ($request->jumlah_orang ?: 1);
+
+        if (count($diminta) !== $orang) {
+            throw ValidationException::withMessages([
+                'kursi' => 'Undangan ini untuk ' . $orang . ' orang, tapi ada '
+                    . count($diminta) . ' nomor kursi.',
+            ]);
+        }
+
+        $lain = Tamu::where('acara_id', $acaraId)
+            ->whereRaw('UPPER(TRIM(meja)) = ?', [mb_strtoupper($meja)])
+            ->when($kecuali?->id, fn ($q, $id) => $q->whereKeyNot($id))
+            ->get();
+
+        foreach ($lain as $tamu) {
+            $bentrok = array_intersect($diminta, $tamu->nomorKursi());
+
+            if ($bentrok) {
+                throw ValidationException::withMessages([
+                    'kursi' => 'Kursi ' . implode(', ', $bentrok) . ' di meja ' . $meja
+                        . ' sudah dipakai ' . $tamu->nama . '.',
+                ]);
+            }
+        }
+    }
+
+    /**
      * Kode undangan acak yang belum dipakai tamu mana pun.
      */
     private function kodeUnik(): string
@@ -244,20 +319,27 @@ class TamuController extends Controller
             'jenis' => 'required|in:hadir,penerima',
             'kategori_penghargaan' => 'nullable|string|max:255',
             'sub_kategori' => 'nullable|string|max:255',
+            'meja' => 'nullable|string|max:50',
+            'kursi' => 'nullable|string|max:50',
         ], [
             'jenis.required' => 'Pilih jenis undangannya.',
             'jenis.in' => 'Jenis undangan tidak dikenal.',
         ]);
 
+        $acaraId = Acara::aktif()?->id;
+        $this->pastikanKursiKosong($request, $acaraId);
+
         $tamu = Tamu::create([
             // Tamu baru selalu masuk edisi yang sedang aktif.
-            'acara_id' => Acara::aktif()?->id,
+            'acara_id' => $acaraId,
             'nama' => $request->nama,
             'alamat' => $request->alamat,
             'lembaga' => $request->lembaga,
             'pic' => $request->pic,
             'jumlah_orang' => $request->jumlah_orang,
             'jenis' => $request->jenis,
+            'meja' => $request->meja ?: null,
+            'kursi' => $request->kursi ?: null,
             'code' => $this->kodeUnik(),
         ] + $this->penghargaanBila($request));
 
@@ -304,10 +386,14 @@ class TamuController extends Controller
             'jenis' => 'required|in:hadir,penerima',
             'kategori_penghargaan' => 'nullable|string|max:255',
             'sub_kategori' => 'nullable|string|max:255',
+            'meja' => 'nullable|string|max:50',
+            'kursi' => 'nullable|string|max:50',
         ], [
             'jenis.required' => 'Pilih jenis undangannya.',
             'jenis.in' => 'Jenis undangan tidak dikenal.',
         ]);
+
+        $this->pastikanKursiKosong($request, $tamu->acara_id, $tamu);
 
         $tamu->update([
             'nama' => $request->nama,
@@ -316,6 +402,8 @@ class TamuController extends Controller
             'jumlah_orang' => $request->jumlah_orang,
             'pic' => $request->pic,
             'jenis' => $request->jenis,
+            'meja' => $request->meja ?: null,
+            'kursi' => $request->kursi ?: null,
             ...$this->penghargaanBila($request),
         ]);
 
@@ -450,7 +538,12 @@ class TamuController extends Controller
         $tamu->status = 'datang';
         $tamu->save();
 
-        return back()->with('success', 'Selamat datang ' . $tamu->nama);
+        // Tempat duduk dikirim terpisah, bukan disisipkan ke kalimat sambutan:
+        // penerima tamu harus bisa membaca nomor mejanya sekilas, dan layar
+        // pemindai menampilkannya jauh lebih besar daripada teks biasa.
+        return back()
+            ->with('success', 'Selamat datang ' . $tamu->nama)
+            ->with('duduk', $tamu->tempatDuduk());
     }
 
     public function update_status(Request $request, $id)

@@ -11,6 +11,19 @@ class Acara extends Model
 {
     public const ZONA = 'Asia/Jakarta';
 
+    /**
+     * Batas susunan grid cadangan, dalam persen terhadap LANTAI - bukan
+     * terhadap seluruh ruangan. Panggung dan pintu berada di luar lantai dan
+     * berukuran tetap, jadi tinggi ruangan boleh tumbuh tanpa ikut
+     * meregangkan keduanya.
+     *
+     * Hanya untuk grid; meja yang digeser admin boleh ke mana saja.
+     */
+    private const LANTAI_KIRI = 8;
+    private const LANTAI_KANAN = 92;
+    private const LANTAI_ATAS = 8;
+    private const LANTAI_BAWAH = 92;
+
     protected $fillable = [
         'nama',
         'mulai',
@@ -20,10 +33,15 @@ class Acara extends Model
         'peta_url',
         'video_url',
         'musik_url',
+        'jumlah_kursi',
+        'kursi_per_meja',
+        'meja_per_baris',
+        'denah',
         'aktif',
     ];
 
     protected $casts = [
+        'denah' => 'array',
         'mulai' => 'datetime',
         'selesai' => 'datetime',
         'aktif' => 'boolean',
@@ -87,6 +105,118 @@ class Acara extends Model
     /**
      * Label pendek untuk judul dan pilihan dropdown, mis. "ATI 2025".
      */
+    /**
+     * Berapa kursi di tiap meja. Enam bila belum diatur - susunan paling lazim
+     * untuk meja bundar.
+     */
+    public function kursiPerMeja(): int
+    {
+        return max(1, (int) ($this->kursi_per_meja ?: 6));
+    }
+
+    /**
+     * Banyak meja diturunkan dari dua angka di pengaturan, tidak disimpan.
+     * Dengan begitu jumlah meja tidak pernah berselisih dengan jumlah kursi.
+     *
+     * Dibulatkan ke atas: 100 kursi dengan 6 per meja berarti 17 meja, yang
+     * terakhir hanya terisi empat kursi - bukan dibuang.
+     */
+    public function jumlahMeja(): int
+    {
+        $kursi = (int) $this->jumlah_kursi;
+
+        return $kursi > 0 ? (int) ceil($kursi / $this->kursiPerMeja()) : 0;
+    }
+
+    /**
+     * Kursi yang benar-benar ada di meja tertentu. Meja terakhir bisa lebih
+     * sedikit bila jumlah kursi tidak habis dibagi.
+     */
+    public function kursiDiMeja(int $meja): int
+    {
+        $total = (int) $this->jumlah_kursi;
+        $per = $this->kursiPerMeja();
+
+        if ($total <= 0 || $meja < 1 || $meja > $this->jumlahMeja()) {
+            return 0;
+        }
+
+        return min($per, $total - ($meja - 1) * $per);
+    }
+
+    /**
+     * Letak tiap meja dalam persen, lengkap untuk meja 1..N.
+     *
+     * Meja yang belum pernah digeser diberi tempat dalam susunan grid - jadi
+     * denah selalu terbaca sejak awal, bahkan sebelum ada yang mengaturnya.
+     */
+    public function letakMeja(): array
+    {
+        $tersimpan = $this->denah ?? [];
+        $jumlah = $this->jumlahMeja();
+        $letak = [];
+
+        $kolom = $this->kolomGrid();
+        $baris = max(1, (int) ceil($jumlah / $kolom));
+
+        for ($n = 1; $n <= $jumlah; $n++) {
+            $ada = $tersimpan[(string) $n] ?? null;
+
+            if (is_array($ada) && isset($ada['x'], $ada['y'])) {
+                $letak[$n] = [
+                    'x' => max(0, min(100, (float) $ada['x'])),
+                    'y' => max(0, min(100, (float) $ada['y'])),
+                ];
+
+                continue;
+            }
+
+            // Dibatasi ke area lantai saja. Bagian atas ruangan dipakai
+            // videotron dan panggung, jadi grid yang memakai seluruh tinggi
+            // akan menaruh baris pertama tepat di atas panggung.
+            $i = $n - 1;
+            $letak[$n] = [
+                'x' => round(self::LANTAI_KIRI + ($i % $kolom + 0.5) / $kolom
+                    * (self::LANTAI_KANAN - self::LANTAI_KIRI), 2),
+                'y' => round(self::LANTAI_ATAS + (intdiv($i, $kolom) + 0.5) / $baris
+                    * (self::LANTAI_BAWAH - self::LANTAI_ATAS), 2),
+            ];
+        }
+
+        return $letak;
+    }
+
+    /**
+     * Banyak meja dalam satu baris pada susunan grid cadangan.
+     *
+     * Ikut rasio ruangan, bukan akar polos: ruangan yang lebih lebar daripada
+     * tinggi butuh lebih banyak kolom, kalau tidak barisnya bertumpuk dan meja
+     * saling menindih. Dipakai bersama oleh perhitungan letak di sini dan
+     * ukuran gambar meja di layar, jadi keduanya tidak bisa berselisih.
+     */
+    public function kolomGrid(): int
+    {
+        $jumlah = $this->jumlahMeja();
+
+        if ($jumlah < 1) {
+            return 1;
+        }
+
+        // Pilihan admin menang: hanya dia yang tahu bentuk ruangan sebenarnya.
+        if ($this->meja_per_baris > 0) {
+            return min($jumlah, (int) $this->meja_per_baris);
+        }
+
+        // Lantai dianggap sekitar 4:3; kolom dipilih supaya barisnya tidak
+        // jauh lebih banyak daripada kolomnya.
+        return max(1, (int) ceil(sqrt($jumlah * 4 / 3)));
+    }
+
+    public function barisGrid(): int
+    {
+        return max(1, (int) ceil($this->jumlahMeja() / $this->kolomGrid()));
+    }
+
     public function label(): string
     {
         return 'ATI ' . $this->mulai?->timezone(self::ZONA)->year;

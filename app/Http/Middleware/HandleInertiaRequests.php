@@ -38,6 +38,8 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error'   => fn() => $request->session()->get('error'),
+                // Tempat duduk hasil pemindaian QR, dipakai layar penerima tamu.
+                'duduk'   => fn() => $request->session()->get('duduk'),
             ],
             // Satu sumber tanggal & lokasi acara untuk seluruh halaman
             'acara' => fn() => Acara::aktif()?->toShare(),

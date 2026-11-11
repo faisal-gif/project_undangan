@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcaraController;
+use App\Http\Controllers\PenempatanController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UndanganController;
@@ -41,6 +42,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/participants/update-status/{id}', [TamuController::class, 'update_status'])->name('participants.update-status');
     Route::get('/qrScanner', [TamuController::class, 'qrScanner'])->name('qrScanner');
     Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');
+    Route::get('/penempatan', [PenempatanController::class, 'index'])->name('penempatan.index');
+    Route::get('/penempatan/denah', [PenempatanController::class, 'denah'])->name('penempatan.denah');
+    Route::post('/penempatan/denah', [PenempatanController::class, 'simpanDenah'])->name('penempatan.denah.simpan');
+    Route::post('/penempatan/denah/reset', [PenempatanController::class, 'resetDenah'])->name('penempatan.denah.reset');
+    Route::post('/penempatan/denah/grid', [PenempatanController::class, 'aturGrid'])->name('penempatan.denah.grid');
+    Route::post('/penempatan', [PenempatanController::class, 'tempatkan'])->name('penempatan.tempatkan');
+    Route::post('/penempatan/{tamu}/keluarkan', [PenempatanController::class, 'keluarkan'])->name('penempatan.keluarkan');
     Route::get('/acara', [AcaraController::class, 'edit'])->name('acara.edit');
     Route::post('/acara', [AcaraController::class, 'store'])->name('acara.store');
     Route::put('/acara/{acara}', [AcaraController::class, 'update'])->name('acara.update');

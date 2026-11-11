@@ -26,6 +26,8 @@ class AcaraController extends Controller
                 'peta_url' => $acara->peta_url,
                 'video_url' => $acara->video_url,
                 'musik_url' => $acara->musik_url,
+                'jumlah_kursi' => $acara->jumlah_kursi,
+                'kursi_per_meja' => $acara->kursi_per_meja,
                 'aktif' => $acara->aktif,
             ] : null,
             'acaras' => Acara::withCount('tamus')->orderByDesc('mulai')->get()
@@ -80,12 +82,15 @@ class AcaraController extends Controller
             'peta_url' => 'nullable|url|max:255',
             'video_url' => 'nullable|string|max:255',
             'musik_url' => 'nullable|string|max:255',
+            'jumlah_kursi' => 'nullable|integer|min:0|max:5000',
+            'kursi_per_meja' => 'nullable|integer|min:1|max:50',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
             'mulai.required' => 'Tanggal dan jam mulai wajib diisi.',
             'mulai.date' => 'Tanggal mulai tidak valid.',
             'selesai.after' => 'Jam selesai harus setelah jam mulai.',
             'peta_url.url' => 'Tautan peta harus berupa URL lengkap.',
+            'kursi_per_meja.min' => 'Satu meja minimal punya satu kursi.',
         ]);
 
         // Terima bentuk tautan YouTube apa pun, tolak yang bukan YouTube.

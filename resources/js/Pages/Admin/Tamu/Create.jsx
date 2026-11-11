@@ -11,6 +11,8 @@ function Create({ acaraAktif }) {
         pic: "",
         jenis: "hadir",
         kategori_penghargaan: "",
+        meja: "",
+        kursi: "",
         sub_kategori: "",
     });
 
@@ -125,6 +127,46 @@ function Create({ acaraAktif }) {
                                             <p className="text-red-500 text-xs mt-1">
                                                 {errors.jumlah_orang}
                                             </p>
+                                        )}
+                                    </div>
+
+                                    <div className="w-full col-span-1">
+                                        <label htmlFor="meja" className="block text-sm font-medium text-gray-700">
+                                            Nomor Meja
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="meja"
+                                            value={data.meja}
+                                            onChange={(e) => setData("meja", e.target.value)}
+                                            placeholder="5"
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Boleh huruf, mis. "VIP 2". Kosongkan bila penempatan belum selesai.
+                                        </p>
+                                        {errors.meja && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.meja}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="w-full col-span-1">
+                                        <label htmlFor="kursi" className="block text-sm font-medium text-gray-700">
+                                            Nomor Kursi
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="kursi"
+                                            value={data.kursi}
+                                            onChange={(e) => setData("kursi", e.target.value)}
+                                            placeholder="3, 4"
+                                            className="mt-2 input input-bordered w-full"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Kursi 1-6, pisahkan dengan koma. Jumlahnya harus sama dengan jumlah orang.
+                                        </p>
+                                        {errors.kursi && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.kursi}</p>
                                         )}
                                     </div>
 

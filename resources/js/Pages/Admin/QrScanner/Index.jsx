@@ -38,11 +38,19 @@ function Index({ tamus, filters }) {
 
     useEffect(() => {
         if (flash.success) {
+            // Nomor meja dibuat sebesar mungkin dan popupnya ditahan lebih
+            // lama: penerima tamu membacanya sambil berdiri, lalu langsung
+            // mengarahkan tamu. Kalau tamu belum ditempatkan, popupnya kembali
+            // sesingkat semula - tidak ada yang perlu dibaca.
             Swal.fire({
                 icon: "success",
-                title: "Berhasil",
-                text: flash.success,
-                timer: 2000,
+                title: flash.duduk ?? "Berhasil",
+                html: flash.duduk
+                    ? `<div style="font-size:1.05rem">${flash.success}</div>`
+                    : undefined,
+                text: flash.duduk ? undefined : flash.success,
+                customClass: flash.duduk ? { title: "text-4xl font-bold" } : undefined,
+                timer: flash.duduk ? 6000 : 2000,
                 showConfirmButton: false
             });
         }
@@ -141,6 +149,7 @@ function Index({ tamus, filters }) {
                                             <th className="py-2 px-4 border-b">Nama</th>
                                             <th className="py-2 px-4 border-b">Lembaga</th>
                                             <th className="py-2 px-4 border-b">Jumlah Orang</th>
+                                            <th className="py-2 px-4 border-b">Tempat Duduk</th>
                                             <th className="py-2 px-4 border-b">PIC</th>
                                             <th className="py-2 px-4 border-b">Status</th>
                                             <th className="py-2 px-4 border-b">Aksi</th>
@@ -153,6 +162,16 @@ function Index({ tamus, filters }) {
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
+                                                <td className="py-2 px-4 border-b whitespace-nowrap">
+                                                    {tamu.meja ? (
+                                                        <span className="badge badge-neutral p-3">
+                                                            Meja {tamu.meja}
+                                                            {tamu.kursi ? ` · ${tamu.kursi}` : ""}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">belum</span>
+                                                    )}
+                                                </td>
                                                 <td className="py-2 px-4 border-b"><span className="badge badge-primary badge-outline p-3">{tamu.pic}</span></td>
                                                 <td className="py-2 border-b w-40">
                                                     {getStatusBadge(tamu.status)}

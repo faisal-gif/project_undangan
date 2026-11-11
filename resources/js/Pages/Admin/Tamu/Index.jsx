@@ -184,6 +184,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                             <th className="py-2 px-4 border-b">Nama</th>
                                             <th className="py-2 px-4 border-b">Lembaga</th>
                                             <th className="py-2 px-4 border-b">Jumlah Orang</th>
+                                            <th className="py-2 px-4 border-b">Tempat Duduk</th>
                                             <th className="py-2 px-4 border-b">PIC</th>
                                             <th className="py-2 px-4 border-b">Konfirmasi</th>
                                             <th className="py-2 px-4 border-b">Status</th>
@@ -197,6 +198,16 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
+                                                <td className="py-2 px-4 border-b whitespace-nowrap">
+                                                    {tamu.meja ? (
+                                                        <span className="badge badge-neutral p-3">
+                                                            Meja {tamu.meja}
+                                                            {tamu.kursi ? ` · ${tamu.kursi}` : ""}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">belum</span>
+                                                    )}
+                                                </td>
                                                 <td className="py-2 px-4 border-b"><span className="badge badge-primary badge-outline p-3">{tamu.pic}</span></td>
                                                 <td className="py-2 border-b w-40">
                                                     {getRsvpBadge(tamu.rsvp)}

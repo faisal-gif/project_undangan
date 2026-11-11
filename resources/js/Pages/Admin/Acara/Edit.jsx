@@ -15,6 +15,8 @@ const kosong = {
     peta_url: "",
     video_url: "",
     musik_url: "",
+    jumlah_kursi: "",
+    kursi_per_meja: 6,
 };
 
 /**
@@ -33,6 +35,26 @@ function bacaWib(nilai) {
     const tanggal = new Date(Number(th), Number(bl) - 1, Number(tg));
 
     return `${hari[tanggal.getDay()]}, ${Number(tg)} ${bulan[Number(bl) - 1]} ${th} pukul ${jam}.${menit} WIB`;
+}
+
+/**
+ * "144 kursi, 6 per meja" -> "24 meja; meja terakhir terisi 6 kursi".
+ * Dibulatkan ke atas, karena sisa kursi tetap butuh mejanya sendiri.
+ */
+function hitungMeja({ jumlah_kursi, kursi_per_meja }) {
+    const kursi = Number(jumlah_kursi);
+    const per = Number(kursi_per_meja);
+
+    if (!kursi || !per || kursi < 0 || per < 1) {
+        return "Belum diatur. Penempatan tamu baru bisa dilakukan setelah ini diisi.";
+    }
+
+    const meja = Math.ceil(kursi / per);
+    const sisa = kursi - (meja - 1) * per;
+
+    return `${meja} meja` + (sisa === per
+        ? ` masing-masing ${per} kursi.`
+        : `; ${meja - 1} meja berisi ${per} kursi dan meja terakhir ${sisa} kursi.`);
 }
 
 /**
@@ -55,6 +77,8 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 peta_url: acara.peta_url || "",
                 video_url: acara.video_url || "",
                 musik_url: acara.musik_url || "",
+                jumlah_kursi: acara.jumlah_kursi ?? "",
+                kursi_per_meja: acara.kursi_per_meja ?? 6,
             }
     );
 
@@ -181,6 +205,46 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                     Kosongkan untuk mematikan musik. Musik baru berbunyi setelah tamu menekan "Buka Undangan".
                 </p>
                 <InputError message={errors.musik_url} className="mt-2" />
+            </div>
+
+            {/* Tata letak kursi. Jumlah mejanya tidak diketik - ia hasil bagi
+                kedua angka ini, jadi tidak pernah berselisih dengan keduanya. */}
+            <div className="border-t border-gray-200 pt-5">
+                <InputLabel value="Tata letak kursi" />
+                <p className="mt-1 text-xs text-gray-500">
+                    Isi jumlah kursi dan isi tiap meja; banyaknya meja dihitung sendiri.
+                </p>
+
+                <div className="mt-3 grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <InputLabel htmlFor="jumlah_kursi" value="Jumlah kursi" />
+                        <TextInput
+                            id="jumlah_kursi"
+                            type="number"
+                            min="0"
+                            className="mt-1 block w-full"
+                            value={data.jumlah_kursi}
+                            onChange={(e) => setData("jumlah_kursi", e.target.value)}
+                            placeholder="144"
+                        />
+                        <InputError message={errors.jumlah_kursi} className="mt-2" />
+                    </div>
+
+                    <div>
+                        <InputLabel htmlFor="kursi_per_meja" value="Kursi per meja" />
+                        <TextInput
+                            id="kursi_per_meja"
+                            type="number"
+                            min="1"
+                            className="mt-1 block w-full"
+                            value={data.kursi_per_meja}
+                            onChange={(e) => setData("kursi_per_meja", e.target.value)}
+                        />
+                        <InputError message={errors.kursi_per_meja} className="mt-2" />
+                    </div>
+                </div>
+
+                <p className="mt-3 text-sm text-gray-700">{hitungMeja(data)}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">

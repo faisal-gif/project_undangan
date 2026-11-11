@@ -88,6 +88,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <Link href={route('admin.tamu.index')}>Undangan</Link>
                             </li>
 
+                            <li>
+                                <Link href={route('admin.penempatan.index')}>Penempatan Kursi</Link>
+                            </li>
+
+                            <li>
+                                <Link href={route('admin.penempatan.denah')}>Denah Meja</Link>
+                            </li>
+
                             {user.role === 'admin' && (
                                 <>
                                     <li>
