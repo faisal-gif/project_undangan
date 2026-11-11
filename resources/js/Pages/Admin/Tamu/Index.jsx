@@ -180,7 +180,7 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                 <table className="table table-zebra">
                                     <thead>
                                         <tr>
-                                            <th className="py-2 px-4 border-b">ID</th>
+                                            <th className="py-2 px-4 border-b">NO</th>
                                             <th className="py-2 px-4 border-b">Nama</th>
                                             <th className="py-2 px-4 border-b">Lembaga</th>
                                             <th className="py-2 px-4 border-b">Jumlah Orang</th>
@@ -192,9 +192,9 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {tamus.data.map((tamu) => (
+                                        {tamus.data.map((tamu, index) => (
                                             <tr key={tamu.id}>
-                                                <td className="py-2 px-4 border-b text-center">{tamu.id}</td>
+                                                <td className="py-2 px-4 border-b text-center">{index + 1}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.nama}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
