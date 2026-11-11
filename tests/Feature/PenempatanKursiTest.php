@@ -253,6 +253,21 @@ class PenempatanKursiTest extends TestCase
             ->assertSessionHasErrors('orientasi');
     }
 
+    /**
+     * Tombol "Mode Monitor" sempat tidak berfungsi karena controller berhenti
+     * mengirim penandanya, sementara tombol dan cabang tampilannya tetap ada.
+     */
+    public function test_mode_monitor_ditandai_dari_kueri(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('admin.penempatan.denah'))
+            ->assertInertia(fn ($page) => $page->where('layar', false));
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.penempatan.denah', ['layar' => 1]))
+            ->assertInertia(fn ($page) => $page->where('layar', true));
+    }
+
     public function test_denah_membawa_orientasi(): void
     {
         $this->actingAs($this->admin)

@@ -56,7 +56,7 @@ class PenempatanController extends Controller
      * Memakai papan() yang sama dengan halaman penempatan - satu sumber, jadi
      * denah tidak pernah menampilkan susunan yang berbeda dari daftarnya.
      */
-    public function denah()
+    public function denah(Request $request)
     {
         $acara = Acara::aktif();
 
@@ -79,6 +79,8 @@ class PenempatanController extends Controller
             'meja_per_baris' => $acara->meja_per_baris,
             'orientasi' => $acara->orientasiDenah(),
             'rasio_lantai' => $acara->rasioLantai(),
+            // Mode monitor: tanpa menu, tanpa tombol, dan menyegarkan diri.
+            'layar' => $request->boolean('layar'),
         ]);
     }
 
