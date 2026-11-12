@@ -82,7 +82,7 @@ class TambahTamuUndangan extends Command
             Tamu::create([
                 'acara_id' => $acara->id,
                 'code' => $kode,
-                'jenis' => 'hadir',
+                'jenis' => $t['jenis'] ?? 'hadir',
                 'nama' => $t['nama'],
                 'lembaga' => $t['lembaga'],
                 'jumlah_orang' => $t['jumlah'],
@@ -121,6 +121,9 @@ class TambahTamuUndangan extends Command
         '7 baris E70-E76 dari Undangan External.xlsx: tanpa lembaga, tanpa PIC, 1 orang masing-masing',
         'Tidak ada penanda "external" di basis data - kolom jenis hanya punya hadir/penerima,',
         '  dan lembaga tidak dipakai sebagai label karena kolom itu tampil di undangan tamunya',
+        'P40 Dr. H. Abdul Hamid Wahid, M.Ag. adalah PENERIMA, bukan tamu biasa -',
+        '  kategori penghargaannya belum ada di berkas mana pun, isi lewat admin sebelum dikirim',
+        'Dengan P40, total kursi yang dibutuhkan jadi 146 sedangkan denah baru punya 144',
     ];
 
     /**
@@ -168,5 +171,12 @@ class TambahTamuUndangan extends Command
         ['no' => 'E74', 'nama' => 'P. Ainun', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
         ['no' => 'E75', 'nama' => 'P. Yuli', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
         ['no' => 'E76', 'nama' => 'P. Wahyu', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+
+        // Satu-satunya penerima penghargaan di daftar ini. Dia ada di
+        // "Update Undangan Penerima.xlsx" No 40 tapi belum punya baris di
+        // basis data, jadi undangannya dibuat di sini. Kategori
+        // penghargaannya tidak ada di berkas itu, jadi masih kosong dan
+        // harus diisi lewat admin sebelum undangannya dikirim.
+        ['no' => 'P40', 'nama' => 'Dr. H. Abdul Hamid Wahid, M.Ag.', 'lembaga' => 'Bupati Bondowoso', 'jumlah' => 2, 'pic' => 'Hainor', 'jenis' => 'penerima'],
     ];
 }

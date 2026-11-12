@@ -123,9 +123,9 @@ class IsiPicPenerima extends Command
     }
 
     private const CATATAN = [
-        'No 40 "Pemerintah Kabupaten Bondowoso" tidak ada di daftar ini: belum punya baris di basis data',
-        'Tiga kode di bawah ikut diisi PIC walau namanya masih menunggu keputusan Anda -',
-        '  PIC-nya sama siapa pun nama akhirnya: YNNC85RS (No 18), EBYAGOMP (No 22), TE9F98SS (No 30)',
+        'Dibandingkan dengan "Update Undangan Penerima.xlsx": 51 PIC sama persis, tidak ada yang berubah',
+        'No 40 Dr. H. Abdul Hamid Wahid, M.Ag. tidak ada di daftar ini: barisnya belum ada,',
+        '  dibuat oleh tamu:tambah lengkap dengan PIC Hainor, jadi tidak perlu diisi dua kali',
         'Ejaan PIC dibiarkan apa adanya: No 1 dan 2 tertulis "AINUN", sisanya "Ainun"',
         'JUMLAH HADIR di berkas semuanya 2, sama dengan isi basis data, jadi tidak diubah',
     ];
@@ -142,10 +142,10 @@ class IsiPicPenerima extends Command
         ['kode' => 'FGN2TBA4', 'pic' => 'Hainor'],  // 5 Dr. R. Djoni Sudjatmoko, S.E., M.M.
         ['kode' => 'BI03AMKM', 'pic' => 'Dhina'],  // 6 dr. Ayu Widyaningrum, M.M., Master of AAAM
         ['kode' => 'VARQT1T0', 'pic' => 'Yuli'],  // 7 H. Syamsul Hadi, S.Sos., M.M.
-        ['kode' => '5A49D4EX', 'pic' => 'Rudi'],  // 8 PT Dharma Lautan Utama
+        ['kode' => '5A49D4EX', 'pic' => 'Rudi'],  // 8 Pimpinan - PT Dharma Lautan Utama
         ['kode' => 'YUACPHU4', 'pic' => 'Hainor'],  // 9 Prof. Dr. K.H. Nasaruddin Umar, M.A.
         ['kode' => 'KXOMQCVO', 'pic' => 'Dhina'],  // 10 Karina Icha, S.H.
-        ['kode' => 'TISWMECB', 'pic' => 'Hainor'],  // 11 PT Superior Prima Sukses Tbk
+        ['kode' => 'TISWMECB', 'pic' => 'Hainor'],  // 11 Pimpinan - PT Superior Prima Sukses Tbk
         ['kode' => 'NODOTPOZ', 'pic' => 'Hainor'],  // 12 H. Widodo
         ['kode' => 'GDDSWNNT', 'pic' => 'Yuli'],  // 13 dr. Dhelya Widasmara, Sp.DVE, FINSDV, FAADV
         ['kode' => 'VM6UZZSS', 'pic' => 'Ainun'],  // 14 Yusuf Rio Wahyu Prayogo, S.Sos., M.SM.
@@ -155,10 +155,10 @@ class IsiPicPenerima extends Command
         ['kode' => 'EOWJZBGF', 'pic' => 'Dhina'],  // 19 Siti Aisya, A.Md., S.T., M.M.
         ['kode' => '71MOA2FV', 'pic' => 'Yuli'],  // 20 Dwi Retno Palupi, M.Pd.
         ['kode' => 'MATOQR31', 'pic' => 'Yuli'],  // 21 Prof. Dr. Ir. Sutanto Hidayat, M.T.
-        ['kode' => 'VPUFLWAS', 'pic' => 'Hainor'],  // 23 Pemerintah Kabupaten Probolinggo
+        ['kode' => 'VPUFLWAS', 'pic' => 'Hainor'],  // 23 dr. H. Mohammad Haris, M.Kes
         ['kode' => 'JGCRQAMM', 'pic' => 'Hainor'],  // 24 AKBP Dr. Gede Harimbawa, S.E., S.H., M.H., M.I.Kom.
         ['kode' => 'DBGTIYM2', 'pic' => 'Hainor'],  // 25 Eva Lestari, A.P., S.H., C.M.H.
-        ['kode' => 'CBHNY353', 'pic' => 'Hainor'],  // 26 PT Freeport Indonesia
+        ['kode' => 'CBHNY353', 'pic' => 'Hainor'],  // 26 Pimpinan - PT Freeport Indonesia
         ['kode' => 'KTFP2P9G', 'pic' => 'Ainun'],  // 27 AKBP Rulian Syauri, S.H., S.I.K., M.Si.
         ['kode' => 'OUKPE34P', 'pic' => 'Hainor'],  // 28 Ahmad Juhairi, S.IP., M.Phil.
         ['kode' => 'I2DWWWRT', 'pic' => 'Rudi'],  // 29 Dr. Ir. Nyono, S.T., S.H., IPU., ASEAN Eng.
@@ -168,26 +168,25 @@ class IsiPicPenerima extends Command
         ['kode' => 'NLR0H0H9', 'pic' => 'Hainor'],  // 34 Rd. Hendrian Surya Natanagara, S.E.
         ['kode' => '5TJJSCWA', 'pic' => 'Hainor'],  // 35 Anto Febrianto, M.Pd.
         ['kode' => 'OP8BGIJQ', 'pic' => 'Ainun'],  // 36 Amithya Ratnanggani Sirraduhita, S.S
-        ['kode' => 'ZWI6QDHN', 'pic' => 'Ainun'],  // 37 Pemerintah Kabupaten Pasuruan
+        ['kode' => 'ZWI6QDHN', 'pic' => 'Ainun'],  // 37 H. Mochamad Rusdi Sutejo, S.M.
         ['kode' => '6XGPJ69I', 'pic' => 'Rudi'],  // 38 Dr. Hendro Puspito, S.E., M.PSDM.
         ['kode' => 'DRAQWUGC', 'pic' => 'Naning'],  // 39 Nur Vicky Wahyudi, S.Sn.
-        ['kode' => '4BTHJ6CR', 'pic' => 'Rudi'],  // 41 AKBP Dr. Raden Erik Bangun Prakasa, S.H., S.I.K., M.
-        ['kode' => 'BDZZTUU4', 'pic' => 'Ainun'],  // 42 Pemerintah Kota Malang
+        ['kode' => '4BTHJ6CR', 'pic' => 'Rudi'],  // 41 AKBP Dr. Raden Erik Bangun Prakasa, S.H., S.I.K., M.M.
+        ['kode' => 'BDZZTUU4', 'pic' => 'Ainun'],  // 42 Dr. Ir. Wahyu Hidayat, M.M
         ['kode' => 'TSJYMPQE', 'pic' => 'Hainor'],  // 43 H. Hari Wuryanto, S.H., M.Ak.
         ['kode' => 'GIFH8YBP', 'pic' => 'Imam'],  // 44 Iwhan Tri Cahyono
-        ['kode' => 'RTBDNSPH', 'pic' => 'Hainor'],  // 45 MIN 1 Malang
-        ['kode' => 'ZCWLGVI4', 'pic' => 'Hainor'],  // 46 Institut Agama Islam KH Ahmad Hasyim Muzadi
-        ['kode' => 'P6MCVFRE', 'pic' => 'Hainor'],  // 47 Pemerintah Kabupaten Banyuwangi
-        ['kode' => 'QOHXMM74', 'pic' => 'Hainor'],  // 48 Pemerintah Kabupaten Pacitan
+        ['kode' => 'RTBDNSPH', 'pic' => 'Hainor'],  // 45 Kepala - MIN 1 Malang
+        ['kode' => 'ZCWLGVI4', 'pic' => 'Hainor'],  // 46 Kepala - Institut Agama Islam KH Ahmad Hasyim Muzadi
+        ['kode' => 'P6MCVFRE', 'pic' => 'Hainor'],  // 47 Hj. Ipuk Fiestiandani Azwar Anas, S.Pd., M.KP.
+        ['kode' => 'QOHXMM74', 'pic' => 'Hainor'],  // 48 Indrata Nur Bayuaji, S.S.
         ['kode' => 'L5YZTH6B', 'pic' => 'Dhina'],  // 49 Gledy Webyansyah
         ['kode' => 'B2SDKOXX', 'pic' => 'Hainor'],  // 50 Dr. KH. Isroqunnajah, M.Ag.
-        ['kode' => '0LUU1KHG', 'pic' => 'Hainor'],  // 51 MAN 2 Kota Malang
-        ['kode' => '6AQRFKGQ', 'pic' => 'Fery'],  // 52 Pemerintah Kota Batu
-        // Tiga baris yang namanya masih menunggu keputusan. Kodenya sudah
-        // pasti - lihat PERLU_KEPUTUSAN di SelaraskanTamu - dan PIC-nya tidak
-        // bergantung pada nama mana yang akhirnya dipakai.
-        ['kode' => 'YNNC85RS', 'pic' => 'Hainor'],  // 18 Kantor Kemenag Kabupaten Bondowoso
-        ['kode' => 'EBYAGOMP', 'pic' => 'Yuli'],  // 22 Pemerintah Kabupaten Malang
+        ['kode' => '0LUU1KHG', 'pic' => 'Hainor'],  // 51 Kepala - MAN 2 Kota Malang
+        ['kode' => '6AQRFKGQ', 'pic' => 'Fery'],  // 52 Nurochman, S.H., M.H.
+        // Tiga baris yang dulu menunggu keputusan nama. Sekarang sudah
+        // dijawab oleh "Update Undangan Penerima.xlsx"; PIC-nya tetap sama.
+        ['kode' => 'YNNC85RS', 'pic' => 'Hainor'],  // 18 Kepala - Kantor Kemenag Kabupaten Bondowoso
+        ['kode' => 'EBYAGOMP', 'pic' => 'Yuli'],  // 22 Drs. H. M. Sanusi, M.M.
         ['kode' => 'TE9F98SS', 'pic' => 'Yuli'],  // 30 Hj. Jajuk Sulistyowati, S.E., M.M.
     ];
 }

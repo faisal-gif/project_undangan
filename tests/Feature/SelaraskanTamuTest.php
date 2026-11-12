@@ -67,6 +67,65 @@ class SelaraskanTamuTest extends TestCase
         $this->assertSame('Best Innovation in Digital Transformation Policy', $segar->sub_kategori);
     }
 
+    /**
+     * "Update Undangan Penerima.xlsx" mengganti enam baris instansi jadi
+     * pejabatnya. Satu contohnya dikunci di sini supaya tidak diam-diam
+     * kembali ke nama lembaga.
+     */
+    public function test_baris_instansi_diganti_jadi_pejabatnya(): void
+    {
+        $tamu = Tamu::create([
+            'acara_id' => Acara::where('aktif', true)->firstOrFail()->id,
+            'code' => 'QOHXMM74',
+            'nama' => 'Pemerintah Kabupaten Pacitan',
+            'lembaga' => 'Instansi Pemerintah Daerah',
+            'jenis' => 'penerima',
+            'jumlah_orang' => 2,
+            'status' => 'belum',
+            'rsvp' => 'belum',
+        ]);
+
+        $this->artisan('tamu:selaraskan --terapkan')->assertSuccessful();
+
+        $segar = $tamu->fresh();
+
+        $this->assertSame('Indrata Nur Bayuaji, S.S.', $segar->nama);
+        $this->assertSame('Bupati Pacitan', $segar->lembaga);
+    }
+
+    /**
+     * Dua baris yang dulu menunggu keputusan sekarang ikut diperbarui, tapi
+     * berkas barunya tidak punya kolom kategori - jadi kategori lama harus
+     * tetap utuh.
+     */
+    public function test_baris_bekas_perlu_keputusan_tidak_kehilangan_kategori(): void
+    {
+        $tamu = Tamu::create([
+            'acara_id' => Acara::where('aktif', true)->firstOrFail()->id,
+            'code' => 'TE9F98SS',
+            'nama' => 'Hj. Jajuk Rendra Kresna, S.E., M.M.',
+            'lembaga' => 'Anggota DPRD Provinsi Jawa Timur',
+            'jenis' => 'penerima',
+            'kategori_penghargaan' => 'Woman of The Year',
+            'sub_kategori' => null,
+            'jumlah_orang' => 2,
+            'meja' => '5',
+            'kursi' => '1, 2',
+            'status' => 'belum',
+            'rsvp' => 'belum',
+        ]);
+
+        $this->artisan('tamu:selaraskan --terapkan')->assertSuccessful();
+
+        $segar = $tamu->fresh();
+
+        $this->assertSame('Hj. Jajuk Sulistyowati, S.E., M.M.', $segar->nama);
+        $this->assertSame('Anggota DPRD Provinsi Jawa Timur', $segar->lembaga);
+        $this->assertSame('Woman of The Year', $segar->kategori_penghargaan);
+        $this->assertNull($segar->sub_kategori);
+        $this->assertSame('5', $segar->meja);
+    }
+
     public function test_kode_tempat_duduk_dan_rsvp_tidak_pernah_disentuh(): void
     {
         $tamu = $this->tamu();

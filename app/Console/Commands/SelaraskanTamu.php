@@ -20,6 +20,12 @@ use Illuminate\Console\Command;
  * Pasangan di bawah sudah ditentukan dari hasil pencocokan dengan berkas
  * Terbaru.xlsx, bukan ditebak saat dijalankan - supaya hasilnya sama persis
  * dengan yang ditinjau saat mode coba.
+ *
+ * Nama dan lembaga kemudian ditimpa oleh "Update Undangan Penerima.xlsx" di
+ * 14 baris, dan 2 baris yang dulu menunggu keputusan ikut ditambahkan. Kolom
+ * kategori dan sub tidak ada di berkas itu, jadi tetap dari Terbaru.xlsx.
+ * Sel LEMBAGA yang kosong di berkas baru dianggap "tidak diisi", bukan
+ * "dikosongkan" - lihat PERLU_KEPUTUSAN.
  */
 class SelaraskanTamu extends Command
 {
@@ -138,10 +144,15 @@ class SelaraskanTamu extends Command
      * Baris yang sengaja tidak diotomatiskan, lengkap dengan alasannya.
      */
     private const PERLU_KEPUTUSAN = [
-        'YNNC85RS  H. Moh. Ali Masyhur -> Kantor Kemenag Kabupaten Bondowoso (pejabat diganti instansinya)',
-        'EBYAGOMP  Drs. H. M. Sanusi -> Pemerintah Kabupaten Malang (pejabat diganti instansinya)',
-        'TE9F98SS  Hj. Jajuk Rendra Kresna -> Hj. Jajuk Sulistyowati (nama belakang berbeda jauh)',
-        '(baru)    Pemerintah Kabupaten Bondowoso - belum ada di basis data, perlu undangan baru',
+        'LEMBAGA KOSONG di berkas baru - dibiarkan seperti sekarang, bukan dikosongkan -',
+        '  GDDSWNNT (No 13) Dokter spesialis kulit dan kelamin/Akademisi',
+        '  GNTSDJOA (No 16) Tokoh peduli masyarakat Malang Raya',
+        '  MATOQR31 (No 21) Pakar Manajemen Infrastruktur dan Ekonomi Pembangunan',
+        '  DRAQWUGC (No 39) Pengusaha Kota Batu',
+        '94VMPAK4 (No 15) berkas baru menghapus "(wafat 19 Juni 2026)" dari lembaga - dibiarkan',
+        'KXOMQCVO (No 10) berkas baru menulis "MErah" dan membuang "Aktris dan" serta "Laskar" - dipakai apa adanya',
+        'No 40 Dr. H. Abdul Hamid Wahid, M.Ag. (Bupati Bondowoso) belum ada di basis data -',
+        '  dibuatkan undangan baru oleh tamu:tambah, kategori penghargaannya masih kosong',
     ];
 
     private const PERUBAHAN = [
@@ -153,13 +164,13 @@ class SelaraskanTamu extends Command
             'kategori' => 'Innovation in Community Empowerment', 'sub' => 'Best Innovation in Sports Community Development'],
         ['kode' => 'VARQT1T0', 'nama' => 'H. Syamsul Hadi, S.Sos., M.M.', 'lembaga' => 'Direktur Utama Perumda Tirta Kanjuruhan',
             'kategori' => 'Man of The Year', 'sub' => 'Outstanding Leadership in Public Utility Services'],
-        ['kode' => '5A49D4EX', 'nama' => 'PT Dharma Lautan Utama', 'lembaga' => 'Perusahaan transportasi laut',
+        ['kode' => '5A49D4EX', 'nama' => 'Pimpinan', 'lembaga' => 'PT Dharma Lautan Utama',
             'kategori' => 'Innovation in Business Excellence', 'sub' => 'Best Innovation in Maritime Transportation Services'],
         ['kode' => 'YUACPHU4', 'nama' => 'Prof. Dr. K.H. Nasaruddin Umar, M.A.', 'lembaga' => 'Menteri Agama RI',
             'kategori' => 'Positive News Maker', 'sub' => 'Outstanding Leadership in Religious Affairs'],
-        ['kode' => 'KXOMQCVO', 'nama' => 'Karina Icha, S.H.', 'lembaga' => 'Aktris dan Ketua Srikandi Laskar Merah Putih',
+        ['kode' => 'KXOMQCVO', 'nama' => 'Karina Icha, S.H.', 'lembaga' => 'Ketua Srikandi MErah Putih',
             'kategori' => 'Woman of The Year', 'sub' => 'Outstanding Woman in Social and Community Leadership'],
-        ['kode' => 'TISWMECB', 'nama' => 'PT Superior Prima Sukses Tbk', 'lembaga' => 'Perusahaan manufaktur',
+        ['kode' => 'TISWMECB', 'nama' => 'Pimpinan', 'lembaga' => 'PT Superior Prima Sukses Tbk',
             'kategori' => 'Innovation in Sustainability', 'sub' => 'Best Innovation in Green Manufacturing and Renewable Energy'],
         ['kode' => 'NODOTPOZ', 'nama' => 'H. Widodo', 'lembaga' => 'Penggagas Pelangi Kapuas Park',
             'kategori' => 'Innovation in Environment', 'sub' => 'Best Innovation in Community-Based Environmental Development'],
@@ -177,13 +188,13 @@ class SelaraskanTamu extends Command
             'kategori' => 'Woman of The Year', 'sub' => 'Outstanding Woman in Child-Friendly and Inclusive Education'],
         ['kode' => 'MATOQR31', 'nama' => 'Prof. Dr. Ir. Sutanto Hidayat, M.T.', 'lembaga' => 'Pakar Manajemen Infrastruktur dan Ekonomi Pembangunan',
             'kategori' => 'Innovation in Education', 'sub' => 'Excellent in Infrastructure Development and Economic Strategist'],
-        ['kode' => 'VPUFLWAS', 'nama' => 'Pemerintah Kabupaten Probolinggo', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => 'VPUFLWAS', 'nama' => 'dr. H. Mohammad Haris, M.Kes', 'lembaga' => 'Bupati Probolinggo',
             'kategori' => 'Innovation in Government', 'sub' => 'Best Innovation in Sustainable Nature Tourism Development'],
         ['kode' => 'JGCRQAMM', 'nama' => 'AKBP Dr. Gede Harimbawa, S.E., S.H., M.H., M.I.Kom.', 'lembaga' => 'Kapolres Ngada, Polda NTT',
             'kategori' => 'Innovation in Education', 'sub' => 'Best Innovation in Public Education and Literacy'],
         ['kode' => 'DBGTIYM2', 'nama' => 'Eva Lestari, A.P., S.H., C.M.H.', 'lembaga' => 'Pendiri EL-Law Office',
             'kategori' => 'Innovation in Integrity Movement', 'sub' => 'Best Innovation in Legal Integrity and Advocacy'],
-        ['kode' => 'CBHNY353', 'nama' => 'PT Freeport Indonesia', 'lembaga' => 'Perusahaan Industri',
+        ['kode' => 'CBHNY353', 'nama' => 'Pimpinan', 'lembaga' => 'PT Freeport Indonesia',
             'kategori' => 'Innovation in Social Impact', 'sub' => 'Best Innovation in Community Empowerment and Environment'],
         ['kode' => 'KTFP2P9G', 'nama' => 'AKBP Rulian Syauri, S.H., S.I.K., M.Si.', 'lembaga' => 'Kapolres Malang',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Achievement in Counter-Drug Trafficking'],
@@ -191,33 +202,33 @@ class SelaraskanTamu extends Command
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Transportation Public Services'],
         ['kode' => 'B2SDKOXX', 'nama' => 'Dr. KH. Isroqunnajah, M.Ag.', 'lembaga' => 'Ketua PCNU Kota Malang',
             'kategori' => 'Regional Man of The Year', 'sub' => 'Outstanding Leadership in Religious and Community Affairs – Malang'],
-        ['kode' => '0LUU1KHG', 'nama' => 'MAN 2 Kota Malang', 'lembaga' => 'Lembaga pendidikan',
+        ['kode' => '0LUU1KHG', 'nama' => 'Kepala', 'lembaga' => 'MAN 2 Kota Malang',
             'kategori' => 'Innovation in Education', 'sub' => 'Best Innovation in Digital Madrasah Education'],
         ['kode' => 'JI621DM7', 'nama' => 'Drs. H. Eman Suherman, M.M.', 'lembaga' => 'Bupati Majalengka',
             'kategori' => 'Regional Positive News Maker Jabar', 'sub' => 'Best Innovation in Regional Development Leadership'],
         ['kode' => 'NLR0H0H9', 'nama' => 'Rd. Hendrian Surya Natanagara, S.E.', 'lembaga' => 'Ketua Kadin Majalengka',
             'kategori' => 'Innovation in Creative Economy', 'sub' => 'Best Innovation in Regional Business Development'],
-        ['kode' => 'OP8BGIJQ', 'nama' => 'Amithya Ratnanggani Sirraduhita, S.S', 'lembaga' => 'Tokoh politisi perempuan Jawa Timur',
+        ['kode' => 'OP8BGIJQ', 'nama' => 'Amithya Ratnanggani Sirraduhita, S.S', 'lembaga' => 'Ketua DPRD Kota Malang',
             'kategori' => 'Innovation in Social Impact', 'sub' => 'Best Innovation in Women\'s Social Participation'],
-        ['kode' => 'ZWI6QDHN', 'nama' => 'Pemerintah Kabupaten Pasuruan', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => 'ZWI6QDHN', 'nama' => 'H. Mochamad Rusdi Sutejo, S.M.', 'lembaga' => 'Bupati Pasuruan',
             'kategori' => 'Innovation in Government', 'sub' => 'Best Innovation in Public Healthcare Service and Economic Empowerment'],
-        ['kode' => 'BDZZTUU4', 'nama' => 'Pemerintah Kota Malang', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => 'BDZZTUU4', 'nama' => 'Dr. Ir. Wahyu Hidayat, M.M', 'lembaga' => 'Wali Kota Malang',
             'kategori' => 'Innovation in Government', 'sub' => null],
         ['kode' => '6XGPJ69I', 'nama' => 'Dr. Hendro Puspito, S.E., M.PSDM.', 'lembaga' => 'Direktur Utama PT Sinergi Inti Mineral',
             'kategori' => 'Innovation in Education', 'sub' => 'Best Innovation in Industry-Based Education'],
-        ['kode' => '6AQRFKGQ', 'nama' => 'Pemerintah Kota Batu', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => '6AQRFKGQ', 'nama' => 'Nurochman, S.H., M.H.', 'lembaga' => 'Wali Kota Batu',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Local Public Services'],
         ['kode' => '4BTHJ6CR', 'nama' => 'AKBP Dr. Raden Erik Bangun Prakasa, S.H., S.I.K., M.M.', 'lembaga' => 'Kapolres Mojokerto',
             'kategori' => 'Innovation in Social Impact', 'sub' => 'Best Innovation in Community Public Safety'],
         ['kode' => 'GIFH8YBP', 'nama' => 'Iwhan Tri Cahyono', 'lembaga' => 'Public Relation Manager Gudang Garam',
             'kategori' => 'Innovation in Business Excellence', 'sub' => 'Best Innovation in Corporate Communication'],
-        ['kode' => 'RTBDNSPH', 'nama' => 'MIN 1 Malang', 'lembaga' => 'Instansi pendidikan',
+        ['kode' => 'RTBDNSPH', 'nama' => 'Kepala', 'lembaga' => 'MIN 1 Malang',
             'kategori' => 'Innovation in Education', 'sub' => 'Best Innovation in Primary Education'],
-        ['kode' => 'ZCWLGVI4', 'nama' => 'Institut Agama Islam KH Ahmad Hasyim Muzadi', 'lembaga' => 'Lembaga pendidikan',
+        ['kode' => 'ZCWLGVI4', 'nama' => 'Kepala', 'lembaga' => 'Institut Agama Islam KH Ahmad Hasyim Muzadi',
             'kategori' => 'Innovation in Education', 'sub' => 'Best Innovation in Islamic Higher Education'],
-        ['kode' => 'P6MCVFRE', 'nama' => 'Pemerintah Kabupaten Banyuwangi', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => 'P6MCVFRE', 'nama' => 'Hj. Ipuk Fiestiandani Azwar Anas, S.Pd., M.KP.', 'lembaga' => 'Bupati Banyuwangi',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Digital and Accessible Public Services'],
-        ['kode' => 'QOHXMM74', 'nama' => 'Pemerintah Kabupaten Pacitan', 'lembaga' => 'Instansi Pemerintah Daerah',
+        ['kode' => 'QOHXMM74', 'nama' => 'Indrata Nur Bayuaji, S.S.', 'lembaga' => 'Bupati Pacitan',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Inclusive Regional Public Service'],
         ['kode' => 'L5YZTH6B', 'nama' => 'Gledy Webyansyah', 'lembaga' => 'Marketing Communication',
             'kategori' => 'Innovation in Business Excellence', 'sub' => 'Innovative Marcom and Public Relation Campaign Strategist'],
@@ -225,5 +236,13 @@ class SelaraskanTamu extends Command
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Decentralized Public Service Delivery'],
         ['kode' => 'O4YG304B', 'nama' => 'Dr. Gde Made Kartikajaya, SE, MM, M.AP, QGIA, CAFP.', 'lembaga' => 'Komisaris Utama PT. Multi Nitrotama Kimia',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Youth Empowerment'],
+
+        // Dua baris yang dulu menunggu keputusan, sekarang dijawab oleh
+        // "Update Undangan Penerima.xlsx". Kategori dan sub sengaja disalin
+        // apa adanya dari basis data supaya kedua kolom itu tidak berubah.
+        ['kode' => 'YNNC85RS', 'nama' => 'Kepala', 'lembaga' => 'Kantor Kemenag Kabupaten Bondowoso',
+            'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Religious Public Services'],
+        ['kode' => 'TE9F98SS', 'nama' => 'Hj. Jajuk Sulistyowati, S.E., M.M.', 'lembaga' => 'Anggota DPRD Provinsi Jawa Timur',
+            'kategori' => 'Woman of The Year', 'sub' => null],
     ];
 }

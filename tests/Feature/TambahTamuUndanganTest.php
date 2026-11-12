@@ -16,7 +16,9 @@ class TambahTamuUndanganTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const JUMLAH = 35;
+    private const JUMLAH = 36;
+
+    private const JUMLAH_HADIR = 35;
 
     public function test_mode_coba_tidak_membuat_baris(): void
     {
@@ -33,7 +35,8 @@ class TambahTamuUndanganTest extends TestCase
 
         $this->assertSame(self::JUMLAH, Tamu::count());
         $this->assertSame(self::JUMLAH, Tamu::distinct()->pluck('code')->count());
-        $this->assertSame(self::JUMLAH, Tamu::where('jenis', 'hadir')->count());
+        $this->assertSame(self::JUMLAH_HADIR, Tamu::where('jenis', 'hadir')->count());
+        $this->assertSame(1, Tamu::where('jenis', 'penerima')->count());
         $this->assertSame(0, Tamu::whereNotNull('kategori_penghargaan')->count());
 
         $tamu = Tamu::where('nama', 'Fifi Trisjanti')->firstOrFail();
@@ -98,6 +101,25 @@ class TambahTamuUndanganTest extends TestCase
      * pernah benar - kalau query builder berhenti menerjemahkannya jadi
      * "lembaga is null", ketujuh baris ini akan terduplikasi tiap dijalankan.
      */
+    /**
+     * No 40 dari "Update Undangan Penerima.xlsx" adalah satu-satunya
+     * penerima di daftar ini. Dia harus lahir sebagai penerima, bukan tamu
+     * biasa, dan kategori penghargaannya memang masih kosong.
+     */
+    public function test_penerima_baru_dibuat_sebagai_penerima(): void
+    {
+        $this->artisan('tamu:tambah --terapkan')->assertSuccessful();
+
+        $tamu = Tamu::where('nama', 'Dr. H. Abdul Hamid Wahid, M.Ag.')->firstOrFail();
+
+        $this->assertSame('penerima', $tamu->jenis);
+        $this->assertSame('Bupati Bondowoso', $tamu->lembaga);
+        $this->assertSame(2, $tamu->jumlah_orang);
+        $this->assertSame('Hainor', $tamu->pic);
+        $this->assertNull($tamu->kategori_penghargaan);
+        $this->assertSame(8, strlen($tamu->code));
+    }
+
     public function test_baris_external_tanpa_lembaga_tidak_terduplikasi(): void
     {
         $this->artisan('tamu:tambah --terapkan')->assertSuccessful();
