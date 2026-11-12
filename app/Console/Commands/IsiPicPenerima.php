@@ -184,8 +184,9 @@ class IsiPicPenerima extends Command
         ['kode' => '0LUU1KHG', 'pic' => 'Hainor'],  // 51 Kepala - MAN 2 Kota Malang
         ['kode' => '6AQRFKGQ', 'pic' => 'Fery'],  // 52 Nurochman, S.H., M.H.
         // Tiga baris yang dulu menunggu keputusan nama. Sekarang sudah
-        // dijawab oleh "Update Undangan Penerima.xlsx"; PIC-nya tetap sama.
-        ['kode' => 'YNNC85RS', 'pic' => 'Hainor'],  // 18 Kepala - Kantor Kemenag Kabupaten Bondowoso
+        // selesai: YNNC85RS tetap pakai nama pejabatnya, dua sisanya ikut
+        // "Update Undangan Penerima.xlsx". PIC-nya sama di ketiga kasus.
+        ['kode' => 'YNNC85RS', 'pic' => 'Hainor'],  // 18 H. Moh. Ali Masyhur, S.Ag., M.HI.
         ['kode' => 'EBYAGOMP', 'pic' => 'Yuli'],  // 22 Drs. H. M. Sanusi, M.M.
         ['kode' => 'TE9F98SS', 'pic' => 'Yuli'],  // 30 Hj. Jajuk Sulistyowati, S.E., M.M.
     ];

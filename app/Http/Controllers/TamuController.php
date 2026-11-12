@@ -45,7 +45,16 @@ class TamuController extends Controller
     {
         $acara = Acara::dilihat($request->integer('acara') ?: null);
 
-        $tamus = Tamu::query()
+        // Hanya dua nilai yang diizinkan; sisanya dianggap "semua" supaya
+        // ?jenis= apa pun dari luar tidak pernah mengosongkan daftar.
+        $jenis = in_array($request->input('jenis'), ['hadir', 'penerima'], true)
+            ? $request->input('jenis')
+            : null;
+
+        // Dipakai dua kali - sekali untuk menghitung isi tiap jenis, sekali
+        // untuk daftarnya - jadi dibungkus supaya definisi pencariannya
+        // tidak pernah bercabang dua.
+        $dasar = fn () => Tamu::query()
             ->edisi($acara)
             ->when($request->input('search'), function ($query, $search) {
                 // Grup OR wajib: tanpa closure, AND mengikat lebih kuat dan
@@ -55,13 +64,24 @@ class TamuController extends Controller
                         ->orWhere('lembaga', 'like', "%{$search}%")
                         ->orWhere('pic', 'like', "%{$search}%");
                 });
-            })
+            });
+
+        // Dihitung tanpa filter jenis, supaya angka di tombolnya tetap utuh
+        // saat salah satu jenis sedang dipilih.
+        $jumlahJenis = $dasar()
+            ->selectRaw('jenis, count(*) as jumlah')
+            ->groupBy('jenis')
+            ->pluck('jumlah', 'jenis');
+
+        $tamus = $dasar()
+            ->when($jenis, fn ($query, $j) => $query->where('jenis', $j))
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Admin/Tamu/Index', [
             'tamus' => $tamus,
-            'filters' => $request->only(['search', 'acara']),
+            'filters' => $request->only(['search', 'acara']) + ['jenis' => $jenis],
+            'jumlahJenis' => $jumlahJenis,
             'acaras' => $this->daftarEdisi(),
             'acaraDilihat' => $acara ? [
                 'id' => $acara->id,

@@ -6,6 +6,12 @@
       "runtimeExecutable": "php",
       "runtimeArgs": ["artisan", "serve", "--port=8000"],
       "port": 8000
+    },
+    {
+      "name": "pratinjau",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "C:\\Users\\fagde\\AppData\\Local\\Temp\\claude\\4a0259456ac9d740\\1b4cc662-2241-4562-8141-5b25619bbfd0\\scratchpad\\serve_pratinjau.cmd"],
+      "port": 8193
     }
   ]
 }

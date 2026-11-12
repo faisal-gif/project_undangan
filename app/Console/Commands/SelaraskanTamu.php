@@ -22,7 +22,7 @@ use Illuminate\Console\Command;
  * dengan yang ditinjau saat mode coba.
  *
  * Nama dan lembaga kemudian ditimpa oleh "Update Undangan Penerima.xlsx" di
- * 14 baris, dan 2 baris yang dulu menunggu keputusan ikut ditambahkan. Kolom
+ * 14 baris, dan 1 baris yang dulu menunggu keputusan ikut ditambahkan. Kolom
  * kategori dan sub tidak ada di berkas itu, jadi tetap dari Terbaru.xlsx.
  * Sel LEMBAGA yang kosong di berkas baru dianggap "tidak diisi", bukan
  * "dikosongkan" - lihat PERLU_KEPUTUSAN.
@@ -144,6 +144,11 @@ class SelaraskanTamu extends Command
      * Baris yang sengaja tidak diotomatiskan, lengkap dengan alasannya.
      */
     private const PERLU_KEPUTUSAN = [
+        'YNNC85RS (No 18) berkas baru menulis "Kepala", basis data sudah punya nama orangnya -',
+        '  H. Moh. Ali Masyhur, S.Ag., M.HI. (Kepala Kantor Kemenag Kabupaten Bondowoso) dipertahankan.',
+        '  Kalau pejabatnya memang sudah berganti, barisnya perlu nama penggantinya, bukan "Kepala"',
+        'Enam baris lain memang BOLEH jadi Pimpinan/Kepala karena namanya nama lembaga, bukan orang:',
+        '  5A49D4EX TISWMECB CBHNY353 (PT) dan RTBDNSPH ZCWLGVI4 0LUU1KHG (sekolah/kampus)',
         'LEMBAGA KOSONG di berkas baru - dibiarkan seperti sekarang, bukan dikosongkan -',
         '  GDDSWNNT (No 13) Dokter spesialis kulit dan kelamin/Akademisi',
         '  GNTSDJOA (No 16) Tokoh peduli masyarakat Malang Raya',
@@ -237,11 +242,12 @@ class SelaraskanTamu extends Command
         ['kode' => 'O4YG304B', 'nama' => 'Dr. Gde Made Kartikajaya, SE, MM, M.AP, QGIA, CAFP.', 'lembaga' => 'Komisaris Utama PT. Multi Nitrotama Kimia',
             'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Youth Empowerment'],
 
-        // Dua baris yang dulu menunggu keputusan, sekarang dijawab oleh
+        // Baris yang dulu menunggu keputusan, sekarang dijawab oleh
         // "Update Undangan Penerima.xlsx". Kategori dan sub sengaja disalin
         // apa adanya dari basis data supaya kedua kolom itu tidak berubah.
-        ['kode' => 'YNNC85RS', 'nama' => 'Kepala', 'lembaga' => 'Kantor Kemenag Kabupaten Bondowoso',
-            'kategori' => 'Innovation in Public Service', 'sub' => 'Best Innovation in Religious Public Services'],
+        //
+        // YNNC85RS sengaja TIDAK ada di sini. Berkas baru menulis "Kepala",
+        // tapi basis data sudah punya nama orangnya - lihat PERLU_KEPUTUSAN.
         ['kode' => 'TE9F98SS', 'nama' => 'Hj. Jajuk Sulistyowati, S.E., M.M.', 'lembaga' => 'Anggota DPRD Provinsi Jawa Timur',
             'kategori' => 'Woman of The Year', 'sub' => null],
     ];

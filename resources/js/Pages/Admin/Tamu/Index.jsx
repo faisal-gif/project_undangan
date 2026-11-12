@@ -4,7 +4,7 @@ import { Check, Copy, Edit2, Eye, Send, User } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-function Index({ tamus, filters, acaras = [], acaraDilihat }) {
+function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) {
     const user = usePage().props.auth.user;
 
     const { flash } = usePage().props
@@ -22,15 +22,32 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
             .replace(/^-+|-+$/g, "");  // trim - di awal/akhir
 
 
+    const jenis = filters.jenis || "";
+
+    // Satu pintu untuk semua filter supaya yang satu tidak pernah menghapus
+    // yang lain. Nilai kosong dibuang dari URL, bukan dikirim sebagai "".
+    const terapkanFilter = (ubahan) => {
+        const q = { search, jenis, acara: acaraDilihat?.id, ...ubahan };
+        router.get(route("admin.tamu.index"), Object.fromEntries(
+            Object.entries(q).filter(([, v]) => v !== "" && v != null)
+        ));
+    };
+
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route("admin.tamu.index", { search, acara: acaraDilihat?.id }));
+        terapkanFilter({});
     };
 
     // Pindah edisi: bawa pencarian, tapi kembali ke halaman 1.
     const gantiEdisi = (id) => {
-        router.get(route("admin.tamu.index", { acara: id, search }), {}, { preserveState: false });
+        router.get(route("admin.tamu.index", { acara: id, search, jenis: jenis || undefined }), {}, { preserveState: false });
     };
+
+    const JENIS = [
+        { nilai: "", label: "Semua", jumlah: (jumlahJenis.hadir || 0) + (jumlahJenis.penerima || 0) },
+        { nilai: "hadir", label: "Tamu undangan", jumlah: jumlahJenis.hadir || 0 },
+        { nilai: "penerima", label: "Penerima penghargaan", jumlah: jumlahJenis.penerima || 0 },
+    ];
 
     // Konfirmasi dari tamu lewat undangannya; berbeda dari status kehadiran
     // yang baru terisi saat QR dipindai di pintu masuk.
@@ -157,6 +174,21 @@ function Index({ tamus, filters, acaras = [], acaraDilihat }) {
                                     </span>
                                 </div>
                             )}
+                            <div role="tablist" className="tabs tabs-boxed mb-4 w-fit">
+                                {JENIS.map((j) => (
+                                    <button
+                                        key={j.nilai || "semua"}
+                                        role="tab"
+                                        type="button"
+                                        aria-selected={jenis === j.nilai}
+                                        className={`tab gap-2 ${jenis === j.nilai ? "tab-active" : ""}`}
+                                        onClick={() => terapkanFilter({ jenis: j.nilai })}
+                                    >
+                                        {j.label}
+                                        <span className="badge badge-sm">{j.jumlah}</span>
+                                    </button>
+                                ))}
+                            </div>
                             <form
                                 onSubmit={handleSearch}
                                 className="flex items-center mb-4"
