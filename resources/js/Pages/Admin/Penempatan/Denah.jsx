@@ -16,12 +16,34 @@ import { useEffect, useRef, useState } from "react";
  * layar sama dengan yang dilihat tamu di lapangan.
  */
 
-// Kursi dibesarkan terhadap mejanya supaya nomornya masih terbaca saat denah
-// dilihat dari jarak beberapa meter di monitor penerima tamu.
-const JARI_MEJA = 44;
-const JARI_KURSI = 13;
-const ORBIT = JARI_MEJA + JARI_KURSI + 5;
-const KOTAK = (ORBIT + JARI_KURSI + 2) * 2;
+/**
+ * Pembagian ruang di dalam satu gambar meja.
+ *
+ * Piringan meja hanya memikul satu angka, sedangkan enam kursinya memikul
+ * enam angka yang sama pentingnya - padahal dulu piringannya 57% dari gambar
+ * dan kursinya 17%, jadi angka kursi tinggal 8px dan tidak terbaca. Jari-jari
+ * meja dikecilkan dan kursinya dibesarkan di dalam kotak yang sama besar:
+ * angka kursi naik dari 8px ke 14px di layar admin tanpa memakan lantai
+ * sepetak pun.
+ */
+const JARI_MEJA = 34;
+const JARI_KURSI_MAKS = 20;
+const CELAH = 3;
+const ORBIT = JARI_MEJA + CELAH + JARI_KURSI_MAKS;
+const KOTAK = (ORBIT + JARI_KURSI_MAKS + 2) * 2;
+
+/**
+ * Kursi sebesar mungkin tanpa saling bertumpuk di orbitnya.
+ *
+ * Jarak antar pusat kursi di orbit adalah 2 * ORBIT * sin(pi/n), jadi kursi
+ * yang lebih banyak harus lebih kecil. Tanpa ini, meja berisi 10 kursi akan
+ * menggambar kursi yang saling menimpa begitu kursinya dibesarkan.
+ */
+function jariKursi(total) {
+    const muat = ORBIT * Math.sin(Math.PI / Math.max(3, total)) * 0.88;
+
+    return Math.max(9, Math.min(JARI_KURSI_MAKS, muat));
+}
 
 // Harus sama dengan LANTAI_* di App\Models\Acara: bagian lantai yang dipakai
 // grid cadangan. Persen letak meja mengacu ke lantai, bukan ke seluruh
@@ -30,11 +52,11 @@ const LANTAI_LEBAR = 84;
 const LANTAI_TINGGI = 84;
 
 /** Batas ukuran gambar meja, supaya tetap terbaca tanpa jadi raksasa. */
-const MEJA_MIN = 40;
-const MEJA_MAKS = 230;
+const MEJA_MIN = 48;
+const MEJA_MAKS = 320;
 
 /** Bagian sel yang dipakai gambar meja; sisanya jadi jarak antar meja. */
-const ISI_SEL = 0.93;
+const ISI_SEL = 0.96;
 
 /**
  * Ukuran lantai per orientasi - selalu muat satu layar, tidak pernah digulir.
@@ -43,8 +65,11 @@ const ISI_SEL = 0.93;
  * yang dipakai menghitung jumlah kolom grid.
  */
 const LANTAI = {
-    landscape: { vh: 0.64, min: 440, maks: 820, rasio: 1.95 },
-    potret: { vh: 0.76, min: 540, maks: 1000, rasio: 0.72 },
+    // vhLayar diukur, bukan dikira: di 1920x1080 judul, videotron, panggung,
+    // pintu, dan jaraknya memakan 217px, jadi 0.80 ke atas membuat halaman
+    // monitor ikut tergulir - dan di monitor tidak ada yang menggulirnya.
+    landscape: { vh: 0.64, vhLayar: 0.79, min: 440, maks: 1000, rasio: 1.95 },
+    potret: { vh: 0.76, vhLayar: 0.84, min: 540, maks: 1250, rasio: 0.72 },
 };
 
 /**
@@ -53,8 +78,15 @@ const LANTAI = {
  * Denah ini juga tampil di monitor besar sebelah penerima tamu; tinggi yang
  * dipatok membuat separuh layar terbuang dan mejanya kecil tanpa alasan.
  */
-function tinggiLantai(bentuk, tinggiLayar) {
-    return Math.max(bentuk.min, Math.min(bentuk.maks, (tinggiLayar || 900) * bentuk.vh));
+function tinggiLantai(bentuk, tinggiLayar, layar = false) {
+    // Mode monitor hampir tidak punya hiasan di sekelilingnya - tanpa menu,
+    // tanpa tombol, hanya satu baris judul - jadi lantainya boleh jauh lebih
+    // tinggi daripada di halaman admin. Memakai satu angka untuk keduanya
+    // berarti monitor yang justru paling perlu terbaca ikut dikecilkan oleh
+    // ruang yang dipakai tombol-tombol admin.
+    const bagian = layar ? bentuk.vhLayar : bentuk.vh;
+
+    return Math.max(bentuk.min, Math.min(bentuk.maks, (tinggiLayar || 900) * bagian));
 }
 
 /**
@@ -86,6 +118,13 @@ function posisiKursi(index, total) {
 
 function MejaBundar({ meja, ukuran }) {
     const penuh = meja.terisi >= meja.kapasitas;
+    const jariK = jariKursi(meja.kursi.length);
+
+    // Ukuran huruf diturunkan dari jari-jarinya, bukan dipatok, supaya angka
+    // selalu mengisi bulatannya - termasuk saat kursi mengecil karena satu
+    // meja diisi banyak kursi.
+    const hurufMeja = Math.round(JARI_MEJA * 0.82);
+    const hurufKursi = Math.round(jariK * 0.95);
 
     return (
         <svg viewBox={`0 0 ${KOTAK} ${KOTAK}`} style={{ width: ukuran, height: ukuran }}>
@@ -95,13 +134,14 @@ function MejaBundar({ meja, ukuran }) {
                 r={JARI_MEJA}
                 className={penuh ? "fill-gray-200" : "fill-white"}
                 stroke="#9ca3af"
-                strokeWidth="1.5"
+                strokeWidth="2"
             />
             <text
                 x={KOTAK / 2}
-                y={KOTAK / 2 + 6}
+                y={KOTAK / 2 + hurufMeja * 0.35}
                 textAnchor="middle"
-                className="fill-gray-700 text-[24px] font-bold"
+                fontSize={hurufMeja}
+                className="fill-gray-700 font-bold"
             >
                 {meja.nomor}
             </text>
@@ -114,18 +154,19 @@ function MejaBundar({ meja, ukuran }) {
                         <circle
                             cx={x}
                             cy={y}
-                            r={JARI_KURSI}
+                            r={jariK}
                             className={k.tamu ? "fill-amber-500" : "fill-white"}
-                            stroke={k.tamu ? "#b45309" : "#d1d5db"}
-                            strokeWidth="1.5"
+                            stroke={k.tamu ? "#b45309" : "#9ca3af"}
+                            strokeWidth="2"
                         >
                             <title>{`Kursi ${k.nomor}: ${k.tamu ? k.tamu.nama : "kosong"}`}</title>
                         </circle>
                         <text
                             x={x}
-                            y={y + 4}
+                            y={y + hurufKursi * 0.35}
                             textAnchor="middle"
-                            className={`text-[11px] font-semibold ${k.tamu ? "fill-white" : "fill-gray-500"}`}
+                            fontSize={hurufKursi}
+                            className={`font-bold ${k.tamu ? "fill-white" : "fill-gray-600"}`}
                         >
                             {k.nomor}
                         </text>
@@ -140,7 +181,7 @@ function MejaBundar({ meja, ukuran }) {
  * Ruangan beserta isinya. Dipakai mode admin dan mode monitor; bedanya hanya
  * boleh-tidaknya digeser.
  */
-function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, onGeser, onPilih, disorot }) {
+function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = false, onGeser, onPilih, disorot }) {
     const ruang = useRef(null);
     const menyeret = useRef(null);
     const bentuk = LANTAI[orientasi] ?? LANTAI.landscape;
@@ -152,7 +193,7 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, onGeser, on
         if (!el) return;
 
         const hitung = () => {
-            const t = tinggiLantai(bentuk, window.innerHeight);
+            const t = tinggiLantai(bentuk, window.innerHeight, layar);
 
             setTinggi(t);
             setUkuran(ukuranMeja(el.getBoundingClientRect().width, t, kolom, baris));
@@ -160,15 +201,24 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, onGeser, on
 
         hitung();
 
+        // Ukur ulang beberapa saat setelah mount. Pengukuran pertama bisa
+        // jatuh sebelum tata letak tenang - huruf web baru selesai dimuat,
+        // batang gulir muncul - dan denah ini dibuka sekali di monitor
+        // penerima tamu lalu ditinggal berjam-jam: tidak ada yang mengubah
+        // ukuran jendela untuk memicu pengukuran ulang. Satu ResizeObserver
+        // saja berarti satu titik gagal tanpa jaring pengaman.
+        const jeda = [120, 400, 1200].map((ms) => setTimeout(hitung, ms));
+
         const pengamat = new ResizeObserver(hitung);
         pengamat.observe(el);
         window.addEventListener("resize", hitung);
 
         return () => {
+            jeda.forEach(clearTimeout);
             pengamat.disconnect();
             window.removeEventListener("resize", hitung);
         };
-    }, [kolom, baris, bentuk]);
+    }, [kolom, baris, bentuk, layar]);
 
     // Pointer event, bukan drag-and-drop HTML5: yang terakhir itu tidak
     // bekerja di layar sentuh, dan denah ini kemungkinan diatur dari tablet.
@@ -353,7 +403,7 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                             <strong>{terisi}</strong>/{acara.jumlah_kursi} kursi terisi
                         </p>
                     </div>
-                    <Ruangan mejas={mejas} letak={letak} kolom={kolom} baris={baris} orientasi={orientasi} aturUlang={false} />
+                    <Ruangan mejas={mejas} letak={letak} kolom={kolom} baris={baris} orientasi={orientasi} aturUlang={false} layar />
                 </div>
             </>
         );
