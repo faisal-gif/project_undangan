@@ -8,8 +8,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
 /**
- * Tambahkan tamu undangan biasa (bukan penerima penghargaan) dari berkas
- * "Undangan Tamu.xlsx" - nomor 52-85.
+ * Tambahkan tamu undangan biasa (bukan penerima penghargaan) dari dua
+ * berkas: "Undangan Tamu.xlsx" (No 52-85) dan "Undangan External.xlsx"
+ * (No 70-76, diberi awalan E di laporan karena nomornya bertabrakan).
  *
  * Aturannya kebalikan dari tamu:selaraskan: perintah ini HANYA membuat baris
  * baru, tidak pernah mengubah atau menghapus baris yang sudah ada. Undangan
@@ -23,7 +24,7 @@ class TambahTamuUndangan extends Command
 {
     protected $signature = 'tamu:tambah {--terapkan : Tulis ke basis data}';
 
-    protected $description = 'Tambahkan 28 tamu undangan (No 52-85) sebagai undangan baru';
+    protected $description = 'Tambahkan 35 tamu undangan dan external sebagai undangan baru';
 
     public function handle(): int
     {
@@ -114,9 +115,12 @@ class TambahTamuUndangan extends Command
     private const CATATAN = [
         'No 65 Monica Felisitas Gracia - JUMLAH HADIR dan PIC kosong di berkas, dipakai 1 orang tanpa PIC',
         'No 56 Bayhaqi Kadmi (Gus Bay) - kolom LEMBAGA kosong di berkas',
-        'No 71-76 tidak ada di berkas (nomornya melompat), jadi tidak ikut ditambahkan',
+        'No 71-76 tidak ada di Undangan Tamu.xlsx - celah itu diisi E71-E76 dari berkas external',
         'Kolom ALAMAT dan TELEPON kosong di seluruh berkas, jadi dibiarkan kosong',
         'No 83 "Pimpinan - Gudang Garam" terpisah dari penerima GIFH8YBP (Iwhan Tri Cahyono)',
+        '7 baris E70-E76 dari Undangan External.xlsx: tanpa lembaga, tanpa PIC, 1 orang masing-masing',
+        'Tidak ada penanda "external" di basis data - kolom jenis hanya punya hadir/penerima,',
+        '  dan lembaga tidak dipakai sebagai label karena kolom itu tampil di undangan tamunya',
     ];
 
     /**
@@ -152,5 +156,17 @@ class TambahTamuUndangan extends Command
         ['no' => '83', 'nama' => 'Pimpinan', 'lembaga' => 'Gudang Garam', 'jumlah' => 2, 'pic' => 'Imam'],
         ['no' => '84', 'nama' => 'Fifi Trisjanti', 'lembaga' => 'Dirut Lippo Mall Jatim', 'jumlah' => 1, 'pic' => 'Naning'],
         ['no' => '85', 'nama' => 'Very Ardianto', 'lembaga' => 'Ketua Ikatan Pengusaha Muslim Indonesia Malang Raya', 'jumlah' => 1, 'pic' => 'Naning'],
+
+        // Berkas "Undangan External.xlsx" - No 70-76, diberi awalan E
+        // karena nomornya bertabrakan dengan No 70 di berkas tamu biasa.
+        // Tidak punya lembaga, dan "External" tidak ditaruh di kolom
+        // lembaga karena kolom itu tampil di undangan tamunya.
+        ['no' => 'E70', 'nama' => 'P. Anwar', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E71', 'nama' => 'B. Elok', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E72', 'nama' => 'B. Ida', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E73', 'nama' => 'B. Naning', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E74', 'nama' => 'P. Ainun', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E75', 'nama' => 'P. Yuli', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
+        ['no' => 'E76', 'nama' => 'P. Wahyu', 'lembaga' => null, 'jumlah' => 1, 'pic' => null],
     ];
 }

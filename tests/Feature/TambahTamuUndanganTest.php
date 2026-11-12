@@ -16,7 +16,7 @@ class TambahTamuUndanganTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const JUMLAH = 28;
+    private const JUMLAH = 35;
 
     public function test_mode_coba_tidak_membuat_baris(): void
     {
@@ -90,5 +90,27 @@ class TambahTamuUndanganTest extends TestCase
         $this->assertSame('hadir', $segar->rsvp);
 
         $this->assertSame(self::JUMLAH + 1, Tamu::count());
+    }
+
+    /**
+     * Tujuh baris "Undangan External" tidak punya lembaga. Penjagaan baris
+     * ganda membandingkan nama DAN lembaga, dan di SQL "lembaga = null" tidak
+     * pernah benar - kalau query builder berhenti menerjemahkannya jadi
+     * "lembaga is null", ketujuh baris ini akan terduplikasi tiap dijalankan.
+     */
+    public function test_baris_external_tanpa_lembaga_tidak_terduplikasi(): void
+    {
+        $this->artisan('tamu:tambah --terapkan')->assertSuccessful();
+        $this->artisan('tamu:tambah --terapkan')->assertSuccessful();
+
+        $this->assertSame(1, Tamu::where('nama', 'P. Wahyu')->count());
+        $this->assertSame(8, Tamu::whereNull('lembaga')->count());
+
+        $wahyu = Tamu::where('nama', 'P. Wahyu')->firstOrFail();
+
+        $this->assertNull($wahyu->lembaga);
+        $this->assertNull($wahyu->pic);
+        $this->assertSame(1, $wahyu->jumlah_orang);
+        $this->assertSame('hadir', $wahyu->jenis);
     }
 }
