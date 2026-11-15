@@ -369,14 +369,44 @@ class TamuController extends Controller
     /**
      * Display the specified resource.
      */
+    /**
+     * Rincian satu tamu.
+     *
+     * Halaman ini sebelumnya sisa dari aplikasi lain - ia membaca kolom
+     * seperti ukuran_jersey dan bukti_pembayaran yang tidak pernah ada di
+     * tabel tamus, lalu gagal total. Sekarang isinya kolom yang benar-benar
+     * dimiliki tamu di acara ini.
+     *
+     * QR dibuat saat diminta lewat rute tamu.qr, bukan dibaca dari kolom
+     * qr_code: berkasnya tidak selalu ada, sedangkan rutenya selalu bisa
+     * menggambar ulang dari kodenya.
+     */
     public function show(Tamu $tamu)
     {
-        $tamu->qrcode = $tamu->qrcode
-            ? asset($tamu->qrcode)
-            : null;
+        $tamu->load('acara');
 
         return Inertia::render('Admin/Tamu/Show', [
-            'participant' => $tamu,
+            'tamu' => [
+                'id' => $tamu->id,
+                'code' => $tamu->code,
+                'nama' => $tamu->nama,
+                'lembaga' => $tamu->lembaga,
+                'alamat' => $tamu->alamat,
+                'telepon' => $tamu->telepon,
+                'pic' => $tamu->pic,
+                'jenis' => $tamu->jenis,
+                'kategori_penghargaan' => $tamu->kategori_penghargaan,
+                'sub_kategori' => $tamu->sub_kategori,
+                'jumlah_orang' => $tamu->jumlah_orang,
+                'meja' => $tamu->meja,
+                'kursi' => $tamu->kursi,
+                'tempat_duduk' => $tamu->tempatDuduk(),
+                'status' => $tamu->status,
+                'rsvp' => $tamu->rsvp,
+                'rsvp_pada' => $tamu->rsvp_pada?->translatedFormat('j F Y, H:i'),
+            ],
+            'edisi' => $tamu->acara?->label(),
+            'qr' => $tamu->code ? route('tamu.qr', $tamu->code) : null,
         ]);
     }
 

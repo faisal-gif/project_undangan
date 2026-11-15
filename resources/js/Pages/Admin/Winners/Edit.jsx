@@ -46,7 +46,7 @@ function Edit({ winner }) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
+                        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
                             <h1 className="text-2xl font-bold mb-4">
                                 Edit Pemenang
                             </h1>
@@ -221,19 +221,19 @@ function Edit({ winner }) {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-end gap-2">
+                                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
                                     <a
                                         href={route("admin.winners.index")}
-                                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                                        className="rounded-md bg-gray-200 px-4 py-3 text-center text-gray-700 transition-colors hover:bg-gray-300 sm:py-2"
                                     >
                                         Batal
                                     </a>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                                        className="rounded-md bg-blue-500 px-4 py-3 text-white transition-colors hover:bg-blue-600 disabled:opacity-60 sm:py-2"
                                         disabled={processing}
                                     >
-                                        Update
+                                        {processing ? "Menyimpan..." : "Update"}
                                     </button>
                                 </div>
                             </form>

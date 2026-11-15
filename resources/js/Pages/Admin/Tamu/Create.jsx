@@ -27,7 +27,7 @@ function Create({ acaraAktif }) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
+                        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
                             <h1 className="text-2xl font-bold">
                                 Tambah Tamu
                             </h1>
@@ -85,7 +85,9 @@ function Create({ acaraAktif }) {
 
                                 </div>
                                 <div className="mb-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                    <div className="w-full col-span-2">
+                                    {/* lg: wajib. Tanpa itu "span 2" berlaku juga di grid
+                                        satu kolom dan menarik formulirnya keluar layar. */}
+                                    <div className="w-full lg:col-span-2">
                                         <label
                                             htmlFor="pic"
                                             className="block text-sm font-medium text-gray-700"
@@ -277,10 +279,10 @@ function Create({ acaraAktif }) {
                                 <div className="flex items-center justify-end">
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                                        className="w-full rounded-md bg-blue-500 px-4 py-3 text-white disabled:opacity-60 sm:w-auto sm:py-2"
                                         disabled={processing}
                                     >
-                                        Simpan
+                                        {processing ? "Menyimpan..." : "Simpan"}
                                     </button>
                                 </div>
                             </form>

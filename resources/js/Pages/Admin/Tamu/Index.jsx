@@ -43,10 +43,13 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
         router.get(route("admin.tamu.index", { acara: id, search, jenis: jenis || undefined }), {}, { preserveState: false });
     };
 
+    // "Penerima penghargaan" tidak muat bertiga di layar 375px dan tabnya
+    // pecah menimpa kolom pencarian, jadi di layar sempit dipakai label
+    // pendeknya. Isinya sama, hanya katanya yang dipotong.
     const JENIS = [
-        { nilai: "", label: "Semua", jumlah: (jumlahJenis.hadir || 0) + (jumlahJenis.penerima || 0) },
-        { nilai: "hadir", label: "Tamu undangan", jumlah: jumlahJenis.hadir || 0 },
-        { nilai: "penerima", label: "Penerima penghargaan", jumlah: jumlahJenis.penerima || 0 },
+        { nilai: "", label: "Semua", pendek: "Semua", jumlah: (jumlahJenis.hadir || 0) + (jumlahJenis.penerima || 0) },
+        { nilai: "hadir", label: "Tamu undangan", pendek: "Tamu", jumlah: jumlahJenis.hadir || 0 },
+        { nilai: "penerima", label: "Penerima penghargaan", pendek: "Penerima", jumlah: jumlahJenis.penerima || 0 },
     ];
 
     // Konfirmasi dari tamu lewat undangannya; berbeda dari status kehadiran
@@ -115,9 +118,9 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
-                            <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-                                <div className="flex items-center gap-3">
+                        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
+                            <div className="flex flex-wrap justify-between items-start sm:items-center gap-4 mb-4">
+                                <div className="flex flex-wrap items-center gap-3">
                                     <h1 className="text-2xl font-bold">
                                         Daftar Pendaftar
                                     </h1>
@@ -174,17 +177,20 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
                                     </span>
                                 </div>
                             )}
-                            <div role="tablist" className="tabs tabs-boxed mb-4 w-fit">
+                            <div role="tablist" className="tabs tabs-boxed mb-4 w-full sm:w-fit">
                                 {JENIS.map((j) => (
                                     <button
                                         key={j.nilai || "semua"}
                                         role="tab"
                                         type="button"
                                         aria-selected={jenis === j.nilai}
-                                        className={`tab gap-2 ${jenis === j.nilai ? "tab-active" : ""}`}
+                                        className={`tab flex-1 gap-1.5 whitespace-nowrap px-2 sm:flex-none sm:gap-2 sm:px-4 ${
+                                            jenis === j.nilai ? "tab-active" : ""
+                                        }`}
                                         onClick={() => terapkanFilter({ jenis: j.nilai })}
                                     >
-                                        {j.label}
+                                        <span className="sm:hidden">{j.pendek}</span>
+                                        <span className="hidden sm:inline">{j.label}</span>
                                         <span className="badge badge-sm">{j.jumlah}</span>
                                     </button>
                                 ))}
@@ -207,7 +213,110 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
                                     Cari
                                 </button>
                             </form>
-                            <div className="overflow-x-auto">
+                            {/*
+                                Di bawah md tabelnya diganti kartu. Sembilan
+                                kolom di layar 375px berarti menggeser ke
+                                samping untuk melihat tempat duduk, PIC, dan
+                                tombol aksinya - padahal justru itu yang
+                                dicari saat memegang ponsel di lokasi acara.
+                            */}
+                            <ul className="grid gap-3 sm:grid-cols-2 xl:hidden">
+                                {tamus.data.map((tamu, index) => (
+                                    <li
+                                        key={tamu.id}
+                                        className="flex flex-col rounded-lg border border-gray-200 p-4"
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <span className="mt-0.5 shrink-0 text-xs text-gray-400">
+                                                {index + 1}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <Link
+                                                    href={route("admin.tamu.show", tamu.id)}
+                                                    className="font-semibold leading-snug hover:underline"
+                                                >
+                                                    {tamu.nama}
+                                                </Link>
+                                                {tamu.lembaga && (
+                                                    <p className="mt-0.5 text-sm text-gray-500">
+                                                        {tamu.lembaga}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                                            {tamu.meja ? (
+                                                <span className="badge badge-neutral">
+                                                    Meja {tamu.meja}
+                                                    {tamu.kursi ? ` \u00b7 ${tamu.kursi}` : ""}
+                                                </span>
+                                            ) : (
+                                                <span className="badge badge-ghost">
+                                                    Belum ada meja
+                                                </span>
+                                            )}
+                                            <span className="badge badge-ghost">
+                                                {tamu.jumlah_orang} org
+                                            </span>
+                                            {tamu.pic && (
+                                                <span className="badge badge-primary badge-outline">
+                                                    {tamu.pic}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <dl className="mb-3 mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs">
+                                            <div className="flex items-center gap-1.5">
+                                                <dt className="text-gray-500">Konfirmasi</dt>
+                                                <dd>{getRsvpBadge(tamu.rsvp)}</dd>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <dt className="text-gray-500">Kehadiran</dt>
+                                                <dd>{getStatusBadge(tamu.status)}</dd>
+                                            </div>
+                                        </dl>
+
+                                        <div className="mt-auto flex flex-wrap gap-2 border-t pt-3">
+                                            {user.role === "admin" && (
+                                                <Link
+                                                    href={route("admin.tamu.edit", tamu)}
+                                                    className="btn btn-sm btn-warning gap-1.5"
+                                                >
+                                                    <Edit2 size={14} />
+                                                    Ubah
+                                                </Link>
+                                            )}
+                                            <Link
+                                                href={route("undangan", [
+                                                    tamu.code,
+                                                    slugify(tamu.nama),
+                                                ])}
+                                                className="btn btn-sm btn-neutral gap-1.5"
+                                            >
+                                                <User size={14} />
+                                                Undangan
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                onClick={() => sendWhatsapp(tamu)}
+                                                className="btn btn-sm btn-success gap-1.5"
+                                            >
+                                                <Send size={14} />
+                                                Kirim
+                                            </button>
+                                        </div>
+                                    </li>
+                                ))}
+
+                                {tamus.data.length === 0 && (
+                                    <li className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 sm:col-span-2">
+                                        Tidak ada pendaftar yang cocok.
+                                    </li>
+                                )}
+                            </ul>
+
+                            <div className="hidden overflow-x-auto xl:block">
 
                                 <table className="table table-zebra">
                                     <thead>
@@ -227,7 +336,16 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
                                         {tamus.data.map((tamu, index) => (
                                             <tr key={tamu.id}>
                                                 <td className="py-2 px-4 border-b text-center">{index + 1}</td>
-                                                <td className="py-2 px-4 border-b">{tamu.nama}</td>
+                                                <td className="py-2 px-4 border-b">
+                                                    {/* Satu-satunya pintu ke halaman rincian; sebelumnya
+                                                        tidak ada tautan ke sana dari mana pun. */}
+                                                    <Link
+                                                        href={route("admin.tamu.show", tamu.id)}
+                                                        className="hover:underline"
+                                                    >
+                                                        {tamu.nama}
+                                                    </Link>
+                                                </td>
                                                 <td className="py-2 px-4 border-b">{tamu.lembaga}</td>
                                                 <td className="py-2 px-4 border-b">{tamu.jumlah_orang}</td>
                                                 <td className="py-2 px-4 border-b whitespace-nowrap">
@@ -276,7 +394,9 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
                                         ))}
                                     </tbody>
                                 </table>
-                                <div className="mt-8 join">
+                            </div>
+
+                            <div className="mt-6 join xl:mt-8">
                                     {
                                         tamus.links
                                             .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
@@ -288,7 +408,6 @@ function Index({ tamus, filters, jumlahJenis = {}, acaras = [], acaraDilihat }) 
                                                     dangerouslySetInnerHTML={{ __html: l.label }}
                                                 />
                                             ))}
-                                </div>
                             </div>
 
                         </div>

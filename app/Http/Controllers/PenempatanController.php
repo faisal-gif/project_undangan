@@ -196,7 +196,11 @@ class PenempatanController extends Controller
                     // dan isset() menganggap kunci bernilai null itu tidak ada,
                     // sehingga tidak satu pun kursi pernah terisi.
                     if (array_key_exists((int) $n, $kursi)) {
-                        $kursi[(int) $n] = ['id' => $tamu->id, 'nama' => $tamu->nama];
+                        $kursi[(int) $n] = [
+                            'id' => $tamu->id,
+                            'nama' => $tamu->nama,
+                            'lembaga' => $tamu->lembaga,
+                        ];
                     }
                 }
             }
@@ -212,6 +216,7 @@ class PenempatanController extends Controller
                 'tamus' => $penghuni->map(fn (Tamu $t) => [
                     'id' => $t->id,
                     'nama' => $t->nama,
+                    'lembaga' => $t->lembaga,
                     'kursi' => $t->kursi,
                 ])->values(),
             ];

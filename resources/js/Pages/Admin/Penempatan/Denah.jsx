@@ -78,6 +78,21 @@ const LANTAI = {
  * Denah ini juga tampil di monitor besar sebelah penerima tamu; tinggi yang
  * dipatok membuat separuh layar terbuang dan mejanya kecil tanpa alasan.
  */
+/**
+ * Denah ini sebuah peta, bukan tabel: memaksanya muat di layar 375px
+ * membuat semua meja jatuh ke MEJA_MIN dan saling menimpa, dan angkanya
+ * tidak terbaca lagi. Jadi di layar sempit lantainya dipatok selebar ini dan
+ * digeser ke samping - gerakan yang memang wajar untuk peta.
+ *
+ * 110px per kolom menghasilkan meja sekitar 95px - diukur, bukan ditebak:
+ * barisnya yang mengikat, bukan kolomnya, karena rasio ruangan membuat sel
+ * vertikal selalu ~11% lebih sempit. Dibagi LANTAI_LEBAR karena hanya
+ * sebagian lantai yang dipakai meja.
+ */
+function lebarLantaiSempit(kolom) {
+    return Math.round((Math.max(1, kolom) * 110 * 100) / LANTAI_LEBAR);
+}
+
 function tinggiLantai(bentuk, tinggiLayar, layar = false) {
     // Mode monitor hampir tidak punya hiasan di sekelilingnya - tanpa menu,
     // tanpa tombol, hanya satu baris judul - jadi lantainya boleh jauh lebih
@@ -187,16 +202,30 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = fal
     const bentuk = LANTAI[orientasi] ?? LANTAI.landscape;
     const [ukuran, setUkuran] = useState(90);
     const [tinggi, setTinggi] = useState(bentuk.min);
+    const [lebarMin, setLebarMin] = useState(0);
 
     useEffect(() => {
         const el = ruang.current;
         if (!el) return;
 
         const hitung = () => {
-            const t = tinggiLantai(bentuk, window.innerHeight, layar);
+            // Mode monitor selalu layar besar, jadi tidak pernah ikut aturan
+            // layar sempit walau jendelanya kebetulan dikecilkan.
+            const sempit = !layar && window.innerWidth < 1024;
+            const min = sempit ? lebarLantaiSempit(kolom) : 0;
 
+            // Saat dipatok, tingginya diturunkan dari lebar itu supaya bentuk
+            // ruangannya tetap benar - bukan dari tinggi jendela, yang akan
+            // membuat ruangan melebar jadi tampak hampir persegi.
+            const t = sempit
+                ? Math.round(min / bentuk.rasio)
+                : tinggiLantai(bentuk, window.innerHeight, layar);
+
+            setLebarMin(min);
             setTinggi(t);
-            setUkuran(ukuranMeja(el.getBoundingClientRect().width, t, kolom, baris));
+            setUkuran(
+                ukuranMeja(Math.max(el.getBoundingClientRect().width, min), t, kolom, baris)
+            );
         };
 
         hitung();
@@ -256,9 +285,11 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = fal
     // tumbuh. Kalau keduanya ikut dipersen, ruangan yang panjang akan
     // meregangkan panggung dan menyisakan ratusan piksel kosong di atas meja.
     return (
+        <>
+        <div className="overflow-x-auto">
         <div
             className="mx-auto w-full overflow-hidden rounded-lg border border-gray-300 bg-gray-50"
-            style={{ maxWidth: tinggi * bentuk.rasio }}
+            style={{ maxWidth: Math.max(tinggi * bentuk.rasio, lebarMin), minWidth: lebarMin }}
         >
             <div className="space-y-1.5 p-3">
                 <div className="mx-auto w-3/4 rounded border border-gray-300 bg-white/70 py-0.5 text-center text-[0.6rem] tracking-[0.3em] text-gray-500">
@@ -306,6 +337,13 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = fal
                 </div>
             </div>
         </div>
+        </div>
+        {lebarMin > 0 && (
+            <p className="mt-2 text-center text-xs text-gray-500">
+                Geser denah ke samping untuk melihat seluruh ruangan.
+            </p>
+        )}
+        </>
     );
 }
 
@@ -424,8 +462,10 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                 </span>
                             </h1>
 
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                                <span>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-600">
+                                {/* Di layar sempit angkanya dapat barisnya sendiri; kalau
+                                    disejajarkan dengan tombol, ia tampak seperti label tombol. */}
+                                <span className="w-full lg:w-auto">
                                     <strong>{terisi}</strong>/{acara.jumlah_kursi} kursi terisi
                                 </span>
 

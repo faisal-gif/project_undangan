@@ -46,7 +46,7 @@ function Salin({ tujuan, sumber, sumberTersedia = [], tamus = [] }) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
+                        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
                             <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div>
                                     <h1 className="text-2xl font-bold">Salin Tamu dari Edisi Lain</h1>
@@ -67,13 +67,13 @@ function Salin({ tujuan, sumber, sumberTersedia = [], tamus = [] }) {
                                 </p>
                             ) : (
                                 <form onSubmit={handleSubmit} className="mt-6">
-                                    <div className="flex flex-wrap items-center gap-3">
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                                         <label className="text-sm font-medium text-gray-700" htmlFor="dari">
                                             Ambil dari
                                         </label>
                                         <select
                                             id="dari"
-                                            className="select select-bordered select-sm"
+                                            className="select select-bordered select-sm max-w-full flex-1 sm:flex-none"
                                             value={sumber.id}
                                             onChange={(e) =>
                                                 router.get(route("admin.tamu.salinForm", { dari: e.target.value }))
@@ -91,10 +91,10 @@ function Salin({ tujuan, sumber, sumberTersedia = [], tamus = [] }) {
                                             value={cari}
                                             onChange={(e) => setCari(e.target.value)}
                                             placeholder="Cari nama, lembaga, PIC..."
-                                            className="input input-bordered input-sm w-64"
+                                            className="input input-bordered input-sm w-full sm:w-64"
                                         />
 
-                                        <span className="ml-auto text-sm text-gray-600">
+                                        <span className="text-sm text-gray-600 sm:ml-auto">
                                             {terpilih.size} dipilih dari {bisaDipilih.length} yang bisa disalin
                                         </span>
                                     </div>
@@ -103,7 +103,95 @@ function Salin({ tujuan, sumber, sumberTersedia = [], tamus = [] }) {
                                         <p className="mt-3 text-sm text-red-600">{errors.tamu_ids}</p>
                                     )}
 
-                                    <div className="mt-4 max-h-[28rem] overflow-y-auto border border-gray-200 rounded-md">
+                                    {/*
+                                        Enam kolom dengan kotak centang tidak
+                                        bisa dipakai di layar 375px. Di bawah
+                                        md tiap tamu jadi satu baris kartu
+                                        yang seluruhnya bisa ditekan, jadi
+                                        sasaran sentuhnya sebesar kartunya -
+                                        bukan kotak centang 16px.
+                                    */}
+                                    <div className="mt-4 md:hidden">
+                                        <button
+                                            type="button"
+                                            onClick={toggleSemua}
+                                            disabled={bisaDipilih.length === 0}
+                                            className="btn btn-sm btn-ghost"
+                                        >
+                                            {semuaTerpilih ? "Kosongkan pilihan" : "Pilih semua"}
+                                        </button>
+
+                                        <ul className="mt-2 max-h-[26rem] space-y-2 overflow-y-auto">
+                                            {tampil.map((t) => (
+                                                <li key={t.id}>
+                                                    <button
+                                                        type="button"
+                                                        disabled={t.sudah_ada}
+                                                        onClick={() => toggleSatu(t.id)}
+                                                        className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left ${
+                                                            t.sudah_ada
+                                                                ? "border-gray-200 opacity-50"
+                                                                : terpilih.has(t.id)
+                                                                  ? "border-amber-400 bg-amber-50"
+                                                                  : "border-gray-200"
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            className="checkbox checkbox-sm pointer-events-none mt-0.5 shrink-0"
+                                                            checked={terpilih.has(t.id)}
+                                                            disabled={t.sudah_ada}
+                                                            readOnly
+                                                            tabIndex={-1}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="min-w-0 flex-1">
+                                                            <span className="block font-medium">
+                                                                {t.nama}
+                                                                {t.sudah_ada && (
+                                                                    <span className="ml-2 badge badge-ghost badge-sm">
+                                                                        sudah ada
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                            {t.lembaga && (
+                                                                <span className="mt-0.5 block text-sm text-gray-500">
+                                                                    {t.lembaga}
+                                                                </span>
+                                                            )}
+                                                            <span className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                                                                <span className="badge badge-ghost badge-sm">
+                                                                    {t.jumlah_orang} org
+                                                                </span>
+                                                                {t.pic && (
+                                                                    <span className="badge badge-primary badge-outline badge-sm">
+                                                                        {t.pic}
+                                                                    </span>
+                                                                )}
+                                                                <span
+                                                                    className={`badge badge-sm ${
+                                                                        t.status === "datang"
+                                                                            ? "badge-success"
+                                                                            : "badge-warning"
+                                                                    }`}
+                                                                >
+                                                                    {t.status === "datang" ? "Datang" : "Belum"}
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                    </button>
+                                                </li>
+                                            ))}
+
+                                            {tampil.length === 0 && (
+                                                <li className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">
+                                                    Tidak ada tamu yang cocok dengan pencarian.
+                                                </li>
+                                            )}
+                                        </ul>
+                                    </div>
+
+                                    <div className="mt-4 hidden max-h-[28rem] overflow-y-auto rounded-md border border-gray-200 md:block">
                                         <table className="table table-pin-rows table-sm">
                                             <thead>
                                                 <tr>
@@ -170,7 +258,7 @@ function Salin({ tujuan, sumber, sumberTersedia = [], tamus = [] }) {
 
                                     <button
                                         type="submit"
-                                        className="btn btn-neutral btn-sm mt-4"
+                                        className="btn btn-neutral mt-4 w-full sm:btn-sm sm:w-auto"
                                         disabled={processing || terpilih.size === 0}
                                     >
                                         {processing

@@ -70,8 +70,8 @@ export default function Index({ acara, mejas, belum }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="rounded-lg bg-white p-6 shadow-sm">
-                        <div className="flex flex-wrap items-baseline justify-between gap-3">
+                    <div className="rounded-lg bg-white p-4 shadow-sm sm:p-6">
+                        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                             <h1 className="text-2xl font-bold">
                                 Penempatan Kursi{" "}
                                 <span className="text-base font-normal text-gray-500">
@@ -90,9 +90,17 @@ export default function Index({ acara, mejas, belum }) {
                             </div>
                         )}
 
+                        {/*
+                            min-w-0 wajib di kedua anaknya. Kolom grid
+                            berukuran auto tidak mau menyusut di bawah
+                            min-content isinya, jadi nama panjang di daftar
+                            meja menarik seluruh halaman jadi 509px di layar
+                            375px - melebar diam-diam, karena pembungkus
+                            drawer di layout yang menelan geserannya.
+                        */}
                         <div className="mt-6 grid gap-8 lg:grid-cols-[22rem_1fr]">
                             {/* Tamu yang belum duduk */}
-                            <div>
+                            <div className="min-w-0">
                                 <h2 className="font-semibold">
                                     Belum ditempatkan ({belum.length})
                                 </h2>
@@ -106,13 +114,13 @@ export default function Index({ acara, mejas, belum }) {
                                 />
 
                                 {dipilih && (
-                                    <p className="mt-3 rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                                    <p className="mt-3 hidden rounded bg-amber-50 px-3 py-2 text-sm text-amber-900 lg:block">
                                         <strong>{dipilih.nama}</strong> dipilih &mdash; klik meja
                                         tujuan. Butuh {dipilih.jumlah_orang} kursi.
                                     </p>
                                 )}
 
-                                <ul className="mt-3 max-h-[32rem] overflow-y-auto">
+                                <ul className="mt-3 max-h-72 overflow-y-auto lg:max-h-[32rem]">
                                     {terlihat.length === 0 && (
                                         <li className="py-6 text-sm text-gray-500">
                                             {belum.length === 0
@@ -150,9 +158,20 @@ export default function Index({ acara, mejas, belum }) {
                             </div>
 
                             {/* Susunan meja */}
-                            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <div
+                                className={`grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3 ${
+                                    dipilih ? "pb-24 lg:pb-0" : ""
+                                }`}
+                            >
                                 {mejas.map((m) => {
                                     const penuh = m.terisi >= m.kapasitas;
+                                    // Satu tamu memakai beberapa kursi berturut-turut, jadi
+                                    // lembaganya hanya ditulis di kursi pertamanya - kalau
+                                    // diulang, kartunya jadi dua kali lebih tinggi tanpa
+                                    // menambah satu pun keterangan baru. Memakai Set, bukan
+                                    // membandingkan kursi sebelumnya, karena kursi satu tamu
+                                    // tidak dijamin berdampingan.
+                                    const sudahDisebut = new Set();
                                     const cukup =
                                         dipilih &&
                                         m.kapasitas - m.terisi >= dipilih.jumlah_orang;
@@ -160,7 +179,7 @@ export default function Index({ acara, mejas, belum }) {
                                     return (
                                         <div
                                             key={m.nomor}
-                                            className={`rounded-lg border p-4 ${
+                                            className={`min-w-0 rounded-lg border p-4 ${
                                                 dipilih && cukup
                                                     ? "border-amber-400 bg-amber-50"
                                                     : penuh
@@ -176,25 +195,37 @@ export default function Index({ acara, mejas, belum }) {
                                             </div>
 
                                             <ol className="mt-3 space-y-1">
-                                                {m.kursi.map((k) => (
-                                                    <li
-                                                        key={k.nomor}
-                                                        className="flex gap-2 text-xs leading-5"
-                                                    >
-                                                        <span className="w-4 shrink-0 text-gray-400">
-                                                            {k.nomor}
-                                                        </span>
-                                                        <span
-                                                            className={
-                                                                k.tamu
-                                                                    ? "text-gray-800"
-                                                                    : "text-gray-300"
-                                                            }
+                                                {m.kursi.map((k) => {
+                                                    const ulang =
+                                                        k.tamu && sudahDisebut.has(k.tamu.id);
+
+                                                    if (k.tamu) sudahDisebut.add(k.tamu.id);
+
+                                                    return (
+                                                        <li
+                                                            key={k.nomor}
+                                                            className="flex items-start gap-2 text-xs leading-5"
                                                         >
-                                                            {k.tamu ? k.tamu.nama : "kosong"}
-                                                        </span>
-                                                    </li>
-                                                ))}
+                                                            <span className="w-4 shrink-0 text-gray-400">
+                                                                {k.nomor}
+                                                            </span>
+                                                            <span
+                                                                className={
+                                                                    k.tamu
+                                                                        ? "text-gray-800"
+                                                                        : "text-gray-300"
+                                                                }
+                                                            >
+                                                                {k.tamu ? k.tamu.nama : "kosong"}
+                                                                {k.tamu?.lembaga && !ulang && (
+                                                                    <span className="block text-gray-400">
+                                                                        {k.tamu.lembaga}
+                                                                    </span>
+                                                                )}
+                                                            </span>
+                                                        </li>
+                                                    );
+                                                })}
                                             </ol>
 
                                             {dipilih ? (
@@ -216,8 +247,15 @@ export default function Index({ acara, mejas, belum }) {
                                                                 key={t.id}
                                                                 className="flex items-center justify-between gap-2 text-xs"
                                                             >
-                                                                <span className="truncate">
-                                                                    {t.nama}
+                                                                <span className="min-w-0 flex-1">
+                                                                    <span className="block truncate">
+                                                                        {t.nama}
+                                                                    </span>
+                                                                    {t.lembaga && (
+                                                                        <span className="block truncate text-gray-400">
+                                                                            {t.lembaga}
+                                                                        </span>
+                                                                    )}
                                                                 </span>
                                                                 <button
                                                                     type="button"
@@ -239,6 +277,34 @@ export default function Index({ acara, mejas, belum }) {
                     </div>
                 </div>
             </div>
+
+            {/*
+                Dipasang fixed, bukan sticky: pembungkus drawer di layout
+                punya overflow sendiri, dan sticky akan menempel ke wadah itu
+                - bukan ke layar - sehingga tidak pernah terlihat saat
+                menggulir ke daftar meja.
+            */}
+            {dipilih && (
+                <div className="fixed inset-x-0 bottom-0 z-30 border-t border-amber-300 bg-amber-50 p-3 shadow-[0_-2px_8px_rgba(0,0,0,0.08)] lg:hidden">
+                    <div className="mx-auto flex max-w-7xl items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-amber-900">
+                                {dipilih.nama}
+                            </p>
+                            <p className="text-xs text-amber-800">
+                                Butuh {dipilih.jumlah_orang} kursi &mdash; pilih mejanya di bawah
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setDipilih(null)}
+                            className="btn btn-sm btn-ghost shrink-0"
+                        >
+                            Batal
+                        </button>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

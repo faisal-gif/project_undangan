@@ -28,11 +28,12 @@ class PenempatanKursiTest extends TestCase
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
-    private function tamu(int $orang = 2, string $nama = 'Tamu Uji'): Tamu
+    private function tamu(int $orang = 2, string $nama = 'Tamu Uji', ?string $lembaga = null): Tamu
     {
         return Tamu::create([
             'acara_id' => $this->acara->id,
             'nama' => $nama,
+            'lembaga' => $lembaga,
             'code' => strtoupper(fake()->bothify('????####')),
             'jumlah_orang' => $orang,
             'status' => 'belum',
@@ -142,6 +143,44 @@ class PenempatanKursiTest extends TestCase
                 ->where('mejas.0.terisi', 2)
                 ->where('mejas.0.kursi.0.tamu.nama', 'Sudah Duduk')
                 ->where('belum.0.nama', 'Belum Duduk'));
+    }
+
+    /**
+     * Nama saja tidak cukup untuk mengenali siapa yang duduk di satu meja -
+     * ada tiga baris bernama "Pimpinan" dan beberapa "Kepala", yang hanya
+     * dibedakan oleh lembaganya. Jadi lembaga harus ikut di kursinya maupun
+     * di daftar penghuni yang punya tombol keluarkan.
+     */
+    public function test_papan_menyertakan_lembaga_di_kursi_dan_daftar_penghuni(): void
+    {
+        $tamu = $this->tamu(2, 'Pimpinan', 'PT Freeport Indonesia');
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 1]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.penempatan.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('mejas.0.kursi.0.tamu.lembaga', 'PT Freeport Indonesia')
+                ->where('mejas.0.kursi.1.tamu.lembaga', 'PT Freeport Indonesia')
+                ->where('mejas.0.tamus.0.lembaga', 'PT Freeport Indonesia'));
+    }
+
+    public function test_tamu_tanpa_lembaga_tidak_bikin_kursinya_gagal(): void
+    {
+        $tamu = $this->tamu(2, 'Tanpa Lembaga');
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 1]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.penempatan.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('mejas.0.kursi.0.tamu.nama', 'Tanpa Lembaga')
+                ->where('mejas.0.kursi.0.tamu.lembaga', null)
+                ->where('mejas.0.tamus.0.lembaga', null));
     }
 
     public function test_denah_memakai_susunan_yang_sama(): void

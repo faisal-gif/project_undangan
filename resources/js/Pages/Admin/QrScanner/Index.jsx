@@ -97,13 +97,20 @@ function Index({ tamus, filters }) {
                     </div> */}
 
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
+                        <div className="p-4 sm:p-6 bg-white border-b border-gray-200">
                             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
                                 <h1 className="text-2xl font-bold">
                                     Daftar Pendaftar
-                                    {acara && <span className="font-normal text-gray-500"> — {acara.nama} {acara.tahun}</span>}
+                                    {/* Di ponsel nama acaranya pindah ke baris sendiri dan mengecil;
+                                        satu baris judul tiga baris tinggi memakan layar tanpa guna. */}
+                                    {acara && (
+                                        <span className="block text-sm font-normal text-gray-500 md:inline md:text-2xl">
+                                            <span className="hidden md:inline"> — </span>
+                                            {acara.nama} {acara.tahun}
+                                        </span>
+                                    )}
                                 </h1>
-                                <div className="flex flex-row gap-2 justify-end">
+                                <div className="flex flex-row gap-2 md:justify-end">
                                     <button
                                         onClick={() => router.reload({ only: ['tamus'] })}
                                         className="btn btn-primary btn-sm"
@@ -140,7 +147,73 @@ function Index({ tamus, filters }) {
                                     Cari
                                 </button>
                             </form>
-                            <div className="overflow-x-auto">
+                            {/*
+                                Halaman ini dipakai sambil berdiri di pintu
+                                masuk, jadi di bawah md tabelnya diganti
+                                kartu: tombol tandai hadir selebar kartu dan
+                                tidak ada geseran ke samping untuk mencapainya.
+                            */}
+                            <ul className="grid gap-3 sm:grid-cols-2 xl:hidden">
+                                {tamus.data.map((tamu) => (
+                                    <li
+                                        key={tamu.id}
+                                        className="flex flex-col rounded-lg border border-gray-200 p-4"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="font-semibold leading-snug">
+                                                    {tamu.nama}
+                                                </p>
+                                                {tamu.lembaga && (
+                                                    <p className="mt-0.5 text-sm text-gray-500">
+                                                        {tamu.lembaga}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="shrink-0">
+                                                {getStatusBadge(tamu.status)}
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-3 mt-3 flex flex-wrap items-center gap-2">
+                                            {tamu.meja ? (
+                                                <span className="badge badge-neutral">
+                                                    Meja {tamu.meja}
+                                                    {tamu.kursi ? ` \u00b7 ${tamu.kursi}` : ""}
+                                                </span>
+                                            ) : (
+                                                <span className="badge badge-ghost">
+                                                    Belum ada meja
+                                                </span>
+                                            )}
+                                            <span className="badge badge-ghost">
+                                                {tamu.jumlah_orang} org
+                                            </span>
+                                            {tamu.pic && (
+                                                <span className="badge badge-primary badge-outline">
+                                                    {tamu.pic}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <Link
+                                            href={route("admin.attendance", tamu.code)}
+                                            className="btn btn-neutral mt-auto w-full gap-2"
+                                        >
+                                            <Check size={18} />
+                                            Tandai hadir
+                                        </Link>
+                                    </li>
+                                ))}
+
+                                {tamus.data.length === 0 && (
+                                    <li className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 sm:col-span-2">
+                                        Tidak ada pendaftar yang cocok.
+                                    </li>
+                                )}
+                            </ul>
+
+                            <div className="hidden overflow-x-auto xl:block">
 
                                 <table className="table table-zebra">
                                     <thead>
@@ -190,7 +263,9 @@ function Index({ tamus, filters }) {
                                         ))}
                                     </tbody>
                                 </table>
-                                <div className="mt-8 join">
+                            </div>
+
+                            <div className="mt-6 join xl:mt-8">
                                     {
                                         tamus.links
                                             .filter((l) => l.label.includes("Previous") || l.label.includes("Next"))
@@ -202,7 +277,6 @@ function Index({ tamus, filters }) {
                                                     dangerouslySetInnerHTML={{ __html: l.label }}
                                                 />
                                             ))}
-                                </div>
                             </div>
 
                         </div>

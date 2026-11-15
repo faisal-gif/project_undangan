@@ -1,213 +1,230 @@
-"use client";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router } from "@inertiajs/react";
-import {
-    User,
-    MapPin,
-    Phone,
-    Mail,
-    Calendar,
-    CreditCard,
-    Heart,
-    Users,
-    AlertCircle,
-    Shield,
-    Shirt,
-    QrCode,
-    CheckCircle,
-    Clock,
-} from "lucide-react";
+import { Head, Link } from "@inertiajs/react";
+import { Check, Edit2, Send, User } from "lucide-react";
+import React from "react";
 
+/**
+ * Rincian satu tamu.
+ *
+ * Disusun mulai dari layar ponsel: satu kolom kartu, naik jadi dua kolom di
+ * lg. Halaman ini sering dibuka dari ponsel saat mencocokkan tamu di lokasi,
+ * jadi tiga hal yang paling dicari - tempat duduk, kode undangan, dan status
+ * kehadiran - ditaruh paling atas, bukan data administratif.
+ */
+function Show({ tamu, edisi, qr }) {
+    const slugify = (teks) =>
+        (teks || "")
+            .toLowerCase()
+            .replace(/ /g, "-")
+            .replace(/[^\w-]+/g, "")
+            .replace(/--+/g, "-")
+            .replace(/^-+|-+$/g, "");
 
-const Show = ({ participant }) => {
+    const tautan = route("undangan", [tamu.code, slugify(tamu.nama)]);
 
-    const handleUpdateStatus = () => {
-        router.post(route("admin.participants.update-status", participant.id), {
-            _method: "put",
-            status: "ambil",
-        });
+    const kirimWhatsapp = () => {
+        const pesan = `Kepada Yth. ${tamu.nama}\n\nDengan hormat, Melalui pesan ini, kami bermaksud menyampaikan undangan resmi kepada Bapak/Ibu. Besar harapan kami agar Bapak/Ibu berkenan membuka tautan undangan digital berikut untuk informasi lengkap acara:\n\n${tautan}\n\nAtas perhatian dan waktunya, kami ucapkan terima kasih.\n\nSalam hormat.\nTIMES Indonesia`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, "_blank");
     };
 
-    const getStatusText = (status) => {
-        return status === "ambil" ? (
-            <span className="flex items-center px-3 py-1 rounded bg-green-100 text-green-700 text-sm font-medium">
-                <CheckCircle className="w-4 h-4 mr-1" /> Sudah Diambil
-            </span>
-        ) : (
-            <div className="flex flex-col md:flex-row gap-4">
-                <span className="flex items-center px-3 py-1 rounded bg-gray-100 text-gray-700 text-sm font-medium">
-                    <Clock className="w-4 h-4 mr-1" /> Belum Diambil
-                </span>
-                <button
-                    onClick={handleUpdateStatus}
-                    className="px-3 py-1 text-xs md:text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
-                >
-                    Tandai Sudah Diambil
-                </button>
-            </div>
-        );
+    const badgeRsvp = {
+        hadir: "badge-success",
+        berhalangan: "badge-error",
     };
 
     return (
         <AuthenticatedLayout>
-            <Head title="Tamu" />
-            <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-                {/* Header */}
-                <div className="flex items-center justify-between bg-white p-6 rounded-lg shadow">
-                    <div>
-                        <h1 className="text-2xl font-bold">{participant.nama}</h1>
-                        <p className="text-gray-500">ID: {participant.id}</p>
-                    </div>
-                    {getStatusText(participant.status)}
-                </div>
+            <Head title={tamu.nama || "Tamu"} />
 
-                {/* Grid Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {/* Personal */}
-                    <div className="md:col-span-2 bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <User className="w-5 h-5 mr-2 text-blue-500" />
-                            Informasi Pribadi
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <InfoItem icon={<MapPin />} label="Alamat" value={participant.alamat} />
-                            <InfoItem icon={<Calendar />} label="Tempat, Tanggal Lahir" value={participant.tempat_tanggal_lahir} />
-                            <InfoItem icon={<Phone />} label="Telepon" value={participant.telepon} />
-                            <InfoItem icon={<Mail />} label="Email" value={participant.email} />
-                        </div>
-                    </div>
+            <div className="py-6 sm:py-12">
+                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                    <div className="space-y-4 sm:space-y-6">
+                        {/* Kepala */}
+                        <div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <h1 className="text-2xl font-bold leading-tight">
+                                        {tamu.nama}
+                                    </h1>
+                                    {tamu.lembaga && (
+                                        <p className="mt-1 text-gray-600">{tamu.lembaga}</p>
+                                    )}
+                                    <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                                        <span
+                                            className={`badge ${
+                                                tamu.jenis === "penerima"
+                                                    ? "badge-warning"
+                                                    : "badge-ghost"
+                                            }`}
+                                        >
+                                            {tamu.jenis === "penerima"
+                                                ? "Penerima penghargaan"
+                                                : "Tamu undangan"}
+                                        </span>
+                                        {edisi && (
+                                            <span className="text-gray-500">{edisi}</span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
 
-                    {/* Identitas */}
-                    <div className="bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <CreditCard className="w-5 h-5 mr-2 text-blue-500" />
-                            Identitas
-                        </h2>
-                        <InfoBlock label="Jenis Kartu" value={participant.kartu_identitas} />
-                        <InfoBlock label="Nomor" value={participant.no_kartu_identitas} />
-                        <InfoBlock label="Jenis Kelamin" value={participant.jenis_kelamin} />
-                    </div>
-
-                    {/* Medis */}
-                    <div className="bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <Heart className="w-5 h-5 mr-2 text-blue-500" />
-                            Informasi Medis
-                        </h2>
-                        <InfoBlock label="Golongan Darah" value={participant.golongan_darah} />
-                        <InfoBlock label="Penyakit" value={participant.penyakit} />
-                        <InfoBlock label="Disabilitas" value={participant.apakah_penyandang_disabilitas} />
-                    </div>
-
-                    {/* Emergency */}
-                    <div className="md:col-span-2 bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <AlertCircle className="w-5 h-5 mr-2 text-blue-500" />
-                            Kontak Darurat
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <InfoBlock label="Nama" value={participant.nama_kontak_darurat} />
-                            <InfoBlock label="Hubungan" value={participant.hubungan_kontak_darurat} />
-                            <InfoBlock label="Nomor Telepon" value={participant.nomor_kontak_darurat} />
-                        </div>
-                    </div>
-
-                    {/* Komunitas */}
-                    <div className="bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <Users className="w-5 h-5 mr-2 text-blue-500" />
-                            Komunitas
-                        </h2>
-                        <p>{participant.nama_komunitas}</p>
-                    </div>
-
-                    {/* Jersey */}
-                    <div className="bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <Shirt className="w-5 h-5 mr-2 text-blue-500" />
-                            Jersey
-                        </h2>
-                        <span className="px-4 py-2 border rounded text-blue-600 font-semibold">
-                            {participant.ukuran_jersey}
-                        </span>
-                    </div>
-
-                    {/* Pembayaran */}
-                    <div className="md:col-span-3 bg-white p-5 rounded-lg shadow">
-                        <h2 className="flex items-center text-lg font-semibold mb-4">
-                            <Shield className="w-5 h-5 mr-2 text-blue-500" />
-                            Informasi Pembayaran
-                        </h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <InfoBlock label="Atas Nama" value={participant.atas_nama} />
-                            <PaymentProof url={participant.bukti_pembayaran} />
-                        </div>
-                    </div>
-
-
-                    {/* QR Code */}
-                    <div className="card bg-white p-5 rounded-lg shadow text-center">
-                        <h2 className="flex items-center justify-center text-lg font-semibold mb-4">
-                            <QrCode className="w-5 h-5 mr-2 text-blue-500" />
-                            QR Code
-                        </h2>
-                        <div className="flex items-center justify-center p-4 border rounded bg-gray-50">
-                            <img src={participant.qrcode} className="h-full w-full" />
+                            {/* Tombol selebar layar di ponsel; di sm ke atas kembali
+                                sebaris supaya tidak memakan ruang sia-sia. */}
+                            <div className="mt-4 grid grid-cols-1 gap-2 border-t pt-4 sm:flex sm:flex-wrap">
+                                <Link
+                                    href={route("admin.tamu.edit", tamu.id)}
+                                    className="btn btn-warning gap-2 sm:btn-sm"
+                                >
+                                    <Edit2 size={16} />
+                                    Ubah
+                                </Link>
+                                <Link
+                                    href={tautan}
+                                    className="btn btn-neutral gap-2 sm:btn-sm"
+                                >
+                                    <User size={16} />
+                                    Buka undangan
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={kirimWhatsapp}
+                                    className="btn btn-success gap-2 sm:btn-sm"
+                                >
+                                    <Send size={16} />
+                                    Kirim WhatsApp
+                                </button>
+                                {tamu.status !== "datang" && (
+                                    <Link
+                                        href={route("admin.attendance", tamu.code)}
+                                        className="btn btn-outline gap-2 sm:btn-sm"
+                                    >
+                                        <Check size={16} />
+                                        Tandai hadir
+                                    </Link>
+                                )}
+                            </div>
                         </div>
 
+                        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+                            <Kartu judul="Tempat duduk">
+                                <Baris
+                                    label="Meja"
+                                    nilai={tamu.meja ? `Meja ${tamu.meja}` : null}
+                                />
+                                <Baris label="Kursi" nilai={tamu.kursi} />
+                                <Baris
+                                    label="Jumlah orang"
+                                    nilai={tamu.jumlah_orang ? `${tamu.jumlah_orang} orang` : null}
+                                />
+                            </Kartu>
+
+                            <Kartu judul="Kehadiran">
+                                <div className="flex items-center justify-between gap-3 border-b border-gray-100 py-2 last:border-0">
+                                    <span className="text-sm text-gray-500">Konfirmasi</span>
+                                    <span
+                                        className={`badge ${badgeRsvp[tamu.rsvp] ?? "badge-ghost"}`}
+                                    >
+                                        {tamu.rsvp === "hadir"
+                                            ? "Hadir"
+                                            : tamu.rsvp === "berhalangan"
+                                              ? "Berhalangan"
+                                              : "Belum"}
+                                    </span>
+                                </div>
+                                <Baris label="Dikonfirmasi pada" nilai={tamu.rsvp_pada} />
+                                <div className="flex items-center justify-between gap-3 border-b border-gray-100 py-2 last:border-0">
+                                    <span className="text-sm text-gray-500">Check-in</span>
+                                    <span
+                                        className={`badge ${
+                                            tamu.status === "datang"
+                                                ? "badge-success"
+                                                : "badge-warning"
+                                        }`}
+                                    >
+                                        {tamu.status === "datang" ? "Datang" : "Belum"}
+                                    </span>
+                                </div>
+                            </Kartu>
+
+                            {tamu.jenis === "penerima" && (
+                                <Kartu judul="Penghargaan">
+                                    <Baris
+                                        label="Kategori"
+                                        nilai={tamu.kategori_penghargaan}
+                                    />
+                                    <Baris label="Nama penghargaan" nilai={tamu.sub_kategori} />
+                                </Kartu>
+                            )}
+
+                            <Kartu judul="Kontak">
+                                <Baris label="PIC" nilai={tamu.pic} />
+                                <Baris label="Telepon" nilai={tamu.telepon} />
+                                <Baris label="Alamat" nilai={tamu.alamat} />
+                            </Kartu>
+
+                            <Kartu judul="Undangan">
+                                <Baris label="Kode" nilai={tamu.code} />
+                                <div className="py-2">
+                                    <p className="text-sm text-gray-500">Tautan</p>
+                                    <a
+                                        href={tautan}
+                                        className="mt-1 block break-all text-sm text-blue-600 hover:underline"
+                                    >
+                                        {tautan}
+                                    </a>
+                                </div>
+                                {qr && (
+                                    <div className="pt-2">
+                                        <p className="text-sm text-gray-500">QR</p>
+                                        <img
+                                            src={qr}
+                                            alt={`QR undangan ${tamu.nama}`}
+                                            className="mt-2 h-40 w-40 rounded border border-gray-200 bg-white p-2"
+                                        />
+                                    </div>
+                                )}
+                            </Kartu>
+                        </div>
+
+                        <div className="px-4 sm:px-0">
+                            <Link
+                                href={route("admin.tamu.index")}
+                                className="btn btn-ghost btn-sm"
+                            >
+                                Kembali ke daftar
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
         </AuthenticatedLayout>
-
     );
-};
+}
 
-// Helper Component
-const InfoItem = ({ icon, label, value }) => (
-    <div className="flex items-start space-x-2">
-        <span className="text-blue-500">{icon}</span>
-        <div>
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="text-gray-800">{value}</p>
-        </div>
-    </div>
-);
-
-const InfoBlock = ({ label, value }) => (
-    <div className="mb-3">
-        <p className="text-sm text-gray-500">{label}</p>
-        <p className="font-medium">{value}</p>
-    </div>
-);
-
-
-const PaymentProof = ({ url }) => {
-    const extractFileId = (driveUrl) => {
-        const match = driveUrl.match(/[-\w]{25,}/);
-        return match ? match[0] : null;
-    };
-
-    const fileId = extractFileId(url);
-    const previewUrl = fileId
-        ? `https://drive.google.com/file/d/${fileId}/preview`
-        : null;
-
+function Kartu({ judul, children }) {
     return (
-        <div>
-            <p className="text-sm text-gray-500 mb-2">Bukti Pembayaran</p>
-            {previewUrl ? (
-                <iframe
-                    src={previewUrl}
-                    className="w-full max-w-sm h-64 border rounded"
-                    allow="autoplay"
-                />
-            ) : (
-                <p className="text-red-500">Link tidak valid</p>
-            )}
+        <div className="bg-white p-4 shadow-sm sm:rounded-lg sm:p-5">
+            <h2 className="font-semibold">{judul}</h2>
+            <div className="mt-2">{children}</div>
         </div>
     );
-};
+}
 
+/**
+ * Baris kosong sengaja tetap ditampilkan dengan tanda "-". Kalau
+ * disembunyikan, admin tidak bisa membedakan "belum diisi" dari "kolomnya
+ * memang tidak ada di halaman ini".
+ */
+function Baris({ label, nilai }) {
+    return (
+        <div className="flex items-baseline justify-between gap-3 border-b border-gray-100 py-2 last:border-0">
+            <span className="shrink-0 text-sm text-gray-500">{label}</span>
+            <span className="min-w-0 break-words text-right">
+                {nilai || <span className="text-gray-300">-</span>}
+            </span>
+        </div>
+    );
+}
 
 export default Show;

@@ -60,6 +60,16 @@ export default function AuthenticatedLayout({ header, children }) {
                         </Dropdown>
                     </div>
                 </div>
+                {/* Prop header selama ini diterima tapi tidak pernah dirender,
+                    jadi judul halaman Dashboard dan Profil hilang diam-diam. */}
+                {header && (
+                    <header className="bg-white shadow-sm">
+                        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+                            {header}
+                        </div>
+                    </header>
+                )}
+
                 <main className=''>{children}</main>
             </div>
             <div className="drawer-side">
