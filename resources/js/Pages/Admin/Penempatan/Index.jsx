@@ -7,29 +7,56 @@ import { useState } from "react";
  * kanan.
  *
  * Nomor kursi tidak pernah diketik. Admin memilih satu tamu, lalu menunjuk
- * mejanya; sistem yang mengambil kursi kosong sebanyak orang yang diundang.
- * Cara ini menghapus seluruh kelas salah ketik sekaligus - kursi ganda, kursi
- * di luar kapasitas, dan jumlah kursi yang tidak sesuai jumlah orang.
+ * mejanya; sistem yang mengambil kursi kosong. Cara ini menghapus seluruh
+ * kelas salah ketik sekaligus - kursi ganda, kursi di luar kapasitas, dan
+ * jumlah kursi yang tidak sesuai jumlah orang.
+ *
+ * Rombongannya tidak harus utuh satu meja: undangan berkuota 2 bisa diisi
+ * satu orang di sini dan satu lagi di meja lain. Yang dipilih adalah berapa
+ * orang yang duduk di meja ini, dan tamunya tetap di daftar kiri sampai
+ * seluruh kuotanya kebagian kursi.
  */
 export default function Index({ acara, mejas, belum }) {
     const { errors } = usePage().props;
     const [dipilih, setDipilih] = useState(null);
+    const [jumlah, setJumlah] = useState(1);
     const [cari, setCari] = useState("");
 
+    // Daftar di kiri dimuat ulang setiap kali ada penempatan, jadi yang
+    // dipegang state bisa basi. Yang dipakai selalu baris terbarunya.
+    const aktif = dipilih && belum.find((t) => t.id === dipilih.id);
+    const sisa = aktif ? aktif.sisa : 0;
+    const duduk = Math.min(Math.max(jumlah, 1), Math.max(sisa, 1));
+
+    const pilih = (t) => {
+        const sama = aktif?.id === t.id;
+        setDipilih(sama ? null : t);
+        if (!sama) setJumlah(t.sisa);
+    };
+
     const tempatkan = (meja) => {
-        if (!dipilih) return;
+        if (!aktif) return;
 
         router.post(
             route("admin.penempatan.tempatkan"),
-            { tamu_id: dipilih.id, meja },
-            { preserveScroll: true, onSuccess: () => setDipilih(null) }
+            { tamu_id: aktif.id, meja, jumlah: duduk },
+            {
+                preserveScroll: true,
+                // Tamu yang masih bersisa tetap terpilih, supaya sisa
+                // rombongannya bisa langsung ditunjuk ke meja berikutnya.
+                onSuccess: (halaman) => {
+                    const lagi = halaman.props.belum.find((t) => t.id === aktif.id);
+                    setDipilih(lagi ?? null);
+                    setJumlah(lagi ? lagi.sisa : 1);
+                },
+            }
         );
     };
 
-    const keluarkan = (tamuId) => {
+    const keluarkan = (tamuId, meja) => {
         router.post(
             route("admin.penempatan.keluarkan", tamuId),
-            {},
+            { meja },
             { preserveScroll: true }
         );
     };
@@ -63,6 +90,39 @@ export default function Index({ acara, mejas, belum }) {
     }
 
     const totalTerisi = mejas.reduce((n, m) => n + m.terisi, 0);
+
+    // Pengatur "berapa orang di meja ini". Hanya muncul kalau memang ada
+    // yang bisa dibagi - undangan satu orang tidak punya pilihan apa pun.
+    const kontrolJumlah = sisa > 1 && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-xs">Duduk di meja ini:</span>
+            <div className="join">
+                <button
+                    type="button"
+                    onClick={() => setJumlah(Math.max(1, duduk - 1))}
+                    disabled={duduk <= 1}
+                    className="btn btn-xs join-item"
+                >
+                    &minus;
+                </button>
+                <span className="join-item border-y border-base-300 bg-white px-3 text-sm font-semibold leading-6">
+                    {duduk}
+                </span>
+                <button
+                    type="button"
+                    onClick={() => setJumlah(Math.min(sisa, duduk + 1))}
+                    disabled={duduk >= sisa}
+                    className="btn btn-xs join-item"
+                >
+                    +
+                </button>
+            </div>
+            <span className="text-xs">
+                dari {sisa} yang belum duduk
+                {duduk < sisa && ` · sisa ${sisa - duduk} ke meja lain`}
+            </span>
+        </div>
+    );
 
     return (
         <AuthenticatedLayout>
@@ -113,11 +173,17 @@ export default function Index({ acara, mejas, belum }) {
                                     className="input input-bordered input-sm mt-3 w-full"
                                 />
 
-                                {dipilih && (
-                                    <p className="mt-3 hidden rounded bg-amber-50 px-3 py-2 text-sm text-amber-900 lg:block">
-                                        <strong>{dipilih.nama}</strong> dipilih &mdash; klik meja
-                                        tujuan. Butuh {dipilih.jumlah_orang} kursi.
-                                    </p>
+                                {aktif && (
+                                    <div className="mt-3 hidden rounded bg-amber-50 px-3 py-2 text-sm text-amber-900 lg:block">
+                                        <p>
+                                            <strong>{aktif.nama}</strong> dipilih &mdash; klik meja
+                                            tujuan.{" "}
+                                            {aktif.sudah > 0
+                                                ? `${aktif.sudah} dari ${aktif.jumlah_orang} sudah duduk.`
+                                                : `Butuh ${aktif.jumlah_orang} kursi.`}
+                                        </p>
+                                        {kontrolJumlah}
+                                    </div>
                                 )}
 
                                 <ul className="mt-3 max-h-72 overflow-y-auto lg:max-h-[32rem]">
@@ -133,18 +199,18 @@ export default function Index({ acara, mejas, belum }) {
                                         <li key={t.id}>
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    setDipilih(dipilih?.id === t.id ? null : t)
-                                                }
+                                                onClick={() => pilih(t)}
                                                 className={`w-full border-b px-3 py-2 text-left text-sm transition-colors ${
-                                                    dipilih?.id === t.id
+                                                    aktif?.id === t.id
                                                         ? "bg-amber-100 font-semibold"
                                                         : "hover:bg-gray-50"
                                                 }`}
                                             >
                                                 {t.nama}
                                                 <span className="ml-2 text-xs text-gray-500">
-                                                    {t.jumlah_orang} org
+                                                    {t.sudah > 0
+                                                        ? `sisa ${t.sisa} dari ${t.jumlah_orang} org`
+                                                        : `${t.jumlah_orang} org`}
                                                 </span>
                                                 {t.lembaga && (
                                                     <span className="block text-xs text-gray-400">
@@ -160,7 +226,10 @@ export default function Index({ acara, mejas, belum }) {
                             {/* Susunan meja */}
                             <div
                                 className={`grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3 ${
-                                    dipilih ? "pb-24 lg:pb-0" : ""
+                                    // Bilah pilihan di bawah layar menutupi
+                                    // kartu terakhir; ia lebih tinggi sejak
+                                    // memuat pengatur jumlah orang.
+                                    aktif ? "pb-40 lg:pb-0" : ""
                                 }`}
                             >
                                 {mejas.map((m) => {
@@ -172,15 +241,15 @@ export default function Index({ acara, mejas, belum }) {
                                     // membandingkan kursi sebelumnya, karena kursi satu tamu
                                     // tidak dijamin berdampingan.
                                     const sudahDisebut = new Set();
-                                    const cukup =
-                                        dipilih &&
-                                        m.kapasitas - m.terisi >= dipilih.jumlah_orang;
+                                    // Yang harus muat cuma orang yang didudukkan
+                                    // di meja ini, bukan seluruh rombongannya.
+                                    const cukup = aktif && m.kapasitas - m.terisi >= duduk;
 
                                     return (
                                         <div
                                             key={m.nomor}
                                             className={`min-w-0 rounded-lg border p-4 ${
-                                                dipilih && cukup
+                                                aktif && cukup
                                                     ? "border-amber-400 bg-amber-50"
                                                     : penuh
                                                         ? "border-gray-200 bg-gray-50"
@@ -228,7 +297,7 @@ export default function Index({ acara, mejas, belum }) {
                                                 })}
                                             </ol>
 
-                                            {dipilih ? (
+                                            {aktif ? (
                                                 <button
                                                     type="button"
                                                     disabled={!cukup}
@@ -236,7 +305,7 @@ export default function Index({ acara, mejas, belum }) {
                                                     className="btn btn-sm btn-neutral mt-3 w-full"
                                                 >
                                                     {cukup
-                                                        ? `Tempatkan di sini`
+                                                        ? `Dudukkan ${duduk} di sini`
                                                         : `Sisa ${m.kapasitas - m.terisi} kursi`}
                                                 </button>
                                             ) : (
@@ -250,16 +319,29 @@ export default function Index({ acara, mejas, belum }) {
                                                                 <span className="min-w-0 flex-1">
                                                                     <span className="block truncate">
                                                                         {t.nama}
+                                                                        {t.kursi && (
+                                                                            <span className="text-gray-400">
+                                                                                {" "}
+                                                                                &middot; kursi {t.kursi}
+                                                                            </span>
+                                                                        )}
                                                                     </span>
                                                                     {t.lembaga && (
                                                                         <span className="block truncate text-gray-400">
                                                                             {t.lembaga}
                                                                         </span>
                                                                     )}
+                                                                    {t.terbelah && (
+                                                                        <span className="block text-amber-700">
+                                                                            rombongannya terbagi ke meja lain
+                                                                        </span>
+                                                                    )}
                                                                 </span>
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => keluarkan(t.id)}
+                                                                    onClick={() =>
+                                                                        keluarkan(t.id, m.nomor)
+                                                                    }
                                                                     className="shrink-0 text-red-600 hover:underline"
                                                                 >
                                                                     keluarkan
@@ -284,16 +366,20 @@ export default function Index({ acara, mejas, belum }) {
                 - bukan ke layar - sehingga tidak pernah terlihat saat
                 menggulir ke daftar meja.
             */}
-            {dipilih && (
+            {aktif && (
                 <div className="fixed inset-x-0 bottom-0 z-30 border-t border-amber-300 bg-amber-50 p-3 shadow-[0_-2px_8px_rgba(0,0,0,0.08)] lg:hidden">
-                    <div className="mx-auto flex max-w-7xl items-center gap-3">
+                    <div className="mx-auto flex max-w-7xl items-start gap-3">
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-amber-900">
-                                {dipilih.nama}
+                                {aktif.nama}
                             </p>
                             <p className="text-xs text-amber-800">
-                                Butuh {dipilih.jumlah_orang} kursi &mdash; pilih mejanya di bawah
+                                {aktif.sudah > 0
+                                    ? `${aktif.sudah} dari ${aktif.jumlah_orang} sudah duduk`
+                                    : `Butuh ${aktif.jumlah_orang} kursi`}{" "}
+                                &mdash; pilih mejanya di bawah
                             </p>
+                            <div className="text-amber-900">{kontrolJumlah}</div>
                         </div>
                         <button
                             type="button"

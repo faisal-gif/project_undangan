@@ -24,7 +24,7 @@ class PenempatanKursiTest extends TestCase
         parent::setUp();
 
         $this->acara = Acara::where('aktif', true)->firstOrFail();
-        $this->acara->update(['jumlah_kursi' => 14, 'kursi_per_meja' => 6]);
+        $this->acara->update(['jumlah_meja' => 3, 'kursi_per_meja' => 6]);
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
@@ -40,12 +40,13 @@ class PenempatanKursiTest extends TestCase
         ]);
     }
 
-    public function test_jumlah_meja_dihitung_dari_pengaturan(): void
+    public function test_jumlah_kursi_dihitung_dari_jumlah_meja(): void
     {
-        // 14 kursi, 6 per meja: tiga meja, yang terakhir hanya dua kursi.
+        // 3 meja, 6 per meja: semuanya penuh, totalnya 18 kursi.
         $this->assertSame(3, $this->acara->jumlahMeja());
+        $this->assertSame(18, $this->acara->jumlahKursi());
         $this->assertSame(6, $this->acara->kursiDiMeja(1));
-        $this->assertSame(2, $this->acara->kursiDiMeja(3));
+        $this->assertSame(6, $this->acara->kursiDiMeja(3));
         $this->assertSame(0, $this->acara->kursiDiMeja(4));
     }
 
@@ -78,7 +79,13 @@ class PenempatanKursiTest extends TestCase
 
     public function test_meja_yang_sisa_kursinya_kurang_ditolak(): void
     {
-        // Meja 3 hanya punya dua kursi; tamu bertiga tidak muat.
+        // Semua meja kini berisi enam. Meja 3 diisi empat orang lebih dulu,
+        // jadi sisanya dua - tamu bertiga tetap tidak muat.
+        $penghuni = $this->tamu(4, 'Berempat');
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $penghuni->id, 'meja' => 3]);
+
         $tamu = $this->tamu(3, 'Bertiga');
 
         $this->actingAs($this->admin)
@@ -190,7 +197,7 @@ class PenempatanKursiTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('acara.jumlah_meja', 3)
-                ->where('mejas.2.kapasitas', 2));
+                ->where('mejas.2.kapasitas', 6));
     }
 
     public function test_letak_meja_jatuh_ke_grid_bila_belum_diatur(): void
@@ -249,7 +256,7 @@ class PenempatanKursiTest extends TestCase
 
     public function test_orientasi_menentukan_jumlah_kolom_grid(): void
     {
-        $this->acara->update(['jumlah_kursi' => 144, 'meja_per_baris' => null]);
+        $this->acara->update(['jumlah_meja' => 24, 'meja_per_baris' => null]);
 
         $this->acara->update(['orientasi_denah' => Acara::DENAH_LANDSCAPE]);
         $melebar = $this->acara->fresh()->kolomGrid();

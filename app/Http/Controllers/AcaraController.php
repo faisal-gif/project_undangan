@@ -26,8 +26,12 @@ class AcaraController extends Controller
                 'peta_url' => $acara->peta_url,
                 'video_url' => $acara->video_url,
                 'musik_url' => $acara->musik_url,
-                'jumlah_kursi' => $acara->jumlah_kursi,
+                'jumlah_meja' => $acara->jumlah_meja,
                 'kursi_per_meja' => $acara->kursi_per_meja,
+                // Dipakai formulir untuk memperingatkan sebelum tata letaknya
+                // disusutkan, bukan untuk ditampilkan apa adanya.
+                'meja_terpakai' => $acara->mejaTerpakai(),
+                'kursi_terpakai' => $acara->kursiTerpakai(),
                 'aktif' => $acara->aktif,
             ] : null,
             'acaras' => Acara::withCount('tamus')->orderByDesc('mulai')->get()
@@ -44,6 +48,7 @@ class AcaraController extends Controller
     {
         // Edisi baru sengaja dibuat tidak aktif: membuat dan menayangkan
         // adalah dua keputusan yang berbeda.
+        // Edisi baru belum punya tamu, jadi tidak ada yang bisa tergusur.
         $acara = Acara::create($this->data($request) + ['aktif' => false]);
 
         return redirect()->route('admin.acara.edit', ['acara' => $acara->id])
@@ -52,7 +57,7 @@ class AcaraController extends Controller
 
     public function update(Request $request, Acara $acara)
     {
-        $acara->update($this->data($request));
+        $acara->update($this->data($request, $acara));
 
         return back()->with('success', 'Data acara diperbarui.');
     }
@@ -71,7 +76,7 @@ class AcaraController extends Controller
         return back()->with('success', $acara->label() . ' sekarang menjadi acara aktif.');
     }
 
-    private function data(Request $request): array
+    private function data(Request $request, ?Acara $acara = null): array
     {
         $data = $request->validate([
             'nama' => 'required|string|max:255',
@@ -82,7 +87,7 @@ class AcaraController extends Controller
             'peta_url' => 'nullable|url|max:255',
             'video_url' => 'nullable|string|max:255',
             'musik_url' => 'nullable|string|max:255',
-            'jumlah_kursi' => 'nullable|integer|min:0|max:5000',
+            'jumlah_meja' => 'nullable|integer|min:0|max:500',
             'kursi_per_meja' => 'nullable|integer|min:1|max:50',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
@@ -91,7 +96,10 @@ class AcaraController extends Controller
             'selesai.after' => 'Jam selesai harus setelah jam mulai.',
             'peta_url.url' => 'Tautan peta harus berupa URL lengkap.',
             'kursi_per_meja.min' => 'Satu meja minimal punya satu kursi.',
+            'jumlah_meja.min' => 'Jumlah meja tidak boleh negatif.',
         ]);
+
+        $this->tolakBilaMenggusurTamu($data, $acara);
 
         // Terima bentuk tautan YouTube apa pun, tolak yang bukan YouTube.
         if (filled($data['video_url'] ?? null) && ! Acara::idYoutube($data['video_url'])) {
@@ -105,5 +113,41 @@ class AcaraController extends Controller
         $data['selesai'] = $data['selesai'] ?? null;
 
         return $data;
+    }
+
+    /**
+     * Mengecilkan tata letak akan membuang tempat duduk yang sudah dipakai -
+     * dan undangannya sudah dikirim lengkap dengan nomor meja dan kursinya.
+     * Tamu tidak akan terhapus, tapi kursinya jadi berada di luar denah:
+     * hilang dari papan penempatan tanpa satu pun peringatan.
+     *
+     * Karena itu penyusutan ditolak di sini, bukan sekadar diperingatkan di
+     * layar. Admin harus memindahkan tamunya lebih dulu.
+     */
+    private function tolakBilaMenggusurTamu(array $data, ?Acara $acara): void
+    {
+        if (! $acara) {
+            return;
+        }
+
+        $pesan = [];
+
+        $meja = $data['jumlah_meja'] ?? null;
+        $mejaTerpakai = $acara->mejaTerpakai();
+
+        if ($meja !== null && $mejaTerpakai > 0 && (int) $meja < $mejaTerpakai) {
+            $pesan['jumlah_meja'] = "Meja {$mejaTerpakai} masih ada tamunya, jadi jumlah meja tidak bisa kurang dari {$mejaTerpakai}. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+        }
+
+        $per = $data['kursi_per_meja'] ?? null;
+        $kursiTerpakai = $acara->kursiTerpakai();
+
+        if ($per !== null && $kursiTerpakai > 0 && (int) $per < $kursiTerpakai) {
+            $pesan['kursi_per_meja'] = "Kursi nomor {$kursiTerpakai} masih dipakai, jadi kursi per meja tidak bisa kurang dari {$kursiTerpakai}. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+        }
+
+        if ($pesan) {
+            throw ValidationException::withMessages($pesan);
+        }
     }
 }

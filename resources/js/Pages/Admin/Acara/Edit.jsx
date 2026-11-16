@@ -15,7 +15,7 @@ const kosong = {
     peta_url: "",
     video_url: "",
     musik_url: "",
-    jumlah_kursi: "",
+    jumlah_meja: "",
     kursi_per_meja: 6,
 };
 
@@ -38,23 +38,17 @@ function bacaWib(nilai) {
 }
 
 /**
- * "144 kursi, 6 per meja" -> "24 meja; meja terakhir terisi 6 kursi".
- * Dibulatkan ke atas, karena sisa kursi tetap butuh mejanya sendiri.
+ * "24 meja, 6 per meja" -> "24 meja x 6 kursi = 144 kursi".
  */
-function hitungMeja({ jumlah_kursi, kursi_per_meja }) {
-    const kursi = Number(jumlah_kursi);
+function hitungKursi({ jumlah_meja, kursi_per_meja }) {
+    const meja = Number(jumlah_meja);
     const per = Number(kursi_per_meja);
 
-    if (!kursi || !per || kursi < 0 || per < 1) {
+    if (!meja || !per || meja < 0 || per < 1) {
         return "Belum diatur. Penempatan tamu baru bisa dilakukan setelah ini diisi.";
     }
 
-    const meja = Math.ceil(kursi / per);
-    const sisa = kursi - (meja - 1) * per;
-
-    return `${meja} meja` + (sisa === per
-        ? ` masing-masing ${per} kursi.`
-        : `; ${meja - 1} meja berisi ${per} kursi dan meja terakhir ${sisa} kursi.`);
+    return `${meja} meja \u00d7 ${per} kursi = ${meja * per} kursi.`;
 }
 
 /**
@@ -77,10 +71,19 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 peta_url: acara.peta_url || "",
                 video_url: acara.video_url || "",
                 musik_url: acara.musik_url || "",
-                jumlah_kursi: acara.jumlah_kursi ?? "",
+                jumlah_meja: acara.jumlah_meja ?? "",
                 kursi_per_meja: acara.kursi_per_meja ?? 6,
             }
     );
+
+    // Batas bawah berasal dari tempat duduk yang sudah dipakai. Edisi baru
+    // belum punya tamu, jadi batasnya nol.
+    const batasMeja = membuatBaru || !acara ? 0 : acara.meja_terpakai || 0;
+    const batasKursi = membuatBaru || !acara ? 0 : acara.kursi_terpakai || 0;
+
+    const menyusut =
+        (batasMeja > 0 && Number(data.jumlah_meja) > 0 && Number(data.jumlah_meja) < batasMeja) ||
+        (batasKursi > 0 && Number(data.kursi_per_meja) > 0 && Number(data.kursi_per_meja) < batasKursi);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -207,27 +210,32 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 <InputError message={errors.musik_url} className="mt-2" />
             </div>
 
-            {/* Tata letak kursi. Jumlah mejanya tidak diketik - ia hasil bagi
+            {/* Tata letak kursi. Jumlah kursinya tidak diketik - ia hasil kali
                 kedua angka ini, jadi tidak pernah berselisih dengan keduanya. */}
             <div className="border-t border-gray-200 pt-5">
                 <InputLabel value="Tata letak kursi" />
                 <p className="mt-1 text-xs text-gray-500">
-                    Isi jumlah kursi dan isi tiap meja; banyaknya meja dihitung sendiri.
+                    Isi banyaknya meja dan isi tiap meja; jumlah kursi dihitung sendiri.
                 </p>
 
                 <div className="mt-3 grid gap-5 sm:grid-cols-2">
                     <div>
-                        <InputLabel htmlFor="jumlah_kursi" value="Jumlah kursi" />
+                        <InputLabel htmlFor="jumlah_meja" value="Jumlah meja" />
                         <TextInput
-                            id="jumlah_kursi"
+                            id="jumlah_meja"
                             type="number"
-                            min="0"
+                            min={batasMeja || 0}
                             className="mt-1 block w-full"
-                            value={data.jumlah_kursi}
-                            onChange={(e) => setData("jumlah_kursi", e.target.value)}
-                            placeholder="144"
+                            value={data.jumlah_meja}
+                            onChange={(e) => setData("jumlah_meja", e.target.value)}
+                            placeholder="24"
                         />
-                        <InputError message={errors.jumlah_kursi} className="mt-2" />
+                        {batasMeja > 0 && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                Minimal {batasMeja}; meja {batasMeja} masih ada tamunya.
+                            </p>
+                        )}
+                        <InputError message={errors.jumlah_meja} className="mt-2" />
                     </div>
 
                     <div>
@@ -235,16 +243,30 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         <TextInput
                             id="kursi_per_meja"
                             type="number"
-                            min="1"
+                            min={batasKursi || 1}
                             className="mt-1 block w-full"
                             value={data.kursi_per_meja}
                             onChange={(e) => setData("kursi_per_meja", e.target.value)}
                         />
+                        {batasKursi > 0 && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                Minimal {batasKursi}; kursi nomor {batasKursi} masih dipakai.
+                            </p>
+                        )}
                         <InputError message={errors.kursi_per_meja} className="mt-2" />
                     </div>
                 </div>
 
-                <p className="mt-3 text-sm text-gray-700">{hitungMeja(data)}</p>
+                <p className="mt-3 text-sm text-gray-700">{hitungKursi(data)}</p>
+
+                {menyusut && (
+                    <div className="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        Tata letaknya mengecil dari yang sedang dipakai. Tamu yang
+                        duduk di luar ukuran baru akan hilang dari denah - undangannya
+                        sudah terkirim dengan nomor itu. Pindahkan tamunya dulu lewat
+                        Penempatan Kursi.
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-wrap items-center gap-4">

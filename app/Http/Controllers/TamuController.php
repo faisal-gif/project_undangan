@@ -8,18 +8,15 @@ use App\Models\Acara;
 use App\Models\EmailLog;
 use App\Models\Tamu;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Typography\FontFactory;
 
 class TamuController extends Controller
 {
-
     /**
      * Gambar QR untuk satu tamu, dibuat saat diminta - tidak ada berkas yang
      * disimpan. Isinya kode acak milik tamu, bukan nomor id, supaya QR tamu
@@ -158,6 +155,7 @@ class TamuController extends Controller
 
             if ($kunci !== '' && $sudahAda->has($kunci)) {
                 $dilewati++;
+
                 continue;
             }
 
@@ -179,10 +177,10 @@ class TamuController extends Controller
             $disalin++;
         }
 
-        $pesan = $disalin . ' tamu disalin ke ' . $tujuan->label() . '.';
+        $pesan = $disalin.' tamu disalin ke '.$tujuan->label().'.';
 
         if ($dilewati > 0) {
-            $pesan .= ' ' . $dilewati . ' dilewati karena namanya sudah ada.';
+            $pesan .= ' '.$dilewati.' dilewati karena namanya sudah ada.';
         }
 
         $pesan .= ' Jalankan "Generate Qr Code" untuk membuat QR-nya.';
@@ -219,10 +217,9 @@ class TamuController extends Controller
      */
     private function pastikanKursiKosong(Request $request, ?int $acaraId, ?Tamu $kecuali = null): void
     {
-        $meja = trim((string) $request->meja);
-        $diminta = Tamu::pecahKursi($request->kursi);
+        $peta = Tamu::pecahTempat($request->meja, $request->kursi);
 
-        if ($meja === '' || ! $diminta || ! $acaraId) {
+        if (! $peta || ! $acaraId) {
             return;
         }
 
@@ -230,26 +227,37 @@ class TamuController extends Controller
         // mengubah isi per meja di pengaturan, dan pemeriksaan ini harus ikut.
         $acara = Acara::find($acaraId);
         $perMeja = $acara?->kursiPerMeja() ?? 6;
+        $diminta = [];
 
-        $diluar = array_filter(
-            $diminta,
-            fn ($k) => ! ctype_digit($k) || (int) $k < 1 || (int) $k > $perMeja
-        );
+        foreach ($peta as $meja => $nomor) {
+            $diluar = array_filter(
+                $nomor,
+                fn ($k) => ! ctype_digit($k) || (int) $k < 1 || (int) $k > $perMeja
+            );
 
-        if ($diluar) {
-            throw ValidationException::withMessages([
-                'kursi' => 'Nomor kursi ' . implode(', ', $diluar) . ' tidak ada. '
-                    . 'Tiap meja hanya punya kursi 1 sampai ' . $perMeja . '.',
-            ]);
+            if ($diluar) {
+                throw ValidationException::withMessages([
+                    'kursi' => 'Nomor kursi '.implode(', ', $diluar).' tidak ada. '
+                        .'Tiap meja hanya punya kursi 1 sampai '.$perMeja.'.',
+                ]);
+            }
+
+            // Nomor meja juga dibatasi, tapi hanya bila tata letaknya sudah diatur.
+            if ($acara && $acara->jumlahMeja() > 0 && ctype_digit((string) $meja)
+                && ((int) $meja < 1 || (int) $meja > $acara->jumlahMeja())) {
+                throw ValidationException::withMessages([
+                    'meja' => 'Meja '.$meja.' tidak ada. Acara ini punya '
+                        .$acara->jumlahMeja().' meja.',
+                ]);
+            }
+
+            $diminta = array_merge($diminta, $nomor);
         }
 
-        // Nomor meja juga dibatasi, tapi hanya bila tata letaknya sudah diatur.
-        if ($acara && $acara->jumlahMeja() > 0 && ctype_digit($meja)
-            && ((int) $meja < 1 || (int) $meja > $acara->jumlahMeja())) {
-            throw ValidationException::withMessages([
-                'meja' => 'Meja ' . $meja . ' tidak ada. Acara ini punya '
-                    . $acara->jumlahMeja() . ' meja.',
-            ]);
+        // Mejanya sudah diisi tapi kursinya belum: penempatan yang baru
+        // setengah jadi memang belum bisa dinilai.
+        if (! $diminta) {
+            return;
         }
 
         // Jumlah kursi harus sebanyak orang yang diundang - kalau kurang, ada
@@ -259,24 +267,28 @@ class TamuController extends Controller
 
         if (count($diminta) !== $orang) {
             throw ValidationException::withMessages([
-                'kursi' => 'Undangan ini untuk ' . $orang . ' orang, tapi ada '
-                    . count($diminta) . ' nomor kursi.',
+                'kursi' => 'Undangan ini untuk '.$orang.' orang, tapi ada '
+                    .count($diminta).' nomor kursi.',
             ]);
         }
 
+        // Disaring di PHP, bukan SQL: satu tamu boleh menempati beberapa meja,
+        // jadi kolom mejanya tidak lagi cocok dibandingkan sebagai teks utuh.
         $lain = Tamu::where('acara_id', $acaraId)
-            ->whereRaw('UPPER(TRIM(meja)) = ?', [mb_strtoupper($meja)])
+            ->whereNotNull('meja')
             ->when($kecuali?->id, fn ($q, $id) => $q->whereKeyNot($id))
             ->get();
 
         foreach ($lain as $tamu) {
-            $bentrok = array_intersect($diminta, $tamu->nomorKursi());
+            foreach ($peta as $meja => $nomor) {
+                $bentrok = array_intersect($nomor, $tamu->kursiDi($meja));
 
-            if ($bentrok) {
-                throw ValidationException::withMessages([
-                    'kursi' => 'Kursi ' . implode(', ', $bentrok) . ' di meja ' . $meja
-                        . ' sudah dipakai ' . $tamu->nama . '.',
-                ]);
+                if ($bentrok) {
+                    throw ValidationException::withMessages([
+                        'kursi' => 'Kursi '.implode(', ', $bentrok).' di meja '.$meja
+                            .' sudah dipakai '.$tamu->nama.'.',
+                    ]);
+                }
             }
         }
     }
@@ -493,10 +505,9 @@ class TamuController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-
         return Inertia::render('Admin/QrScanner/Index', [
             'tamus' => $tamus,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -514,7 +525,7 @@ class TamuController extends Controller
             }
         });
 
-        return back()->with('success', 'Email untuk ' . $acara->label() . ' sedang dikirim.');
+        return back()->with('success', 'Email untuk '.$acara->label().' sedang dikirim.');
     }
 
     public function sendEmail($id)
@@ -530,7 +541,7 @@ class TamuController extends Controller
         }
 
         if ($tamu->email) {
-            $qrcodePath = storage_path('app/public/' . str_replace('storage/', '', $tamu->qrcode));
+            $qrcodePath = storage_path('app/public/'.str_replace('storage/', '', $tamu->qrcode));
 
             try {
                 Mail::to($tamu->email)->send(new TicketMail($tamu, $qrcodePath));
@@ -538,16 +549,16 @@ class TamuController extends Controller
                 // jika berhasil
                 EmailLog::create([
                     'tamu_id' => $tamu->id,
-                    'email'   => $tamu->email,
-                    'status'  => 'success',
+                    'email' => $tamu->email,
+                    'status' => 'success',
                     'message' => 'Email berhasil dikirim',
                 ]);
             } catch (\Exception $e) {
                 // jika gagal
                 EmailLog::create([
                     'tamu_id' => $tamu->id,
-                    'email'   => $tamu->email,
-                    'status'  => 'failed',
+                    'email' => $tamu->email,
+                    'status' => 'failed',
                     'message' => $e->getMessage(),
                 ]);
             }
@@ -564,7 +575,7 @@ class TamuController extends Controller
         $tamu = Tamu::with('acara')->where('code', $kode)->first()
             ?? (ctype_digit($kode) ? Tamu::with('acara')->find($kode) : null);
 
-        if (!$tamu) {
+        if (! $tamu) {
             return back()->with('error', 'Undangan Tidak ditemukan');
         }
 
@@ -575,8 +586,8 @@ class TamuController extends Controller
         if (! $acara || $tamu->acara_id !== $acara->id) {
             return back()->with(
                 'error',
-                'QR ini untuk ' . ($tamu->acara?->label() ?? 'acara lain')
-                    . ', bukan ' . ($acara?->label() ?? 'acara yang sedang berlangsung') . '.'
+                'QR ini untuk '.($tamu->acara?->label() ?? 'acara lain')
+                    .', bukan '.($acara?->label() ?? 'acara yang sedang berlangsung').'.'
             );
         }
 
@@ -592,7 +603,7 @@ class TamuController extends Controller
         // penerima tamu harus bisa membaca nomor mejanya sekilas, dan layar
         // pemindai menampilkannya jauh lebih besar daripada teks biasa.
         return back()
-            ->with('success', 'Selamat datang ' . $tamu->nama)
+            ->with('success', 'Selamat datang '.$tamu->nama)
             ->with('duduk', $tamu->tempatDuduk());
     }
 
@@ -607,9 +618,6 @@ class TamuController extends Controller
         $tamu->status = $request->status;
         $tamu->save();
 
-        return redirect()->route('admin.qrScanner')->with('success', 'Racepack atas nama: ' . $tamu->nama . ' sudah diambil');
+        return redirect()->route('admin.qrScanner')->with('success', 'Racepack atas nama: '.$tamu->nama.' sudah diambil');
     }
-
-
-
 }

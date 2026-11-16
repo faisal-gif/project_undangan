@@ -20,6 +20,7 @@ class Acara extends Model
      * Hanya untuk grid; meja yang digeser admin boleh ke mana saja.
      */
     public const DENAH_LANDSCAPE = 'landscape';
+
     public const DENAH_POTRET = 'potret';
 
     /**
@@ -33,8 +34,11 @@ class Acara extends Model
     ];
 
     private const LANTAI_KIRI = 8;
+
     private const LANTAI_KANAN = 92;
+
     private const LANTAI_ATAS = 8;
+
     private const LANTAI_BAWAH = 92;
 
     protected $fillable = [
@@ -46,7 +50,7 @@ class Acara extends Model
         'peta_url',
         'video_url',
         'musik_url',
-        'jumlah_kursi',
+        'jumlah_meja',
         'kursi_per_meja',
         'meja_per_baris',
         'orientasi_denah',
@@ -129,33 +133,65 @@ class Acara extends Model
     }
 
     /**
-     * Banyak meja diturunkan dari dua angka di pengaturan, tidak disimpan.
-     * Dengan begitu jumlah meja tidak pernah berselisih dengan jumlah kursi.
-     *
-     * Dibulatkan ke atas: 100 kursi dengan 6 per meja berarti 17 meja, yang
-     * terakhir hanya terisi empat kursi - bukan dibuang.
+     * Banyak meja diketik langsung oleh admin.
      */
     public function jumlahMeja(): int
     {
-        $kursi = (int) $this->jumlah_kursi;
-
-        return $kursi > 0 ? (int) ceil($kursi / $this->kursiPerMeja()) : 0;
+        return max(0, (int) $this->jumlah_meja);
     }
 
     /**
-     * Kursi yang benar-benar ada di meja tertentu. Meja terakhir bisa lebih
-     * sedikit bila jumlah kursi tidak habis dibagi.
+     * Jumlah kursi diturunkan, tidak disimpan - dengan begitu ia tidak pernah
+     * berselisih dengan jumlah meja. Semua meja berisi sama banyak.
+     */
+    public function jumlahKursi(): int
+    {
+        return $this->jumlahMeja() * $this->kursiPerMeja();
+    }
+
+    /**
+     * Kursi di meja tertentu. Semua meja sama isinya; yang di luar jangkauan
+     * mengembalikan nol supaya pemanggilnya tidak perlu memeriksa sendiri.
      */
     public function kursiDiMeja(int $meja): int
     {
-        $total = (int) $this->jumlah_kursi;
-        $per = $this->kursiPerMeja();
-
-        if ($total <= 0 || $meja < 1 || $meja > $this->jumlahMeja()) {
+        if ($meja < 1 || $meja > $this->jumlahMeja()) {
             return 0;
         }
 
-        return min($per, $total - ($meja - 1) * $per);
+        return $this->kursiPerMeja();
+    }
+
+    /**
+     * Nomor meja tertinggi yang sudah ada tamunya.
+     *
+     * Nomor meja boleh berupa huruf ("VIP 2"), dan yang begitu tidak ikut
+     * dihitung - ia memang di luar denah bernomor.
+     */
+    public function mejaTerpakai(): int
+    {
+        return (int) $this->tamus()
+            ->whereNotNull('meja')
+            ->get(['meja', 'kursi'])
+            ->flatMap(fn ($t) => $t->mejaDitempati())
+            ->map(fn ($m) => ctype_digit((string) $m) ? (int) $m : 0)
+            ->max();
+    }
+
+    /**
+     * Nomor kursi tertinggi yang sudah dipakai di meja mana pun.
+     *
+     * nomorKursi() mengembalikan teks - kursi boleh ditulis "3, 4" maupun
+     * "A1" - jadi yang bukan angka dilewati, sama seperti pada mejaTerpakai().
+     */
+    public function kursiTerpakai(): int
+    {
+        return (int) $this->tamus()
+            ->whereNotNull('kursi')
+            ->get(['meja', 'kursi'])
+            ->flatMap(fn ($t) => $t->nomorKursi())
+            ->map(fn ($n) => ctype_digit((string) $n) ? (int) $n : 0)
+            ->max();
     }
 
     /**
@@ -245,7 +281,7 @@ class Acara extends Model
 
     public function label(): string
     {
-        return 'ATI ' . $this->mulai?->timezone(self::ZONA)->year;
+        return 'ATI '.$this->mulai?->timezone(self::ZONA)->year;
     }
 
     /**
@@ -358,7 +394,7 @@ class Acara extends Model
         $selesai = $this->selesai?->timezone(self::ZONA);
 
         return $selesai
-            ? $mulai->format('H:i') . ' - ' . $selesai->format('H:i') . ' WIB'
-            : $mulai->format('H:i') . ' WIB';
+            ? $mulai->format('H:i').' - '.$selesai->format('H:i').' WIB'
+            : $mulai->format('H:i').' WIB';
     }
 }
