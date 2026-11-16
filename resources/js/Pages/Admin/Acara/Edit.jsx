@@ -17,6 +17,7 @@ const kosong = {
     musik_url: "",
     jumlah_meja: "",
     kursi_per_meja: 6,
+    kursi_tambahan: 0,
 };
 
 /**
@@ -38,17 +39,39 @@ function bacaWib(nilai) {
 }
 
 /**
- * "24 meja, 6 per meja" -> "24 meja x 6 kursi = 144 kursi".
+ * "27 meja, 6 per meja, 1 tambahan" -> "27 x 6 + 1 = 163 kursi. Meja 27
+ * berisi 7."
+ *
+ * Rumus pembagian kursi tambahannya sama persis dengan Acara::kursiDiMeja()
+ * di server - satu kursi per meja dari meja terakhir mundur ke depan.
  */
-function hitungKursi({ jumlah_meja, kursi_per_meja }) {
+function hitungKursi({ jumlah_meja, kursi_per_meja, kursi_tambahan }) {
     const meja = Number(jumlah_meja);
     const per = Number(kursi_per_meja);
+    const tambahan = Math.max(0, Number(kursi_tambahan) || 0);
 
     if (!meja || !per || meja < 0 || per < 1) {
         return "Belum diatur. Penempatan tamu baru bisa dilakukan setelah ini diisi.";
     }
 
-    return `${meja} meja \u00d7 ${per} kursi = ${meja * per} kursi.`;
+    const total = meja * per + tambahan;
+
+    if (tambahan === 0) {
+        return `${meja} meja \u00d7 ${per} kursi = ${total} kursi.`;
+    }
+
+    const putaran = Math.floor(tambahan / meja);
+    const sisa = tambahan % meja;
+    const berlebih = [];
+
+    for (let n = meja - sisa + 1; n <= meja; n++) berlebih.push(n);
+
+    const rincian = putaran
+        ? `Semua meja berisi ${per + putaran} kursi` +
+          (sisa ? `, kecuali meja ${berlebih.join(", ")} yang berisi ${per + putaran + 1}.` : ".")
+        : `Meja ${berlebih.join(", ")} berisi ${per + 1} kursi, sisanya ${per}.`;
+
+    return `${meja} meja \u00d7 ${per} kursi + ${tambahan} kursi tambahan = ${total} kursi. ${rincian}`;
 }
 
 /**
@@ -73,6 +96,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 musik_url: acara.musik_url || "",
                 jumlah_meja: acara.jumlah_meja ?? "",
                 kursi_per_meja: acara.kursi_per_meja ?? 6,
+                kursi_tambahan: acara.kursi_tambahan ?? 0,
             }
     );
 
@@ -81,9 +105,12 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
     const batasMeja = membuatBaru || !acara ? 0 : acara.meja_terpakai || 0;
     const batasKursi = membuatBaru || !acara ? 0 : acara.kursi_terpakai || 0;
 
+    // Hanya penyusutan jumlah meja yang bisa dipastikan di layar. Kursi per
+    // meja tidak lagi sepadan dengan satu angka sejak ada kursi tambahan -
+    // kursi 7 boleh sah di meja terakhir - jadi penilaiannya diserahkan ke
+    // server, yang menyebut nomor kursi, nomor meja, dan nama tamunya.
     const menyusut =
-        (batasMeja > 0 && Number(data.jumlah_meja) > 0 && Number(data.jumlah_meja) < batasMeja) ||
-        (batasKursi > 0 && Number(data.kursi_per_meja) > 0 && Number(data.kursi_per_meja) < batasKursi);
+        batasMeja > 0 && Number(data.jumlah_meja) > 0 && Number(data.jumlah_meja) < batasMeja;
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -210,15 +237,17 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 <InputError message={errors.musik_url} className="mt-2" />
             </div>
 
-            {/* Tata letak kursi. Jumlah kursinya tidak diketik - ia hasil kali
-                kedua angka ini, jadi tidak pernah berselisih dengan keduanya. */}
+            {/* Tata letak kursi. Jumlah kursinya tidak diketik - ia diturunkan
+                dari ketiga angka ini, jadi tidak pernah berselisih dengan
+                ketiganya. */}
             <div className="border-t border-gray-200 pt-5">
                 <InputLabel value="Tata letak kursi" />
                 <p className="mt-1 text-xs text-gray-500">
                     Isi banyaknya meja dan isi tiap meja; jumlah kursi dihitung sendiri.
+                    Kursi tambahan untuk sisa undangan yang tidak pas membagi habis.
                 </p>
 
-                <div className="mt-3 grid gap-5 sm:grid-cols-2">
+                <div className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <InputLabel htmlFor="jumlah_meja" value="Jumlah meja" />
                         <TextInput
@@ -243,17 +272,34 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         <TextInput
                             id="kursi_per_meja"
                             type="number"
-                            min={batasKursi || 1}
+                            min="1"
                             className="mt-1 block w-full"
                             value={data.kursi_per_meja}
                             onChange={(e) => setData("kursi_per_meja", e.target.value)}
                         />
                         {batasKursi > 0 && (
                             <p className="mt-1 text-xs text-gray-500">
-                                Minimal {batasKursi}; kursi nomor {batasKursi} masih dipakai.
+                                Kursi tertinggi yang sudah dipakai: {batasKursi}.
                             </p>
                         )}
                         <InputError message={errors.kursi_per_meja} className="mt-2" />
+                    </div>
+
+                    <div>
+                        <InputLabel htmlFor="kursi_tambahan" value="Kursi tambahan" />
+                        <TextInput
+                            id="kursi_tambahan"
+                            type="number"
+                            min="0"
+                            className="mt-1 block w-full"
+                            value={data.kursi_tambahan}
+                            onChange={(e) => setData("kursi_tambahan", e.target.value)}
+                            placeholder="0"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                            Disisipkan satu per meja dari meja terakhir mundur ke depan.
+                        </p>
+                        <InputError message={errors.kursi_tambahan} className="mt-2" />
                     </div>
                 </div>
 
@@ -261,8 +307,8 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
 
                 {menyusut && (
                     <div className="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        Tata letaknya mengecil dari yang sedang dipakai. Tamu yang
-                        duduk di luar ukuran baru akan hilang dari denah - undangannya
+                        Meja {batasMeja} masih ada tamunya. Tamu yang duduk di luar
+                        jumlah meja yang baru akan hilang dari denah - undangannya
                         sudah terkirim dengan nomor itu. Pindahkan tamunya dulu lewat
                         Penempatan Kursi.
                     </div>

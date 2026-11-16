@@ -28,6 +28,7 @@ class AcaraController extends Controller
                 'musik_url' => $acara->musik_url,
                 'jumlah_meja' => $acara->jumlah_meja,
                 'kursi_per_meja' => $acara->kursi_per_meja,
+                'kursi_tambahan' => $acara->kursi_tambahan,
                 // Dipakai formulir untuk memperingatkan sebelum tata letaknya
                 // disusutkan, bukan untuk ditampilkan apa adanya.
                 'meja_terpakai' => $acara->mejaTerpakai(),
@@ -35,7 +36,7 @@ class AcaraController extends Controller
                 'aktif' => $acara->aktif,
             ] : null,
             'acaras' => Acara::withCount('tamus')->orderByDesc('mulai')->get()
-                ->map(fn(Acara $a) => [
+                ->map(fn (Acara $a) => [
                     'id' => $a->id,
                     'label' => $a->label(),
                     'jumlah' => $a->tamus_count,
@@ -73,7 +74,7 @@ class AcaraController extends Controller
             $acara->update(['aktif' => true]);
         });
 
-        return back()->with('success', $acara->label() . ' sekarang menjadi acara aktif.');
+        return back()->with('success', $acara->label().' sekarang menjadi acara aktif.');
     }
 
     private function data(Request $request, ?Acara $acara = null): array
@@ -89,6 +90,7 @@ class AcaraController extends Controller
             'musik_url' => 'nullable|string|max:255',
             'jumlah_meja' => 'nullable|integer|min:0|max:500',
             'kursi_per_meja' => 'nullable|integer|min:1|max:50',
+            'kursi_tambahan' => 'nullable|integer|min:0|max:500',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
             'mulai.required' => 'Tanggal dan jam mulai wajib diisi.',
@@ -123,6 +125,10 @@ class AcaraController extends Controller
      *
      * Karena itu penyusutan ditolak di sini, bukan sekadar diperingatkan di
      * layar. Admin harus memindahkan tamunya lebih dulu.
+     *
+     * Diperiksa kursi demi kursi, bukan lewat nomor tertinggi: sejak ada
+     * kursi tambahan, kapasitas tiap meja tidak lagi sama. Kursi nomor 7 yang
+     * sah di meja terakhir tidak boleh memaksa seluruh meja berisi tujuh.
      */
     private function tolakBilaMenggusurTamu(array $data, ?Acara $acara): void
     {
@@ -130,20 +136,42 @@ class AcaraController extends Controller
             return;
         }
 
-        $pesan = [];
+        // Tata letak yang diusulkan, belum disimpan. Kapasitas tiap mejanya
+        // ditanyakan lewat rumus yang sama persis dengan yang nanti berlaku,
+        // jadi penjaga ini tidak bisa berselisih dengan hasil akhirnya.
+        $calon = $acara->replicate();
 
-        $meja = $data['jumlah_meja'] ?? null;
-        $mejaTerpakai = $acara->mejaTerpakai();
-
-        if ($meja !== null && $mejaTerpakai > 0 && (int) $meja < $mejaTerpakai) {
-            $pesan['jumlah_meja'] = "Meja {$mejaTerpakai} masih ada tamunya, jadi jumlah meja tidak bisa kurang dari {$mejaTerpakai}. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+        foreach (['jumlah_meja', 'kursi_per_meja', 'kursi_tambahan'] as $kolom) {
+            if (array_key_exists($kolom, $data)) {
+                $calon->{$kolom} = (int) $data[$kolom];
+            }
         }
 
-        $per = $data['kursi_per_meja'] ?? null;
-        $kursiTerpakai = $acara->kursiTerpakai();
+        $pesan = [];
 
-        if ($per !== null && $kursiTerpakai > 0 && (int) $per < $kursiTerpakai) {
-            $pesan['kursi_per_meja'] = "Kursi nomor {$kursiTerpakai} masih dipakai, jadi kursi per meja tidak bisa kurang dari {$kursiTerpakai}. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+        foreach ($acara->tamus()->whereNotNull('meja')->get() as $tamu) {
+            foreach ($tamu->dudukPerMeja() as $meja => $nomor) {
+                // Meja bernama huruf ("VIP 2") memang di luar denah bernomor.
+                if (! ctype_digit((string) $meja)) {
+                    continue;
+                }
+
+                $meja = (int) $meja;
+
+                if ($meja > $calon->jumlahMeja()) {
+                    $pesan['jumlah_meja'] = "Meja {$meja} masih ada tamunya ({$tamu->nama}), jadi jumlah meja tidak bisa kurang dari {$meja}. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+
+                    continue;
+                }
+
+                $kapasitas = $calon->kursiDiMeja($meja);
+
+                foreach ($nomor as $k) {
+                    if (ctype_digit((string) $k) && (int) $k > $kapasitas) {
+                        $pesan['kursi_per_meja'] = "Kursi {$k} di meja {$meja} masih dipakai {$tamu->nama}, sedangkan tata letak baru cuma memberi meja itu {$kapasitas} kursi. Pindahkan tamunya lebih dulu lewat Penempatan Kursi.";
+                    }
+                }
+            }
         }
 
         if ($pesan) {
