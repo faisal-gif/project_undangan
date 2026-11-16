@@ -1,3 +1,5 @@
+import AtiLogo from "@/Components/AtiLogo";
+import PialaTiga from "@/Components/PialaTiga";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
@@ -26,11 +28,87 @@ import { useEffect, useRef, useState } from "react";
  * angka kursi naik dari 8px ke 14px di layar admin tanpa memakan lantai
  * sepetak pun.
  */
-const JARI_MEJA = 34;
+const JARI_MEJA = 44;
 const JARI_KURSI_MAKS = 20;
-const CELAH = 3;
+
+/**
+ * Celahnya negatif: kursi diselipkan ke bawah tepi meja, bukan dijajar di
+ * luarnya. Begitulah kursi banquet yang sudah didorong masuk terlihat dari
+ * atas, dan itu yang membedakan gambar ini dari bunga tujuh kelopak.
+ *
+ * Piringannya digambar BELAKANGAN supaya sandaran kursi benar-benar
+ * tertutup olehnya - kalau urutannya terbalik, kursinya tampak ditumpuk di
+ * atas meja.
+ */
+const CELAH = -6;
 const ORBIT = JARI_MEJA + CELAH + JARI_KURSI_MAKS;
 const KOTAK = (ORBIT + JARI_KURSI_MAKS + 2) * 2;
+
+/**
+ * Dua tempat, dua ruangan yang berbeda.
+ *
+ * Halaman admin dibaca dari jarak dekat di ruang kerja yang terang. Mode
+ * monitor berdiri di meja penerima tamu saat acara berlangsung - ballroom
+ * yang lampunya diredupkan - dan dibaca dari beberapa meter. Lembar putih
+ * seukuran layar itu menyilaukan dan justru menenggelamkan kursi ambernya,
+ * jadi ruangannya digelapkan dan kursi yang terisi yang menyala.
+ *
+ * Warnanya hanya dua: abu-abu netral dan amber yang sudah dipakai seluruh
+ * panel admin. Amber berarti "ada orangnya" di mana pun ia muncul.
+ */
+const TEMA = {
+    terang: {
+        // Tiga lapis: dinding, lantai, lalu benda di atasnya. Tanpa jeda
+        // warna antara dinding dan lantai, panggung dan pintu tampak
+        // melayang di pita putih, bukan berdiri di ruangan yang sama.
+        bingkai: "border-amber-200/70 bg-amber-50/50",
+        lantai: "bg-amber-100/50",
+        panggung: "bg-gray-900 text-white",
+        videotron: "bg-gray-600 text-gray-100",
+        band: "bg-gray-700 text-gray-100",
+        papan: "border-gray-400 bg-white text-gray-600",
+        redup: "text-gray-500",
+        meja: {
+            kosong: { piring: "fill-white stroke-gray-300", taplak: "stroke-gray-200", angka: "fill-gray-500" },
+            sebagian: { piring: "fill-white stroke-amber-400", taplak: "stroke-amber-200", angka: "fill-gray-800" },
+            penuh: { piring: "fill-amber-100 stroke-amber-500", taplak: "stroke-amber-300", angka: "fill-amber-900" },
+        },
+        kursi: {
+            kosong: { bulat: "fill-white stroke-gray-300", angka: "fill-gray-500" },
+            isi: { bulat: "fill-amber-400 stroke-amber-600", angka: "fill-amber-950" },
+        },
+        bayang: "drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.18))",
+    },
+    /**
+     * Mode monitor memakai warna acaranya sendiri - anggur dan emas ATI, sama
+     * dengan undangan yang sudah dipegang tamu. Layar ini berdiri di meja
+     * penerima tamu, dilihat orang yang baru datang: ia bagian dari acara,
+     * bukan jendela panel admin yang kebetulan dipasang di ballroom.
+     *
+     * Emas hanya untuk kursi yang ada orangnya. Itu satu-satunya hal yang
+     * dicari tamu di layar ini, jadi tidak ada benda lain yang boleh
+     * seterang itu - panggungnya pun maroon, bukan emas.
+     */
+    gala: {
+        bingkai: "border-ati-gold/25 bg-ati-wine/70",
+        lantai: "bg-ati-ink/70",
+        panggung: "bg-ati-maroon text-ati-gold-light",
+        videotron: "bg-ati-gold/25 text-ati-gold-light",
+        band: "bg-ati-wine text-ati-gold/80",
+        papan: "border-ati-gold/30 bg-ati-wine text-ati-cream/70",
+        redup: "text-ati-cream/70",
+        meja: {
+            kosong: { piring: "fill-ati-wine stroke-ati-gold/30", taplak: "stroke-ati-gold/15", angka: "fill-ati-cream/60" },
+            sebagian: { piring: "fill-ati-wine stroke-ati-gold/70", taplak: "stroke-ati-gold/30", angka: "fill-ati-cream" },
+            penuh: { piring: "fill-ati-maroon stroke-ati-gold", taplak: "stroke-ati-gold/45", angka: "fill-ati-gold-light" },
+        },
+        kursi: {
+            kosong: { bulat: "fill-ati-wine stroke-ati-gold/30", angka: "fill-ati-cream/50" },
+            isi: { bulat: "fill-ati-gold stroke-ati-gold-light", angka: "fill-ati-ink" },
+        },
+        bayang: "drop-shadow(0 2px 3px rgb(0 0 0 / 0.55))",
+    },
+};
 
 /**
  * Kursi sebesar mungkin tanpa saling bertumpuk di orbitnya.
@@ -65,12 +143,20 @@ const ISI_SEL = 0.96;
  * yang dipakai menghitung jumlah kolom grid.
  */
 const LANTAI = {
-    // vhLayar diukur, bukan dikira: di 1920x1080 judul, videotron, panggung,
-    // pintu, dan jaraknya memakan 217px, jadi 0.80 ke atas membuat halaman
-    // monitor ikut tergulir - dan di monitor tidak ada yang menggulirnya.
-    landscape: { vh: 0.64, vhLayar: 0.79, min: 440, maks: 1000, rasio: 1.95 },
-    potret: { vh: 0.76, vhLayar: 0.84, min: 540, maks: 1250, rasio: 0.72 },
+    landscape: { vh: 0.64, min: 440, maks: 1000, rasio: 1.95 },
+    potret: { vh: 0.76, min: 540, maks: 1250, rasio: 0.72 },
 };
+
+/**
+ * Tinggi yang dipakai selain lantai di mode monitor: kepala halaman, panggung,
+ * pintu, keterangan, dan jaraknya. Diukur, bukan dikira.
+ *
+ * Dikurangkan, bukan dipersenkan. Pecahan dari tinggi layar hanya benar di
+ * satu ukuran monitor - yang 0.79 tadinya pas di 1080 tapi membuat laptop
+ * 900px tergulir seratus piksel, dan di monitor penerima tamu tidak ada yang
+ * menggulirnya. Selisihnya tetap, jadi satu angka benar di semua ukuran.
+ */
+const SISA_LAYAR = 348;
 
 /**
  * Tinggi lantai mengikuti tinggi layar, bukan angka tetap.
@@ -95,13 +181,13 @@ function lebarLantaiSempit(kolom) {
 
 function tinggiLantai(bentuk, tinggiLayar, layar = false) {
     // Mode monitor hampir tidak punya hiasan di sekelilingnya - tanpa menu,
-    // tanpa tombol, hanya satu baris judul - jadi lantainya boleh jauh lebih
-    // tinggi daripada di halaman admin. Memakai satu angka untuk keduanya
-    // berarti monitor yang justru paling perlu terbaca ikut dikecilkan oleh
-    // ruang yang dipakai tombol-tombol admin.
-    const bagian = layar ? bentuk.vhLayar : bentuk.vh;
+    // tanpa tombol - jadi lantainya mengambil seluruh sisa layar. Halaman
+    // admin masih harus berbagi dengan tombol-tombolnya, dan di sana halaman
+    // yang digulir sedikit memang wajar.
+    const layarTinggi = tinggiLayar || 900;
+    const muat = layar ? layarTinggi - SISA_LAYAR : layarTinggi * bentuk.vh;
 
-    return Math.max(bentuk.min, Math.min(bentuk.maks, (tinggiLayar || 900) * bagian));
+    return Math.max(bentuk.min, Math.min(bentuk.maks, muat));
 }
 
 /**
@@ -131,61 +217,89 @@ function posisiKursi(index, total) {
     };
 }
 
-function MejaBundar({ meja, ukuran }) {
-    const penuh = meja.terisi >= meja.kapasitas;
+/**
+ * Keadaan satu meja dalam tiga langkah, bukan dua.
+ *
+ * Dulu meja hanya "penuh" atau "tidak", padahal yang dicari panitia justru
+ * meja yang masih setengah - itu yang paling mungkin diisi berikutnya. Tiga
+ * langkah membuat seluruh ruangan terbaca sekali pandang tanpa perlu
+ * menghitung kursi satu per satu.
+ */
+function keadaanMeja(meja) {
+    if (meja.terisi <= 0) return "kosong";
+
+    return meja.terisi >= meja.kapasitas ? "penuh" : "sebagian";
+}
+
+function MejaBundar({ meja, ukuran, t }) {
     const jariK = jariKursi(meja.kursi.length);
+    const rupa = t.meja[keadaanMeja(meja)];
 
     // Ukuran huruf diturunkan dari jari-jarinya, bukan dipatok, supaya angka
     // selalu mengisi bulatannya - termasuk saat kursi mengecil karena satu
     // meja diisi banyak kursi.
-    const hurufMeja = Math.round(JARI_MEJA * 0.82);
+    const hurufMeja = Math.round(JARI_MEJA * 0.62);
     const hurufKursi = Math.round(jariK * 0.95);
+    const pusat = KOTAK / 2;
 
     return (
-        <svg viewBox={`0 0 ${KOTAK} ${KOTAK}`} style={{ width: ukuran, height: ukuran }}>
+        <svg
+            viewBox={`0 0 ${KOTAK} ${KOTAK}`}
+            style={{ width: ukuran, height: ukuran, filter: t.bayang }}
+        >
+            {/* Kursi lebih dulu: tepi meja yang menutupi sandarannya. */}
+            {meja.kursi.map((k, i) => {
+                const { x, y } = posisiKursi(i, meja.kursi.length);
+                const gaya = k.tamu ? t.kursi.isi : t.kursi.kosong;
+
+                return (
+                    <circle key={k.nomor} cx={x} cy={y} r={jariK} className={gaya.bulat} strokeWidth="2">
+                        <title>{`Kursi ${k.nomor}: ${k.tamu ? k.tamu.nama : "kosong"}`}</title>
+                    </circle>
+                );
+            })}
+
+            <circle cx={pusat} cy={pusat} r={JARI_MEJA} className={rupa.piring} strokeWidth="2.5" />
+
+            {/* Lipatan taplak: satu lingkaran tipis sedikit di dalam tepinya.
+                Tanpa ini piringannya hanya bulatan polos - garis inilah yang
+                membuatnya terbaca sebagai meja yang ditaplaki. */}
             <circle
-                cx={KOTAK / 2}
-                cy={KOTAK / 2}
-                r={JARI_MEJA}
-                className={penuh ? "fill-gray-200" : "fill-white"}
-                stroke="#9ca3af"
-                strokeWidth="2"
+                cx={pusat}
+                cy={pusat}
+                r={JARI_MEJA - 7}
+                fill="none"
+                className={rupa.taplak}
+                strokeWidth="1.5"
             />
+
             <text
-                x={KOTAK / 2}
-                y={KOTAK / 2 + hurufMeja * 0.35}
+                x={pusat}
+                y={pusat + hurufMeja * 0.35}
                 textAnchor="middle"
                 fontSize={hurufMeja}
-                className="fill-gray-700 font-bold"
+                className={`font-bold ${rupa.angka}`}
             >
                 {meja.nomor}
             </text>
 
+            {/* Nomor kursi digambar paling akhir supaya tidak ada yang
+                menutupinya, termasuk tepi meja. */}
             {meja.kursi.map((k, i) => {
                 const { x, y } = posisiKursi(i, meja.kursi.length);
+                const gaya = k.tamu ? t.kursi.isi : t.kursi.kosong;
 
                 return (
-                    <g key={k.nomor}>
-                        <circle
-                            cx={x}
-                            cy={y}
-                            r={jariK}
-                            className={k.tamu ? "fill-amber-500" : "fill-white"}
-                            stroke={k.tamu ? "#b45309" : "#9ca3af"}
-                            strokeWidth="2"
-                        >
-                            <title>{`Kursi ${k.nomor}: ${k.tamu ? k.tamu.nama : "kosong"}`}</title>
-                        </circle>
-                        <text
-                            x={x}
-                            y={y + hurufKursi * 0.35}
-                            textAnchor="middle"
-                            fontSize={hurufKursi}
-                            className={`font-bold ${k.tamu ? "fill-white" : "fill-gray-600"}`}
-                        >
-                            {k.nomor}
-                        </text>
-                    </g>
+                    <text
+                        key={k.nomor}
+                        x={x}
+                        y={y + hurufKursi * 0.35}
+                        textAnchor="middle"
+                        fontSize={hurufKursi}
+                        className={`font-bold ${gaya.angka}`}
+                    >
+                        {k.nomor}
+                    </text>
                 );
             })}
         </svg>
@@ -193,13 +307,41 @@ function MejaBundar({ meja, ukuran }) {
 }
 
 /**
- * Ruangan beserta isinya. Dipakai mode admin dan mode monitor; bedanya hanya
- * boleh-tidaknya digeser.
+ * Amber tidak menjelaskan dirinya sendiri. Keterangan ini yang paling
+ * dibutuhkan justru di monitor penerima tamu, tempat yang melihat bukan
+ * panitia yang sudah hafal.
  */
-function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = false, onGeser, onPilih, disorot }) {
+function Keterangan({ t }) {
+    const tanda = [
+        ["Kursi terisi", t.kursi.isi.bulat],
+        ["Kursi kosong", t.kursi.kosong.bulat],
+        ["Meja penuh", t.meja.penuh.piring],
+        ["Meja terisi sebagian", t.meja.sebagian.piring],
+    ];
+
+    return (
+        <ul className={`mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs ${t.redup}`}>
+            {tanda.map(([label, kelas]) => (
+                <li key={label} className="flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                        <circle cx="10" cy="10" r="8" className={kelas} strokeWidth="2.5" />
+                    </svg>
+                    {label}
+                </li>
+            ))}
+        </ul>
+    );
+}
+
+/**
+ * Ruangan beserta isinya. Dipakai mode admin dan mode monitor; bedanya hanya
+ * boleh-tidaknya digeser dan warnanya.
+ */
+function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = false, tema = "terang", onGeser, onPilih, disorot }) {
     const ruang = useRef(null);
     const menyeret = useRef(null);
     const bentuk = LANTAI[orientasi] ?? LANTAI.landscape;
+    const t = TEMA[tema];
     const [ukuran, setUkuran] = useState(90);
     const [tinggi, setTinggi] = useState(bentuk.min);
     const [lebarMin, setLebarMin] = useState(0);
@@ -217,14 +359,14 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = fal
             // Saat dipatok, tingginya diturunkan dari lebar itu supaya bentuk
             // ruangannya tetap benar - bukan dari tinggi jendela, yang akan
             // membuat ruangan melebar jadi tampak hampir persegi.
-            const t = sempit
+            const tinggiBaru = sempit
                 ? Math.round(min / bentuk.rasio)
                 : tinggiLantai(bentuk, window.innerHeight, layar);
 
             setLebarMin(min);
-            setTinggi(t);
+            setTinggi(tinggiBaru);
             setUkuran(
-                ukuranMeja(Math.max(el.getBoundingClientRect().width, min), t, kolom, baris)
+                ukuranMeja(Math.max(el.getBoundingClientRect().width, min), tinggiBaru, kolom, baris)
             );
         };
 
@@ -286,63 +428,79 @@ function Ruangan({ mejas, letak, kolom, baris, orientasi, aturUlang, layar = fal
     // meregangkan panggung dan menyisakan ratusan piksel kosong di atas meja.
     return (
         <>
-        <div className="overflow-x-auto">
-        <div
-            className="mx-auto w-full overflow-hidden rounded-lg border border-gray-300 bg-gray-50"
-            style={{ maxWidth: Math.max(tinggi * bentuk.rasio, lebarMin), minWidth: lebarMin }}
-        >
-            <div className="space-y-1.5 p-3">
-                <div className="mx-auto w-3/4 rounded border border-gray-300 bg-white/70 py-0.5 text-center text-[0.6rem] tracking-[0.3em] text-gray-500">
-                    VIDEOTRON
-                </div>
-                <div className="flex items-stretch gap-2">
-                    <div className="flex w-16 items-center justify-center rounded border border-gray-300 bg-white/70 text-[0.6rem] text-gray-500">
-                        BAND
+            <div className="overflow-x-auto">
+                <div
+                    className={`mx-auto w-full overflow-hidden rounded-xl border shadow-[0_1px_3px_rgb(0_0_0/0.08),0_8px_24px_-12px_rgb(0_0_0/0.18)] ${t.bingkai}`}
+                    style={{ maxWidth: Math.max(tinggi * bentuk.rasio, lebarMin), minWidth: lebarMin }}
+                >
+                    {/* Panggung adalah benda paling besar di ruangan dan satu-satunya
+                        penunjuk arah yang dipunyai denah ini - dari situ orang tahu
+                        mana depan. Videotron digambar menempel di atasnya, seperti
+                        letaknya yang sebenarnya, bukan melayang sebagai kotak lain. */}
+                    <div className="flex items-stretch gap-2 p-3">
+                        <div
+                            className={`flex w-16 shrink-0 items-center justify-center rounded-md text-[0.65rem] font-semibold tracking-[0.15em] ${t.band}`}
+                        >
+                            BAND
+                        </div>
+                        <div className={`min-w-0 flex-1 rounded-md px-3 pb-2 pt-2 ${t.panggung}`}>
+                            <div
+                                className={`mx-auto w-2/3 rounded-sm py-0.5 text-center text-[0.55rem] tracking-[0.3em] ${t.videotron}`}
+                            >
+                                VIDEOTRON
+                            </div>
+                            <p className="mt-1.5 text-center text-xs font-semibold tracking-[0.35em]">
+                                PANGGUNG
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex-1 rounded border border-gray-400 bg-gray-200/70 py-3 text-center text-xs font-semibold tracking-[0.3em] text-gray-600">
-                        PANGGUNG
+
+                    <div ref={ruang} className={`relative ${t.lantai}`} style={{ height: tinggi }}>
+                        {mejas.map((m) => {
+                            const titik = letak[m.nomor] ?? { x: 50, y: 50 };
+
+                            return (
+                                <button
+                                    key={m.nomor}
+                                    type="button"
+                                    onPointerDown={(e) => {
+                                        if (!aturUlang) return;
+                                        e.preventDefault();
+                                        menyeret.current = m.nomor;
+                                    }}
+                                    onClick={() => !aturUlang && onPilih?.(m)}
+                                    className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full outline-none transition-transform duration-150 ${
+                                        aturUlang
+                                            ? "cursor-grab active:cursor-grabbing active:scale-105"
+                                            : "cursor-pointer hover:scale-[1.06] focus-visible:ring-4 focus-visible:ring-amber-400/70"
+                                    } ${disorot === m.nomor ? "scale-[1.06] ring-4 ring-amber-400" : ""}`}
+                                    style={{ left: `${titik.x}%`, top: `${titik.y}%`, touchAction: "none" }}
+                                    aria-label={`Meja ${m.nomor}, ${m.terisi} dari ${m.kapasitas} kursi terisi`}
+                                >
+                                    <MejaBundar meja={m} ukuran={ukuran} t={t} />
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Pintu di dinding belakang, berseberangan dengan panggung. */}
+                    <div className="flex justify-end p-3">
+                        <div
+                            className={`rounded-md border px-6 py-1 text-[0.65rem] font-semibold tracking-[0.2em] ${t.papan}`}
+                        >
+                            PINTU
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div ref={ruang} className="relative" style={{ height: tinggi }}>
-            {mejas.map((m) => {
-                const titik = letak[m.nomor] ?? { x: 50, y: 50 };
+            <Keterangan t={t} />
 
-                return (
-                    <button
-                        key={m.nomor}
-                        type="button"
-                        onPointerDown={(e) => {
-                            if (!aturUlang) return;
-                            e.preventDefault();
-                            menyeret.current = m.nomor;
-                        }}
-                        onClick={() => !aturUlang && onPilih?.(m)}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-shadow ${
-                            aturUlang ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-                        } ${disorot === m.nomor ? "ring-4 ring-amber-400" : ""}`}
-                        style={{ left: `${titik.x}%`, top: `${titik.y}%`, touchAction: "none" }}
-                        aria-label={`Meja ${m.nomor}, ${m.terisi} dari ${m.kapasitas} kursi terisi`}
-                    >
-                        <MejaBundar meja={m} ukuran={ukuran} />
-                    </button>
-                );
-            })}
-            </div>
-
-            <div className="flex justify-end p-3">
-                <div className="rounded border border-gray-300 bg-white/70 px-5 py-1 text-[0.6rem] tracking-[0.3em] text-gray-500">
-                    PINTU
-                </div>
-            </div>
-        </div>
-        </div>
-        {lebarMin > 0 && (
-            <p className="mt-2 text-center text-xs text-gray-500">
-                Geser denah ke samping untuk melihat seluruh ruangan.
-            </p>
-        )}
+            {lebarMin > 0 && (
+                <p className={`mt-2 text-center text-xs ${t.redup}`}>
+                    Geser denah ke samping untuk melihat seluruh ruangan.
+                </p>
+            )}
         </>
     );
 }
@@ -424,24 +582,75 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
 
     const terisi = mejas.reduce((n, m) => n + m.terisi, 0);
 
-    // Mode monitor: tanpa menu, tanpa tombol, sebesar mungkin.
+    // Mode monitor: tanpa menu, tanpa tombol, sebesar mungkin, dan berwarna
+    // acaranya sendiri - ia berdiri di meja penerima tamu, bukan di ruang
+    // kerja. Kelas ati-guest membawa serta butiran kertas dan batang gulir
+    // emas yang sudah dipakai undangan, jadi layar ini sewarna dengannya.
     if (layar) {
         return (
             <>
                 <Head title="Denah Meja" />
-                <div className="min-h-screen bg-white p-4">
-                    <div className="mb-3 flex items-baseline justify-between">
-                        <h1 className="text-2xl font-bold">
-                            Denah Meja{" "}
-                            <span className="text-lg font-normal text-gray-500">
-                                {acara.tempat || acara.label}
-                            </span>
-                        </h1>
-                        <p className="text-lg text-gray-600">
-                            <strong>{terisi}</strong>/{acara.jumlah_kursi} kursi terisi
-                        </p>
+                <div className="ati-guest relative min-h-screen overflow-hidden bg-ati-ink font-sans text-ati-cream">
+                    {/* Sorot lampu jatuh dari sisi panggung, dan lantai di
+                        dekat pintu meredup - ruangannya punya arah, bukan
+                        kehitaman rata. */}
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                            background:
+                                "radial-gradient(ellipse 68% 42% at 50% -8%, rgba(214,162,73,0.18) 0%, transparent 62%)," +
+                                "radial-gradient(ellipse 120% 65% at 50% 112%, rgba(122,15,31,0.32) 0%, transparent 72%)",
+                        }}
+                    />
+
+                    <div className="relative z-10 p-5">
+                        <header className="mb-3 flex items-center justify-between gap-6">
+                            <div className="flex min-w-0 items-center gap-4">
+                                <PialaTiga
+                                    sumber="/piala1baru.glb"
+                                    alt="Piala Anugerah TIMES Indonesia"
+                                    className="hidden w-28 shrink-0 sm:block"
+                                    tinggi="124px"
+                                    interaktif={false}
+                                    diam
+                                />
+                                <div className="min-w-0">
+                                    <AtiLogo className="mb-1 h-6 w-auto" />
+                                    <h1 className="font-heading text-4xl font-semibold leading-none text-ati-gold-light">
+                                        Denah Meja
+                                    </h1>
+                                    <p className="mt-1 truncate text-lg text-ati-cream/70">
+                                        {acara.tempat || acara.label}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <p className="shrink-0 text-right">
+                                <span className="font-heading text-5xl font-bold tabular-nums text-ati-gold">
+                                    {terisi}
+                                </span>
+                                <span className="text-xl text-ati-cream/70">
+                                    {" "}
+                                    / {acara.jumlah_kursi}
+                                </span>
+                                <span className="block text-sm uppercase tracking-[0.25em] text-ati-cream/50">
+                                    kursi terisi
+                                </span>
+                            </p>
+                        </header>
+
+                        <Ruangan
+                            mejas={mejas}
+                            letak={letak}
+                            kolom={kolom}
+                            baris={baris}
+                            orientasi={orientasi}
+                            aturUlang={false}
+                            tema="gala"
+                            layar
+                        />
                     </div>
-                    <Ruangan mejas={mejas} letak={letak} kolom={kolom} baris={baris} orientasi={orientasi} aturUlang={false} layar />
                 </div>
             </>
         );
@@ -466,7 +675,8 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                 {/* Di layar sempit angkanya dapat barisnya sendiri; kalau
                                     disejajarkan dengan tombol, ia tampak seperti label tombol. */}
                                 <span className="w-full lg:w-auto">
-                                    <strong>{terisi}</strong>/{acara.jumlah_kursi} kursi terisi
+                                    <strong className="tabular-nums">{terisi}</strong>/
+                                    <span className="tabular-nums">{acara.jumlah_kursi}</span> kursi terisi
                                 </span>
 
                                 {aturUlang ? (
@@ -561,15 +771,37 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                         </div>
 
                         {!aturUlang && dilihat && (
-                            <div className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5">
-                                <h2 className="font-semibold">
-                                    Meja {dilihat.nomor} &mdash; {dilihat.terisi}/{dilihat.kapasitas} kursi
-                                </h2>
-                                <ol className="mt-3 grid gap-x-8 gap-y-1 sm:grid-cols-2">
+                            <div className="mt-6 overflow-hidden rounded-xl border border-amber-300">
+                                <div className="flex items-center gap-3 border-b border-amber-300 bg-amber-50 px-4 py-3">
+                                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-amber-500 bg-white font-bold tabular-nums text-amber-900">
+                                        {dilihat.nomor}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <h2 className="font-semibold text-gray-900">
+                                            Meja {dilihat.nomor}
+                                        </h2>
+                                        <p className="text-sm text-amber-900">
+                                            <span className="tabular-nums">{dilihat.terisi}</span> dari{" "}
+                                            <span className="tabular-nums">{dilihat.kapasitas}</span> kursi
+                                            terisi
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDilihat(null)}
+                                        className="btn btn-ghost btn-sm ml-auto shrink-0"
+                                    >
+                                        Tutup
+                                    </button>
+                                </div>
+
+                                <ol className="grid gap-x-8 gap-y-1 p-4 sm:grid-cols-2">
                                     {dilihat.kursi.map((k) => (
-                                        <li key={k.nomor} className="flex gap-3 text-sm">
-                                            <span className="w-5 shrink-0 text-gray-400">{k.nomor}</span>
-                                            <span className={k.tamu ? "" : "text-gray-400"}>
+                                        <li key={k.nomor} className="flex items-baseline gap-3 text-sm">
+                                            <span className="w-5 shrink-0 text-xs font-semibold tabular-nums text-gray-400">
+                                                {k.nomor}
+                                            </span>
+                                            <span className={k.tamu ? "text-gray-900" : "text-gray-400"}>
                                                 {k.tamu ? k.tamu.nama : "kosong"}
                                             </span>
                                         </li>

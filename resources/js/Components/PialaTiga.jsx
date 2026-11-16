@@ -26,6 +26,13 @@ export default function PialaTiga({
     alt = 'Piala Anugerah TIMES Indonesia',
     interaktif = true,
     kilau = 0.35,
+    // Tampil berdiri sejak awal, tanpa dijatuhkan. Untuk layar yang tidak
+    // ditonton orang dari dekat - monitor penerima tamu - jatuhnya tidak
+    // pernah disaksikan siapa pun, sementara gerbangnya menambah satu cara
+    // bagi pialanya untuk tidak muncul sama sekali: selama animasinya belum
+    // jalan, wadahnya masih opacity 0. Di layar yang ditinggal berjam-jam,
+    // itu berarti lubang kosong seukuran piala.
+    diam: diamSelalu = false,
     ...sisa
 }) {
     const wadah = useRef(null);
@@ -143,7 +150,7 @@ export default function PialaTiga({
 
         sudahJatuh.current = true;
 
-        if (kurangiGerak()) {
+        if (diamSelalu || kurangiGerak()) {
             mv.dismissPoster();
             setMendarat(true);
             return;
@@ -182,7 +189,7 @@ export default function PialaTiga({
 
     if (gagal) return null;
 
-    const diam = kurangiGerak();
+    const diam = diamSelalu || kurangiGerak();
 
     // loading="eager", bukan "lazy": elemen ini baru dipasang setelah penjagaan
     // di atas memutuskan berkasnya layak diunduh. Menyerahkannya lagi ke
@@ -227,7 +234,10 @@ export default function PialaTiga({
                     src={sumber}
                     alt={alt}
                     loading="eager"
-                    reveal="manual"
+                    // Tanpa jatuh, tidak ada yang perlu ditahan - dan
+                    // "auto" melepas pialanya tanpa menunggu kode kita
+                    // memanggil dismissPoster.
+                    reveal={diam ? 'auto' : 'manual'}
                     tone-mapping="aces"
                     exposure="1.3"
                     shadow-intensity="0.9"
