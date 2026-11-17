@@ -9,16 +9,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Kursi tambahan: sisa undangan yang tidak pas membagi habis.
+ * Kursi tambahan: sisa undangan yang tidak pas membagi habis, disisipkan di
+ * meja yang DIPILIH admin.
  *
  * 27 meja berisi 6 menghasilkan 162 kursi untuk 163 undangan. Kursi ke-163
- * disisipkan di meja terakhir, bukan dengan menaikkan isi semua meja jadi 7
- * (yang menambah 27 kursi sekaligus) atau mengarang meja ke-28.
+ * disisipkan di satu meja tertentu, bukan dengan menaikkan isi semua meja
+ * jadi 7 (yang menambah 27 kursi sekaligus) atau mengarang meja ke-28. Meja
+ * mana persisnya ditentukan orang yang melihat ruangannya - meja dekat jalan
+ * keluar tidak muat kursi ketujuh, meja di pojok muat dua.
  *
- * Konsekuensinya kapasitas meja tidak lagi seragam, dan itulah yang paling
- * perlu dijaga di sini: penjaga penyusutan tidak boleh lagi menilai dari satu
- * nomor kursi tertinggi, sebab kursi 7 yang sah di meja terakhir akan memaksa
- * seluruh meja berisi tujuh.
+ * Konsekuensinya kapasitas meja tidak seragam, dan itulah yang paling perlu
+ * dijaga: penjaga penyusutan tidak boleh menilai dari satu nomor kursi
+ * tertinggi, sebab kursi 7 yang sah di satu meja akan memaksa seluruh meja
+ * berisi tujuh.
  */
 class KursiTambahanTest extends TestCase
 {
@@ -33,7 +36,7 @@ class KursiTambahanTest extends TestCase
         parent::setUp();
 
         $this->acara = Acara::where('aktif', true)->firstOrFail();
-        $this->acara->update(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan' => 0]);
+        $this->acara->update(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan_meja' => null]);
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
@@ -48,7 +51,19 @@ class KursiTambahanTest extends TestCase
         ]);
     }
 
-    private function simpan(array $ubahan)
+    private function atur(int $meja, int $jumlah)
+    {
+        return $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.kursi-tambahan'), ['meja' => $meja, 'jumlah' => $jumlah]);
+    }
+
+    private function dudukkan(Tamu $tamu, int $meja)
+    {
+        return $this->actingAs($this->admin)
+            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => $meja]);
+    }
+
+    private function simpanAcara(array $ubahan)
     {
         return $this->actingAs($this->admin)
             ->put(route('admin.acara.update', $this->acara->id), $ubahan + [
@@ -58,18 +73,19 @@ class KursiTambahanTest extends TestCase
     }
 
     /**
-     * Angka sungguhan yang memunculkan kebutuhan ini.
+     * Angka sungguhan yang memunculkan kebutuhan ini - tapi sekarang mejanya
+     * dipilih, bukan selalu yang terakhir.
      */
-    public function test_satu_kursi_tambahan_jatuh_di_meja_terakhir(): void
+    public function test_satu_kursi_tambahan_di_meja_pilihan_admin(): void
     {
-        $this->acara->update(['jumlah_meja' => 27, 'kursi_per_meja' => 6, 'kursi_tambahan' => 1]);
+        $this->acara->update(['jumlah_meja' => 27, 'kursi_tambahan_meja' => ['12' => 1]]);
         $segar = $this->acara->fresh();
 
         $this->assertSame(163, $segar->jumlahKursi());
-        $this->assertSame(7, $segar->kursiDiMeja(27));
-        $this->assertSame(6, $segar->kursiDiMeja(26));
+        $this->assertSame(7, $segar->kursiDiMeja(12));
+        $this->assertSame(6, $segar->kursiDiMeja(27));
         $this->assertSame(6, $segar->kursiDiMeja(1));
-        $this->assertSame([27], $segar->mejaBerkursiTambahan());
+        $this->assertSame([12], $segar->mejaBerkursiTambahan());
     }
 
     public function test_tanpa_tambahan_semua_meja_tetap_sama(): void
@@ -83,93 +99,141 @@ class KursiTambahanTest extends TestCase
         $this->assertSame([], $this->acara->mejaBerkursiTambahan());
     }
 
-    /**
-     * Beberapa kursi tambahan diisi dari belakang, satu per meja.
-     */
-    public function test_tambahan_diisi_mundur_dari_meja_terakhir(): void
+    public function test_beberapa_meja_boleh_ditambahi_sekaligus(): void
     {
-        $this->acara->update(['kursi_tambahan' => 2]);
+        $this->acara->update(['kursi_tambahan_meja' => ['1' => 2, '3' => 1]]);
         $segar = $this->acara->fresh();
 
-        $this->assertSame(20, $segar->jumlahKursi());
-        $this->assertSame(6, $segar->kursiDiMeja(1));
-        $this->assertSame(7, $segar->kursiDiMeja(2));
+        $this->assertSame(21, $segar->jumlahKursi());
+        $this->assertSame(8, $segar->kursiDiMeja(1));
+        $this->assertSame(6, $segar->kursiDiMeja(2));
         $this->assertSame(7, $segar->kursiDiMeja(3));
-        $this->assertSame([2, 3], $segar->mejaBerkursiTambahan());
+        $this->assertSame([1, 3], $segar->mejaBerkursiTambahan());
     }
 
     /**
-     * Tambahan yang melebihi jumlah meja memberi satu putaran penuh lebih
-     * dulu, lalu sisanya kembali diisi dari belakang.
+     * Jumlah meja boleh dikecilkan setelahnya. Tambahan di meja yang sudah
+     * tidak ada harus berhenti dihitung sendiri - kalau tidak, jumlah kursi
+     * menghitung kursi di meja yang tidak digambar di denah mana pun.
      */
-    public function test_tambahan_lebih_banyak_dari_meja_berputar(): void
+    public function test_tambahan_di_meja_yang_sudah_tidak_ada_diabaikan(): void
     {
-        $this->acara->update(['kursi_tambahan' => 4]);
+        $this->acara->update(['kursi_tambahan_meja' => ['2' => 1, '9' => 4]]);
         $segar = $this->acara->fresh();
 
-        $this->assertSame(22, $segar->jumlahKursi());
-        $this->assertSame(7, $segar->kursiDiMeja(1));
-        $this->assertSame(7, $segar->kursiDiMeja(2));
-        $this->assertSame(8, $segar->kursiDiMeja(3));
+        $this->assertSame(19, $segar->jumlahKursi());
+        $this->assertSame([2], $segar->mejaBerkursiTambahan());
+        $this->assertSame(0, $segar->kursiDiMeja(9));
     }
 
     public function test_meja_di_luar_jangkauan_tetap_nol(): void
     {
-        $this->acara->update(['kursi_tambahan' => 2]);
+        $this->acara->update(['kursi_tambahan_meja' => ['3' => 2]]);
         $segar = $this->acara->fresh();
 
         $this->assertSame(0, $segar->kursiDiMeja(0));
         $this->assertSame(0, $segar->kursiDiMeja(4));
     }
 
-    public function test_kursi_tambahan_bisa_diatur_lewat_formulir(): void
+    public function test_admin_bisa_menambah_kursi_di_satu_meja(): void
     {
-        $this->simpan(['jumlah_meja' => 27, 'kursi_per_meja' => 6, 'kursi_tambahan' => 1])
-            ->assertSessionHasNoErrors();
+        $this->atur(2, 1)->assertRedirect()->assertSessionHasNoErrors();
 
-        $this->assertSame(163, $this->acara->fresh()->jumlahKursi());
+        $segar = $this->acara->fresh();
+
+        $this->assertSame(7, $segar->kursiDiMeja(2));
+        $this->assertSame(6, $segar->kursiDiMeja(1));
+        $this->assertSame(19, $segar->jumlahKursi());
     }
 
-    public function test_formulir_membawa_kursi_tambahan(): void
+    public function test_menyetel_ke_nol_menghapus_tambahannya(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(2, 2);
+        $this->assertSame(8, $this->acara->fresh()->kursiDiMeja(2));
+
+        $this->atur(2, 0)->assertSessionHasNoErrors();
+
+        $segar = $this->acara->fresh();
+
+        $this->assertSame(6, $segar->kursiDiMeja(2));
+        $this->assertSame([], $segar->mejaBerkursiTambahan());
+        $this->assertNull($segar->kursi_tambahan_meja);
+    }
+
+    public function test_menambah_kursi_di_meja_asing_ditolak(): void
+    {
+        $this->atur(9, 1)->assertSessionHasErrors('meja');
+
+        $this->assertSame([], $this->acara->fresh()->mejaBerkursiTambahan());
+    }
+
+    public function test_papan_membawa_jumlah_tambahan_tiap_meja(): void
+    {
+        $this->atur(3, 1);
 
         $this->actingAs($this->admin)
-            ->get(route('admin.acara.edit'))
+            ->get(route('admin.penempatan.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->component('Admin/Acara/Edit')
-                ->where('acara.kursi_tambahan', 1));
+                ->where('acara.jumlah_kursi', 19)
+                ->where('mejas.0.tambahan', 0)
+                ->where('mejas.0.kapasitas', 6)
+                ->where('mejas.2.tambahan', 1)
+                ->where('mejas.2.kapasitas', 7)
+                ->has('mejas.2.kursi', 7));
     }
 
     public function test_kursi_tambahan_benar_benar_bisa_diduduki(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(3, 1);
 
         $tamu = $this->tamu(7, 'Bertujuh');
-
-        $this->actingAs($this->admin)
-            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 3])
-            ->assertSessionHasNoErrors();
+        $this->dudukkan($tamu, 3)->assertSessionHasNoErrors();
 
         $this->assertSame('1, 2, 3, 4, 5, 6, 7', $tamu->fresh()->kursi);
     }
 
     public function test_meja_tanpa_tambahan_tetap_menolak_kursi_ketujuh(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(3, 1);
 
         $tamu = $this->tamu(7, 'Bertujuh');
 
-        // Meja 1 tidak kebagian tambahan, jadi tetap berisi enam.
-        $this->actingAs($this->admin)
-            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 1])
-            ->assertSessionHasErrors('meja');
+        $this->dudukkan($tamu, 1)->assertSessionHasErrors('meja');
     }
 
-    public function test_denah_menggambar_meja_terakhir_dengan_kursi_lebih(): void
+    /**
+     * Mencabut kursi tambahan yang sedang diduduki membuang tempat duduk yang
+     * nomornya sudah dikirim di undangan.
+     */
+    public function test_mencabut_kursi_tambahan_yang_diduduki_ditolak(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(3, 1);
+
+        $tamu = $this->tamu(7, 'Bertujuh');
+        $this->dudukkan($tamu, 3);
+
+        $this->atur(3, 0)->assertSessionHasErrors('meja');
+
+        $this->assertSame(7, $this->acara->fresh()->kursiDiMeja(3));
+    }
+
+    public function test_mengurangi_sampai_batas_yang_terpakai_masih_boleh(): void
+    {
+        $this->atur(3, 3);
+
+        $tamu = $this->tamu(7, 'Bertujuh');
+        $this->dudukkan($tamu, 3);
+
+        // Kursi tertinggi yang dipakai 7, dan 6 + 1 = 7 - masih pas.
+        $this->atur(3, 1)->assertSessionHasNoErrors();
+
+        $this->assertSame(7, $this->acara->fresh()->kursiDiMeja(3));
+    }
+
+    public function test_denah_menggambar_meja_bertambah_dengan_kursi_lebih(): void
+    {
+        $this->atur(3, 1);
 
         $this->actingAs($this->admin)
             ->get(route('admin.penempatan.denah'))
@@ -181,66 +245,49 @@ class KursiTambahanTest extends TestCase
     }
 
     /**
-     * Inti perubahan penjaganya. Kursi 7 cuma ada di meja terakhir, jadi ia
-     * tidak boleh memaksa kursi per meja ikut naik jadi 7. Sebelum penjaganya
-     * diperiksa per kursi, menyimpan ulang nilai yang sama pun akan ditolak.
+     * Inti penjaga di formulir acara. Kursi 7 cuma ada di meja yang ditambahi,
+     * jadi ia tidak boleh memaksa kursi per meja ikut naik jadi 7 - sebelum
+     * penjaganya diperiksa per kursi, menyimpan ulang nilai yang sama pun
+     * akan ditolak.
      */
-    public function test_kursi_ketujuh_di_meja_terakhir_tidak_mengunci_kursi_per_meja(): void
+    public function test_kursi_ketujuh_tidak_mengunci_kursi_per_meja(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(3, 1);
 
         $tamu = $this->tamu(7, 'Bertujuh');
-        $this->actingAs($this->admin)
-            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 3]);
+        $this->dudukkan($tamu, 3);
 
         $this->assertSame(7, $this->acara->fresh()->kursiTerpakai());
 
-        $this->simpan(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan' => 1])
+        $this->simpanAcara(['jumlah_meja' => 3, 'kursi_per_meja' => 6])
             ->assertSessionHasNoErrors();
     }
 
-    public function test_menghapus_kursi_tambahan_yang_sedang_diduduki_ditolak(): void
+    public function test_formulir_acara_melaporkan_tambahan_tanpa_mengubahnya(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->atur(1, 2);
+        $this->atur(3, 1);
 
-        $tamu = $this->tamu(7, 'Bertujuh');
         $this->actingAs($this->admin)
-            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 3]);
+            ->get(route('admin.acara.edit'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Acara/Edit')
+                ->where('acara.kursi_tambahan', 3)
+                ->where('acara.meja_bertambah', [1, 3]));
 
-        $this->simpan(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan' => 0])
-            ->assertSessionHasErrors('kursi_per_meja');
+        // Menyimpan formulir acara tidak boleh menyentuh kursi tambahan.
+        $this->simpanAcara(['jumlah_meja' => 3, 'kursi_per_meja' => 6])
+            ->assertSessionHasNoErrors();
 
-        $this->assertSame(1, (int) $this->acara->fresh()->kursi_tambahan);
+        $this->assertSame(['1' => 2, '3' => 1], $this->acara->fresh()->kursiTambahanMeja());
     }
 
-    /**
-     * Penjaganya menilai kapasitas meja yang diusulkan, bukan satu angka
-     * global - jadi menambah tambahan boleh walaupun kursi per mejanya
-     * dipangkas, selama tiap kursi yang sudah diduduki tetap ada.
-     */
-    public function test_penjaga_menilai_kapasitas_tiap_meja_bukan_angka_global(): void
+    public function test_tamu_umum_tidak_bisa_mengatur_kursi_tambahan(): void
     {
-        $this->acara->update(['kursi_tambahan' => 2]);
+        $this->post(route('admin.penempatan.kursi-tambahan'), ['meja' => 1, 'jumlah' => 1])
+            ->assertRedirect();
 
-        $tamu = $this->tamu(7, 'Bertujuh');
-        $this->actingAs($this->admin)
-            ->post(route('admin.penempatan.tempatkan'), ['tamu_id' => $tamu->id, 'meja' => 3]);
-
-        $this->assertSame(7, $this->acara->fresh()->kursiDiMeja(3));
-
-        // Kursi per meja turun ke 4, tapi 9 tambahan memberi meja 3
-        // 4 + 3 putaran = 7 kursi - tepat memuat tamunya, jadi diterima.
-        $this->simpan(['jumlah_meja' => 3, 'kursi_per_meja' => 4, 'kursi_tambahan' => 9])
-            ->assertSessionHasNoErrors();
-
-        // Satu tambahan lebih sedikit membuat meja 3 berisi 4 + 2 + 1 = 7
-        // juga - masih pas.
-        $this->simpan(['jumlah_meja' => 3, 'kursi_per_meja' => 4, 'kursi_tambahan' => 7])
-            ->assertSessionHasNoErrors();
-
-        // Tapi tanpa tambahan sama sekali ia tinggal 4, dan kursi 5 sampai 7
-        // kehilangan tempatnya.
-        $this->simpan(['jumlah_meja' => 3, 'kursi_per_meja' => 4, 'kursi_tambahan' => 0])
-            ->assertSessionHasErrors('kursi_per_meja');
+        $this->assertSame([], $this->acara->fresh()->mejaBerkursiTambahan());
     }
 }

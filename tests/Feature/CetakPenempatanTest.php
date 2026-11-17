@@ -29,7 +29,7 @@ class CetakPenempatanTest extends TestCase
         parent::setUp();
 
         $this->acara = Acara::where('aktif', true)->firstOrFail();
-        $this->acara->update(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan' => 0]);
+        $this->acara->update(['jumlah_meja' => 3, 'kursi_per_meja' => 6, 'kursi_tambahan_meja' => null]);
         $this->admin = User::factory()->create(['role' => 'admin']);
     }
 
@@ -132,7 +132,7 @@ class CetakPenempatanTest extends TestCase
 
     public function test_meja_bertambah_kursi_ikut_tercetak(): void
     {
-        $this->acara->update(['kursi_tambahan' => 1]);
+        $this->acara->update(['kursi_tambahan_meja' => ['3' => 1]]);
 
         $this->lihat()
             ->assertOk()

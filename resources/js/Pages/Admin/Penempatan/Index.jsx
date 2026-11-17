@@ -21,6 +21,7 @@ export default function Index({ acara, mejas, belum }) {
     const [dipilih, setDipilih] = useState(null);
     const [jumlah, setJumlah] = useState(1);
     const [cari, setCari] = useState("");
+    const [sibuk, setSibuk] = useState(false);
 
     // Daftar di kiri dimuat ulang setiap kali ada penempatan, jadi yang
     // dipegang state bisa basi. Yang dipakai selalu baris terbarunya.
@@ -50,6 +51,22 @@ export default function Index({ acara, mejas, belum }) {
                     setJumlah(lagi ? lagi.sisa : 1);
                 },
             }
+        );
+    };
+
+    // Yang dikirim jumlah akhirnya, bukan "tambah satu" - jadi permintaan yang
+    // terkirim dua kali tidak pernah menaikkan dua langkah. Tombolnya tetap
+    // dikunci selagi berjalan: tanpa itu klik kedua membaca angka lama dari
+    // prop yang belum diperbarui dan mengirim nilai yang sama lagi, dan
+    // admin melihat dua klik menghasilkan satu kursi tanpa tahu kenapa.
+    const aturTambahan = (meja, jumlah) => {
+        if (sibuk) return;
+
+        setSibuk(true);
+        router.post(
+            route("admin.penempatan.kursi-tambahan"),
+            { meja, jumlah: Math.max(0, jumlah) },
+            { preserveScroll: true, onFinish: () => setSibuk(false) }
         );
     };
 
@@ -277,7 +294,14 @@ export default function Index({ acara, mejas, belum }) {
                                             }`}
                                         >
                                             <div className="flex items-baseline justify-between">
-                                                <h3 className="font-semibold">Meja {m.nomor}</h3>
+                                                <h3 className="font-semibold">
+                                                    Meja {m.nomor}
+                                                    {m.tambahan > 0 && (
+                                                        <span className="ml-2 align-middle text-[0.65rem] font-semibold uppercase tracking-wide text-amber-700">
+                                                            +{m.tambahan} kursi
+                                                        </span>
+                                                    )}
+                                                </h3>
                                                 <span className="text-xs text-gray-500">
                                                     {m.terisi}/{m.kapasitas}
                                                 </span>
@@ -329,7 +353,8 @@ export default function Index({ acara, mejas, belum }) {
                                                         : `Sisa ${m.kapasitas - m.terisi} kursi`}
                                                 </button>
                                             ) : (
-                                                m.tamus.length > 0 && (
+                                                <>
+                                                {m.tamus.length > 0 && (
                                                     <ul className="mt-3 space-y-1 border-t pt-2">
                                                         {m.tamus.map((t) => (
                                                             <li
@@ -369,7 +394,39 @@ export default function Index({ acara, mejas, belum }) {
                                                             </li>
                                                         ))}
                                                     </ul>
-                                                )
+                                                )}
+
+                                                {/* Kursi tambahan diatur di sini, bukan di
+                                                    formulir acara: yang tahu meja mana yang
+                                                    masih muat kursi ketujuh adalah orang yang
+                                                    sedang melihat papan ini. */}
+                                                <div className="mt-3 flex items-center justify-between gap-2 border-t pt-2 text-xs text-gray-500">
+                                                    <span>Kursi tambahan</span>
+                                                    <div className="join">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => aturTambahan(m.nomor, m.tambahan - 1)}
+                                                            disabled={sibuk || m.tambahan <= 0}
+                                                            className="btn btn-xs join-item"
+                                                            aria-label={`Kurangi kursi tambahan meja ${m.nomor}`}
+                                                        >
+                                                            &minus;
+                                                        </button>
+                                                        <span className="join-item border-y border-base-300 bg-white px-2 font-semibold leading-6 tabular-nums text-gray-700">
+                                                            {m.tambahan}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => aturTambahan(m.nomor, m.tambahan + 1)}
+                                                            disabled={sibuk}
+                                                            className="btn btn-xs join-item"
+                                                            aria-label={`Tambah kursi di meja ${m.nomor}`}
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                </>
                                             )}
                                         </div>
                                     );

@@ -50,6 +50,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/penempatan/denah/grid', [PenempatanController::class, 'aturGrid'])->name('penempatan.denah.grid');
     Route::post('/penempatan', [PenempatanController::class, 'tempatkan'])->name('penempatan.tempatkan');
     Route::post('/penempatan/{tamu}/keluarkan', [PenempatanController::class, 'keluarkan'])->name('penempatan.keluarkan');
+    Route::post('/penempatan/kursi-tambahan', [PenempatanController::class, 'aturKursiTambahan'])->name('penempatan.kursi-tambahan');
     Route::get('/acara', [AcaraController::class, 'edit'])->name('acara.edit');
     Route::post('/acara', [AcaraController::class, 'store'])->name('acara.store');
     Route::put('/acara/{acara}', [AcaraController::class, 'update'])->name('acara.update');

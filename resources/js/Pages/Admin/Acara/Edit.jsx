@@ -3,7 +3,7 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
-import { Head, router, useForm, usePage } from "@inertiajs/react";
+import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
 import React, { useState } from "react";
 
 const kosong = {
@@ -17,7 +17,6 @@ const kosong = {
     musik_url: "",
     jumlah_meja: "",
     kursi_per_meja: 6,
-    kursi_tambahan: 0,
 };
 
 /**
@@ -39,16 +38,15 @@ function bacaWib(nilai) {
 }
 
 /**
- * "27 meja, 6 per meja, 1 tambahan" -> "27 x 6 + 1 = 163 kursi. Meja 27
- * berisi 7."
+ * "27 meja, 6 per meja, 1 tambahan di meja 12" -> "27 x 6 + 1 = 163 kursi."
  *
- * Rumus pembagian kursi tambahannya sama persis dengan Acara::kursiDiMeja()
- * di server - satu kursi per meja dari meja terakhir mundur ke depan.
+ * Tambahannya tidak diketik di sini - ia diatur per meja lewat halaman
+ * Penempatan Kursi - tapi tetap ikut dihitung, supaya angka di layar ini
+ * tidak pernah berbeda dari jumlah kursi yang sebenarnya.
  */
-function hitungKursi({ jumlah_meja, kursi_per_meja, kursi_tambahan }) {
+function hitungKursi({ jumlah_meja, kursi_per_meja }, tambahan = 0) {
     const meja = Number(jumlah_meja);
     const per = Number(kursi_per_meja);
-    const tambahan = Math.max(0, Number(kursi_tambahan) || 0);
 
     if (!meja || !per || meja < 0 || per < 1) {
         return "Belum diatur. Penempatan tamu baru bisa dilakukan setelah ini diisi.";
@@ -56,22 +54,9 @@ function hitungKursi({ jumlah_meja, kursi_per_meja, kursi_tambahan }) {
 
     const total = meja * per + tambahan;
 
-    if (tambahan === 0) {
-        return `${meja} meja \u00d7 ${per} kursi = ${total} kursi.`;
-    }
-
-    const putaran = Math.floor(tambahan / meja);
-    const sisa = tambahan % meja;
-    const berlebih = [];
-
-    for (let n = meja - sisa + 1; n <= meja; n++) berlebih.push(n);
-
-    const rincian = putaran
-        ? `Semua meja berisi ${per + putaran} kursi` +
-          (sisa ? `, kecuali meja ${berlebih.join(", ")} yang berisi ${per + putaran + 1}.` : ".")
-        : `Meja ${berlebih.join(", ")} berisi ${per + 1} kursi, sisanya ${per}.`;
-
-    return `${meja} meja \u00d7 ${per} kursi + ${tambahan} kursi tambahan = ${total} kursi. ${rincian}`;
+    return tambahan > 0
+        ? `${meja} meja \u00d7 ${per} kursi + ${tambahan} kursi tambahan = ${total} kursi.`
+        : `${meja} meja \u00d7 ${per} kursi = ${total} kursi.`;
 }
 
 /**
@@ -96,9 +81,14 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 musik_url: acara.musik_url || "",
                 jumlah_meja: acara.jumlah_meja ?? "",
                 kursi_per_meja: acara.kursi_per_meja ?? 6,
-                kursi_tambahan: acara.kursi_tambahan ?? 0,
             }
     );
+
+    // Hanya dibaca, tidak ikut dikirim: kursi tambahan punya halamannya
+    // sendiri, dan menyimpannya dari dua tempat adalah cara paling pasti
+    // untuk membuat keduanya berselisih.
+    const tambahan = membuatBaru || !acara ? 0 : acara.kursi_tambahan || 0;
+    const mejaBertambah = (membuatBaru || !acara ? [] : acara.meja_bertambah) ?? [];
 
     // Batas bawah berasal dari tempat duduk yang sudah dipakai. Edisi baru
     // belum punya tamu, jadi batasnya nol.
@@ -244,7 +234,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 <InputLabel value="Tata letak kursi" />
                 <p className="mt-1 text-xs text-gray-500">
                     Isi banyaknya meja dan isi tiap meja; jumlah kursi dihitung sendiri.
-                    Kursi tambahan untuk sisa undangan yang tidak pas membagi habis.
+                    Meja tertentu boleh ditambahi kursi lewat Penempatan Kursi.
                 </p>
 
                 <div className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -285,25 +275,31 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         <InputError message={errors.kursi_per_meja} className="mt-2" />
                     </div>
 
+                    {/* Kursi tambahan hanya dilaporkan di sini. Yang menentukan
+                        meja mana yang ditambahi adalah orang yang sedang melihat
+                        papan penempatan, bukan orang yang sedang mengisi tanggal
+                        dan tempat acara. */}
                     <div>
-                        <InputLabel htmlFor="kursi_tambahan" value="Kursi tambahan" />
-                        <TextInput
-                            id="kursi_tambahan"
-                            type="number"
-                            min="0"
-                            className="mt-1 block w-full"
-                            value={data.kursi_tambahan}
-                            onChange={(e) => setData("kursi_tambahan", e.target.value)}
-                            placeholder="0"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                            Disisipkan satu per meja dari meja terakhir mundur ke depan.
+                        <InputLabel value="Kursi tambahan" />
+                        <p className="mt-1 text-sm text-gray-700">
+                            {tambahan > 0
+                                ? `${tambahan} kursi di meja ${mejaBertambah.join(", ")}.`
+                                : "Belum ada."}
                         </p>
-                        <InputError message={errors.kursi_tambahan} className="mt-2" />
+                        <p className="mt-1 text-xs text-gray-500">
+                            Diatur per meja lewat{" "}
+                            <Link
+                                href={route("admin.penempatan.index")}
+                                className="underline hover:text-gray-800"
+                            >
+                                Penempatan Kursi
+                            </Link>
+                            .
+                        </p>
                     </div>
                 </div>
 
-                <p className="mt-3 text-sm text-gray-700">{hitungKursi(data)}</p>
+                <p className="mt-3 text-sm text-gray-700">{hitungKursi(data, tambahan)}</p>
 
                 {menyusut && (
                     <div className="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">

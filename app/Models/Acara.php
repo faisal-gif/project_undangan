@@ -52,7 +52,7 @@ class Acara extends Model
         'musik_url',
         'jumlah_meja',
         'kursi_per_meja',
-        'kursi_tambahan',
+        'kursi_tambahan_meja',
         'meja_per_baris',
         'orientasi_denah',
         'denah',
@@ -61,6 +61,7 @@ class Acara extends Model
 
     protected $casts = [
         'denah' => 'array',
+        'kursi_tambahan_meja' => 'array',
         'mulai' => 'datetime',
         'selesai' => 'datetime',
         'aktif' => 'boolean',
@@ -142,14 +143,46 @@ class Acara extends Model
     }
 
     /**
-     * Kursi sisipan di luar hitungan meja x kursi per meja.
+     * Kursi sisipan di luar hitungan meja x kursi per meja, per meja.
      *
      * Jumlah undangan jarang pas membagi habis: 27 meja berisi 6 menghasilkan
-     * 162 kursi untuk 163 undangan. Yang satu itu disimpan di sini.
+     * 162 kursi untuk 163 undangan. Meja mana yang ditambahi ditentukan admin,
+     * bukan rumus - yang tahu meja mana yang masih muat kursi ketujuh adalah
+     * orang yang melihat ruangannya.
+     *
+     * Dibersihkan saat dibaca, bukan saat disimpan: jumlah meja boleh berubah
+     * setelahnya, dan tambahan di meja yang sudah tidak ada harus berhenti
+     * dihitung tanpa perlu ada yang membereskannya lebih dulu.
+     */
+    public function kursiTambahanMeja(): array
+    {
+        $peta = [];
+
+        foreach ((array) ($this->kursi_tambahan_meja ?? []) as $meja => $jumlah) {
+            $nomor = (int) $meja;
+            $isi = (int) $jumlah;
+
+            if ($nomor >= 1 && $nomor <= $this->jumlahMeja() && $isi > 0) {
+                $peta[(string) $nomor] = $isi;
+            }
+        }
+
+        ksort($peta, SORT_NUMERIC);
+
+        return $peta;
+    }
+
+    public function kursiTambahanDi(int $meja): int
+    {
+        return $this->kursiTambahanMeja()[(string) $meja] ?? 0;
+    }
+
+    /**
+     * Seluruh kursi tambahan, dijumlahkan dari semua meja.
      */
     public function kursiTambahan(): int
     {
-        return max(0, (int) $this->kursi_tambahan);
+        return array_sum($this->kursiTambahanMeja());
     }
 
     /**
@@ -162,44 +195,30 @@ class Acara extends Model
     }
 
     /**
-     * Kursi di meja tertentu.
-     *
-     * Kursi tambahan dibagikan satu per meja mulai dari meja TERAKHIR mundur
-     * ke depan: meja di dekat panggung tetap serapi rencana, dan kursi
-     * sempitnya jatuh di belakang. Bila tambahannya melebihi jumlah meja,
-     * satu putaran penuh diberikan ke semua meja lebih dulu, lalu sisanya
-     * kembali diisi dari belakang.
+     * Kursi di meja tertentu: isi bakunya ditambah sisipan khusus meja itu.
      *
      * Yang di luar jangkauan mengembalikan nol supaya pemanggilnya tidak
      * perlu memeriksa sendiri.
      */
     public function kursiDiMeja(int $meja): int
     {
-        $jumlahMeja = $this->jumlahMeja();
-
-        if ($meja < 1 || $meja > $jumlahMeja) {
+        if ($meja < 1 || $meja > $this->jumlahMeja()) {
             return 0;
         }
 
-        $tambahan = $this->kursiTambahan();
-        $putaran = intdiv($tambahan, $jumlahMeja);
-        $sisa = $tambahan % $jumlahMeja;
-
-        return $this->kursiPerMeja() + $putaran + ($meja > $jumlahMeja - $sisa ? 1 : 0);
+        return $this->kursiPerMeja() + $this->kursiTambahanDi($meja);
     }
 
     /**
      * Meja mana saja yang kebagian kursi tambahan, untuk ditampilkan di
-     * formulir. Mis. [26, 27].
+     * formulir. Mis. [5, 12].
      */
     public function mejaBerkursiTambahan(): array
     {
         $daftar = [];
 
-        for ($meja = 1; $meja <= $this->jumlahMeja(); $meja++) {
-            if ($this->kursiDiMeja($meja) > $this->kursiPerMeja()) {
-                $daftar[] = $meja;
-            }
+        foreach (array_keys($this->kursiTambahanMeja()) as $meja) {
+            $daftar[] = (int) $meja;
         }
 
         return $daftar;

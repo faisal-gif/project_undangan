@@ -158,6 +158,81 @@ class PenempatanController extends Controller
     }
 
     /**
+     * Atur berapa kursi tambahan di satu meja.
+     *
+     * Diatur dari sini, bukan dari formulir acara: yang tahu meja mana yang
+     * masih muat kursi ketujuh adalah orang yang sedang melihat papan ini -
+     * meja mana yang penuh, siapa yang masih berdiri - bukan orang yang
+     * sedang mengisi tanggal dan tempat acara.
+     */
+    public function aturKursiTambahan(Request $request)
+    {
+        $data = $request->validate([
+            'meja' => 'required|integer|min:1',
+            'jumlah' => 'required|integer|min:0|max:20',
+        ]);
+
+        $acara = Acara::aktif();
+        abort_unless($acara, 404);
+
+        $meja = (int) $data['meja'];
+        $jumlah = (int) $data['jumlah'];
+
+        if ($meja > $acara->jumlahMeja()) {
+            throw ValidationException::withMessages([
+                'meja' => 'Meja '.$meja.' tidak ada. Acara ini punya '
+                    .$acara->jumlahMeja().' meja.',
+            ]);
+        }
+
+        // Mengurangi kursi tambahan membuang kursi yang nomornya sudah
+        // terlanjur dikirim di undangan. Ditolak, bukan diperingatkan.
+        $kapasitas = $acara->kursiPerMeja() + $jumlah;
+        $tertinggi = $this->kursiTertinggiDi($acara, $meja);
+
+        if ($tertinggi > $kapasitas) {
+            throw ValidationException::withMessages([
+                'meja' => 'Kursi '.$tertinggi.' di meja '.$meja.' masih ada tamunya, '
+                    .'jadi meja ini tidak bisa kurang dari '.$tertinggi.' kursi. '
+                    .'Pindahkan tamunya lebih dulu.',
+            ]);
+        }
+
+        $peta = $acara->kursiTambahanMeja();
+
+        if ($jumlah > 0) {
+            $peta[(string) $meja] = $jumlah;
+        } else {
+            unset($peta[(string) $meja]);
+        }
+
+        $acara->update(['kursi_tambahan_meja' => $peta ?: null]);
+
+        return back()->with(
+            'success',
+            $jumlah > 0
+                ? 'Meja '.$meja.' sekarang berisi '.$kapasitas.' kursi.'
+                : 'Kursi tambahan di meja '.$meja.' dihapus.'
+        );
+    }
+
+    /**
+     * Nomor kursi tertinggi yang sedang dipakai di satu meja.
+     *
+     * Disaring di PHP, bukan SQL: kolom meja boleh memuat beberapa meja
+     * sekaligus ("3, 7") sejak satu undangan boleh terbelah.
+     */
+    private function kursiTertinggiDi(Acara $acara, int $meja): int
+    {
+        return (int) Tamu::where('acara_id', $acara->id)
+            ->whereNotNull('meja')
+            ->get()
+            ->flatMap(fn (Tamu $t) => $t->kursiDi($meja))
+            ->map(fn ($n) => ctype_digit((string) $n) ? (int) $n : 0)
+            ->max();
+    }
+
+    /**
      * Simpan letak meja hasil geseran admin.
      *
      * Hanya meja yang benar-benar ada yang disimpan, dan nilainya dijepit ke
@@ -289,6 +364,7 @@ class PenempatanController extends Controller
             $papan[] = [
                 'nomor' => $nomor,
                 'kapasitas' => $kapasitas,
+                'tambahan' => $acara->kursiTambahanDi($nomor),
                 'terisi' => count(array_filter($kursi)),
                 'kursi' => array_map(
                     fn ($n) => ['nomor' => $n, 'tamu' => $kursi[$n]],

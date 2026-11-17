@@ -28,7 +28,10 @@ class AcaraController extends Controller
                 'musik_url' => $acara->musik_url,
                 'jumlah_meja' => $acara->jumlah_meja,
                 'kursi_per_meja' => $acara->kursi_per_meja,
-                'kursi_tambahan' => $acara->kursi_tambahan,
+                // Hanya untuk diberitahukan, bukan diubah di sini - kursi
+                // tambahan diatur per meja lewat halaman Penempatan Kursi.
+                'kursi_tambahan' => $acara->kursiTambahan(),
+                'meja_bertambah' => $acara->mejaBerkursiTambahan(),
                 // Dipakai formulir untuk memperingatkan sebelum tata letaknya
                 // disusutkan, bukan untuk ditampilkan apa adanya.
                 'meja_terpakai' => $acara->mejaTerpakai(),
@@ -90,7 +93,6 @@ class AcaraController extends Controller
             'musik_url' => 'nullable|string|max:255',
             'jumlah_meja' => 'nullable|integer|min:0|max:500',
             'kursi_per_meja' => 'nullable|integer|min:1|max:50',
-            'kursi_tambahan' => 'nullable|integer|min:0|max:500',
         ], [
             'nama.required' => 'Nama acara wajib diisi.',
             'mulai.required' => 'Tanggal dan jam mulai wajib diisi.',
@@ -141,7 +143,7 @@ class AcaraController extends Controller
         // jadi penjaga ini tidak bisa berselisih dengan hasil akhirnya.
         $calon = $acara->replicate();
 
-        foreach (['jumlah_meja', 'kursi_per_meja', 'kursi_tambahan'] as $kolom) {
+        foreach (['jumlah_meja', 'kursi_per_meja'] as $kolom) {
             if (array_key_exists($kolom, $data)) {
                 $calon->{$kolom} = (int) $data[$kolom];
             }
