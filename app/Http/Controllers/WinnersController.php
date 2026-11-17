@@ -18,11 +18,16 @@ class WinnersController extends Controller
             ->when($request->input('search'), function ($query, $search) {
                 $query->where('nama', 'like', "%{$search}%");
             })
+            // Yang terbaru di atas, dan dari id supaya urutannya pasti -
+            // paginasi tanpa urutan boleh mengembalikan baris yang sama di
+            // dua halaman, atau melewatkannya sama sekali.
+            ->latest('id')
             ->paginate(10)
             ->withQueryString();
+
         return Inertia::render('Admin/Winners/Index', [
             'winners' => $winners,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -37,14 +42,13 @@ class WinnersController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-
     public function store(Request $request)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
             'kategori' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
-            'tahun' => 'required|integer|digits:4|min:1900|max:' . (date('Y') + 10),
+            'tahun' => 'required|integer|digits:4|min:1900|max:'.(date('Y') + 10),
             'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'nama.required' => 'Nama wajib diisi.',
@@ -64,7 +68,7 @@ class WinnersController extends Controller
 
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
             $fotoPath = $file->storeAs('winners', $filename, 'public');
         }
 
@@ -83,7 +87,7 @@ class WinnersController extends Controller
     public function edit(Winners $winner)
     {
         return Inertia::render('Admin/Winners/Edit', [
-            'winner' => $winner
+            'winner' => $winner,
         ]);
     }
 
@@ -93,7 +97,7 @@ class WinnersController extends Controller
             'nama' => 'required|string|max:255',
             'kategori' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
-            'tahun' => 'required|integer|digits:4|min:1900|max:' . (date('Y') + 10),
+            'tahun' => 'required|integer|digits:4|min:1900|max:'.(date('Y') + 10),
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'nama.required' => 'Nama wajib diisi.',
@@ -124,7 +128,7 @@ class WinnersController extends Controller
 
             // Upload foto baru
             $file = $request->file('foto');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
             $fotoPath = $file->storeAs('winners', $filename, 'public');
             $data['foto'] = $fotoPath;
         }
@@ -134,7 +138,6 @@ class WinnersController extends Controller
         return redirect()->route('admin.winners.index')
             ->with('success', 'Pemenang berhasil diupdate.');
     }
-
 
     /**
      * Remove the specified resource from storage.

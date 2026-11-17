@@ -509,6 +509,10 @@ class TamuController extends Controller
                         ->orWhere('pic', 'like', "%{$search}%");
                 });
             })
+            // Yang terbaru di atas, dan dari id supaya baris hasil impor yang
+            // berbagi detik yang sama tetap punya urutan pasti - tanpa itu
+            // paginasinya bisa mengulang atau melewatkan baris.
+            ->latest('id')
             ->paginate(10)
             ->withQueryString();
 

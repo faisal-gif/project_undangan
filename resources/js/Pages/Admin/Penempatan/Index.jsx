@@ -61,9 +61,21 @@ export default function Index({ acara, mejas, belum }) {
         );
     };
 
-    const terlihat = belum.filter((t) =>
-        t.nama.toLowerCase().includes(cari.trim().toLowerCase())
-    );
+    // Dicocokkan ke nama DAN lembaga, masing-masing utuh - bukan ke gabungan
+    // keduanya, yang akan membuat "Pimpinan TIMES" cocok lewat celah di
+    // antara dua medan dan menyulitkan menebak kenapa sesuatu muncul.
+    //
+    // Lembaga ikut dicari karena banyak baris bernama sama persis - ada tiga
+    // "Pimpinan" dan beberapa "Kepala" - dan satu-satunya yang membedakan
+    // mereka adalah lembaganya.
+    const kunci = cari.trim().toLowerCase();
+    const terlihat = kunci
+        ? belum.filter(
+              (t) =>
+                  t.nama.toLowerCase().includes(kunci) ||
+                  (t.lembaga ?? "").toLowerCase().includes(kunci)
+          )
+        : belum;
 
     if (!acara || acara.jumlah_meja < 1) {
         return (
@@ -177,7 +189,7 @@ export default function Index({ acara, mejas, belum }) {
                                     type="text"
                                     value={cari}
                                     onChange={(e) => setCari(e.target.value)}
-                                    placeholder="Cari nama..."
+                                    placeholder="Cari nama atau lembaga..."
                                     className="input input-bordered input-sm mt-3 w-full"
                                 />
 
@@ -199,7 +211,7 @@ export default function Index({ acara, mejas, belum }) {
                                         <li className="py-6 text-sm text-gray-500">
                                             {belum.length === 0
                                                 ? "Semua tamu sudah ditempatkan."
-                                                : "Tidak ada nama yang cocok."}
+                                                : "Tidak ada nama atau lembaga yang cocok."}
                                         </li>
                                     )}
 

@@ -5,17 +5,20 @@ namespace Tests\Feature;
 use App\Models\Acara;
 use App\Models\Tamu;
 use App\Models\User;
+use App\Models\Winners;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Daftar undangan: yang terbaru di atas.
+ * Tiga daftar bernomor halaman - Undangan, Buku Tamu, dan Pemenang - dengan
+ * yang terbaru di atas.
  *
- * Diurutkan dari id, bukan created_at. Tamu ditambahkan berombongan lewat
- * perintah impor sehingga puluhan baris berbagi detik yang sama, dan urutan
- * yang seri membuat paginasi mengulang baris di halaman berikutnya atau
- * melewatkannya sama sekali - itu bug yang jauh lebih merepotkan daripada
- * urutan yang terbalik.
+ * Ketiganya diurutkan dari id, bukan created_at. Barisnya ditambahkan
+ * berombongan lewat perintah impor sehingga puluhan baris berbagi detik yang
+ * sama, dan urutan yang seri membuat paginasi mengulang baris di halaman
+ * berikutnya atau melewatkannya sama sekali - bug yang jauh lebih merepotkan
+ * daripada urutan yang terbalik. Sebelumnya tidak satu pun dari ketiganya
+ * punya urutan tersurat.
  */
 class UrutanUndanganTest extends TestCase
 {
@@ -115,5 +118,61 @@ class UrutanUndanganTest extends TestCase
                 ->has('tamus.data', 2)
                 ->where('tamus.data.0.nama', 'Penerima Baru')
                 ->where('tamus.data.1.nama', 'Penerima Lama'));
+    }
+
+    public function test_buku_tamu_juga_terbaru_di_atas(): void
+    {
+        $this->tamu('Datang Lebih Dulu');
+        $this->tamu('Baru Didaftarkan');
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.qrScanner'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/QrScanner/Index')
+                ->where('tamus.data.0.nama', 'Baru Didaftarkan')
+                ->where('tamus.data.1.nama', 'Datang Lebih Dulu'));
+    }
+
+    public function test_buku_tamu_tetap_terbaru_dulu_saat_dicari(): void
+    {
+        $this->tamu('Kepala Lama', ['lembaga' => 'Pemprov Jawa Timur']);
+        $this->tamu('Kepala Baru', ['lembaga' => 'Pemprov Jawa Timur']);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.qrScanner', ['search' => 'Pemprov']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('tamus.data', 2)
+                ->where('tamus.data.0.nama', 'Kepala Baru'));
+    }
+
+    public function test_pemenang_juga_terbaru_di_atas(): void
+    {
+        Winners::create(['nama' => 'Pemenang Lama', 'kategori' => 'Tokoh']);
+        Winners::create(['nama' => 'Pemenang Baru', 'kategori' => 'Tokoh']);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.winners.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Winners/Index')
+                ->where('winners.data.0.nama', 'Pemenang Baru')
+                ->where('winners.data.1.nama', 'Pemenang Lama'));
+    }
+
+    public function test_pemenang_tetap_terbaru_dulu_saat_dicari(): void
+    {
+        Winners::create(['nama' => 'Budi Lama', 'kategori' => 'Tokoh']);
+        Winners::create(['nama' => 'Budi Baru', 'kategori' => 'Tokoh']);
+        Winners::create(['nama' => 'Sari', 'kategori' => 'Tokoh']);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.winners.index', ['search' => 'Budi']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('winners.data', 2)
+                ->where('winners.data.0.nama', 'Budi Baru')
+                ->where('winners.data.1.nama', 'Budi Lama'));
     }
 }
