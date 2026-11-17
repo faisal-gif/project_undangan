@@ -156,6 +156,71 @@ class CetakPenempatanTest extends TestCase
                 ->has('indeks', 0));
     }
 
+    /**
+     * Kertas ini dibawa keliling ruangan dan dicocokkan meja demi meja, jadi
+     * meja yang hilang dari daftar berarti meja yang tidak pernah diperiksa.
+     */
+    public function test_meja_kosong_ikut_dicetak(): void
+    {
+        $this->tamu('Sendirian', null, '2', '1');
+
+        $this->lihat()
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('mejas', 3)
+                ->where('mejas.0.nomor', 1)
+                ->where('mejas.0.terisi', 0)
+                ->has('mejas.0.kursi', 6)
+                ->where('mejas.1.terisi', 1)
+                ->where('mejas.2.terisi', 0));
+    }
+
+    public function test_yang_belum_dapat_kursi_ikut_dicetak(): void
+    {
+        $this->tamu('Sudah Duduk', 'Pemprov Jawa Timur', '1', '1');
+        $this->tamu('Belum Duduk', 'TIMES Indonesia', null, null, 3);
+
+        $this->lihat()
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('belum', 1)
+                ->where('belum.0.nama', 'Belum Duduk')
+                ->where('belum.0.lembaga', 'TIMES Indonesia')
+                ->where('belum.0.jumlah_orang', 3)
+                ->where('belum.0.sudah', 0)
+                ->where('belum.0.sisa', 3));
+    }
+
+    /**
+     * Rombongan yang sebagiannya sudah duduk tetap masuk daftar - dengan
+     * sisanya saja, bukan seluruh kuotanya.
+     */
+    public function test_rombongan_separuh_duduk_masuk_dengan_sisanya(): void
+    {
+        $this->tamu('Berempat', 'Bank Indonesia', '1', '1, 2', 4);
+
+        $this->lihat()
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('belum', 1)
+                ->where('belum.0.nama', 'Berempat')
+                ->where('belum.0.sudah', 2)
+                ->where('belum.0.sisa', 2));
+    }
+
+    public function test_belum_urut_abjad(): void
+    {
+        $this->tamu('Zainal Arifin', null, null, null);
+        $this->tamu('Ahmad Basuki', null, null, null);
+
+        $this->lihat()
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('belum', 2)
+                ->where('belum.0.nama', 'Ahmad Basuki')
+                ->where('belum.1.nama', 'Zainal Arifin'));
+    }
+
     public function test_tamu_umum_tidak_bisa_membuka_lembar_cetak(): void
     {
         $this->get(route('admin.penempatan.cetak'))->assertRedirect();

@@ -109,6 +109,7 @@ class PenempatanController extends Controller
                 'acara' => null,
                 'mejas' => [],
                 'indeks' => [],
+                'belum' => [],
             ]);
         }
 
@@ -134,6 +135,19 @@ class PenempatanController extends Controller
                     'nama' => $t->nama,
                     'lembaga' => $t->lembaga,
                     'tempat_duduk' => $this->tempatRingkas($t),
+                ])->values(),
+            // Yang belum kebagian kursi ikut dicetak. Panitia membawa kertas
+            // ini keliling ruangan, dan daftar siapa yang masih berdiri
+            // justru yang paling dibutuhkan di sana - termasuk rombongan yang
+            // baru separuh duduk.
+            'belum' => $tamus->filter(fn (Tamu $t) => $t->sisaKursi() > 0)
+                ->map(fn (Tamu $t) => [
+                    'id' => $t->id,
+                    'nama' => $t->nama,
+                    'lembaga' => $t->lembaga,
+                    'jumlah_orang' => (int) ($t->jumlah_orang ?: 1),
+                    'sudah' => $t->kursiTerisi(),
+                    'sisa' => $t->sisaKursi(),
                 ])->values(),
         ]);
     }

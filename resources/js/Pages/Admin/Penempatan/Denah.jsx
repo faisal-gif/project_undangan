@@ -2,7 +2,7 @@ import AtiLogo from "@/Components/AtiLogo";
 import Ruangan from "@/Components/DenahRuangan";
 import PialaTiga from "@/Components/PialaTiga";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 
 /**
@@ -15,10 +15,15 @@ import { useEffect, useState } from "react";
  * susunan yang sama. Gambarnya sendiri ada di Components/DenahRuangan.
  */
 export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, meja_per_baris, orientasi, layar = false }) {
+    const { errors } = usePage().props;
     const [letak, setLetak] = useState(letakAwal ?? {});
     const [aturUlang, setAturUlang] = useState(false);
     const [belumDisimpan, setBelumDisimpan] = useState(false);
+    // Yang disimpan nomornya, bukan mejanya. Kartu meja dimuat ulang setiap
+    // kali kursinya diubah, dan benda yang disalin ke state akan tetap
+    // memperlihatkan jumlah kursi yang lama setelahnya.
     const [dilihat, setDilihat] = useState(null);
+    const [sibuk, setSibuk] = useState(false);
     const [perBaris, setPerBaris] = useState(meja_per_baris ?? "");
 
     const ubahBentuk = (ubahan) =>
@@ -52,6 +57,20 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
     const geser = (nomor, titik) => {
         setLetak((lama) => ({ ...lama, [nomor]: titik }));
         setBelumDisimpan(true);
+    };
+
+    // Kursi meja juga bisa digeser dari sini, bukan cuma dari papan
+    // penempatan: saat menyusun denah, meja yang terlalu dekat pintu atau
+    // terlalu mepet panggung baru kelihatan di gambar ini.
+    const aturKursi = (meja, jumlah) => {
+        if (sibuk) return;
+
+        setSibuk(true);
+        router.post(
+            route("admin.penempatan.kursi-tambahan"),
+            { meja, jumlah },
+            { preserveScroll: true, onFinish: () => setSibuk(false) }
+        );
     };
 
     const simpan = () => {
@@ -90,6 +109,7 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
     }
 
     const terisi = mejas.reduce((n, m) => n + m.terisi, 0);
+    const meja = dilihat ? mejas.find((m) => m.nomor === dilihat) : null;
 
     // Mode monitor: tanpa menu, tanpa tombol, sebesar mungkin, dan berwarna
     // acaranya sendiri - ia berdiri di meja penerima tamu, bukan di ruang
@@ -280,38 +300,85 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                 orientasi={orientasi}
                                 aturUlang={aturUlang}
                                 onGeser={geser}
-                                onPilih={(m) => setDilihat(dilihat?.nomor === m.nomor ? null : m)}
-                                disorot={dilihat?.nomor}
+                                onPilih={(m) => setDilihat(dilihat === m.nomor ? null : m.nomor)}
+                                disorot={dilihat}
                             />
                         </div>
 
-                        {!aturUlang && dilihat && (
+                        {!aturUlang && meja && (
                             <div className="mt-6 overflow-hidden rounded-xl border border-amber-300">
-                                <div className="flex items-center gap-3 border-b border-amber-300 bg-amber-50 px-4 py-3">
+                                <div className="flex flex-wrap items-center gap-3 border-b border-amber-300 bg-amber-50 px-4 py-3">
                                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-amber-500 bg-white font-bold tabular-nums text-amber-900">
-                                        {dilihat.nomor}
+                                        {meja.nomor}
                                     </span>
                                     <div className="min-w-0">
                                         <h2 className="font-semibold text-gray-900">
-                                            Meja {dilihat.nomor}
+                                            Meja {meja.nomor}
+                                            {meja.ubahan !== 0 && (
+                                                <span
+                                                    className={`ml-2 align-middle text-[0.65rem] font-semibold uppercase tracking-wide ${
+                                                        meja.ubahan > 0 ? "text-amber-700" : "text-gray-500"
+                                                    }`}
+                                                >
+                                                    {meja.ubahan > 0 ? "+" : "−"}
+                                                    {Math.abs(meja.ubahan)} kursi
+                                                </span>
+                                            )}
                                         </h2>
                                         <p className="text-sm text-amber-900">
-                                            <span className="tabular-nums">{dilihat.terisi}</span> dari{" "}
-                                            <span className="tabular-nums">{dilihat.kapasitas}</span> kursi
+                                            <span className="tabular-nums">{meja.terisi}</span> dari{" "}
+                                            <span className="tabular-nums">{meja.kapasitas}</span> kursi
                                             terisi
                                         </p>
                                     </div>
+
+                                    {/* Kursinya bisa digeser dari sini juga. Meja yang
+                                        terlalu mepet pintu atau panggung baru kelihatan
+                                        saat denahnya dilihat, bukan saat daftarnya. */}
+                                    <div className="ml-auto flex items-center gap-2 text-xs text-amber-900">
+                                        <span>Jumlah kursi</span>
+                                        <div className="join">
+                                            <button
+                                                type="button"
+                                                onClick={() => aturKursi(meja.nomor, meja.ubahan - 1)}
+                                                disabled={sibuk || meja.kapasitas <= 0}
+                                                className="btn btn-xs join-item"
+                                                aria-label={`Kurangi kursi di meja ${meja.nomor}`}
+                                            >
+                                                &minus;
+                                            </button>
+                                            <span className="join-item border-y border-amber-300 bg-white px-2 font-semibold leading-6 tabular-nums text-gray-800">
+                                                {meja.kapasitas}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => aturKursi(meja.nomor, meja.ubahan + 1)}
+                                                disabled={sibuk}
+                                                className="btn btn-xs join-item"
+                                                aria-label={`Tambah kursi di meja ${meja.nomor}`}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <button
                                         type="button"
                                         onClick={() => setDilihat(null)}
-                                        className="btn btn-ghost btn-sm ml-auto shrink-0"
+                                        className="btn btn-ghost btn-sm shrink-0"
                                     >
                                         Tutup
                                     </button>
                                 </div>
 
+                                {errors.meja && (
+                                    <div className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">
+                                        {errors.meja}
+                                    </div>
+                                )}
+
                                 <ol className="grid gap-x-8 gap-y-1 p-4 sm:grid-cols-2">
-                                    {dilihat.kursi.map((k) => (
+                                    {meja.kursi.map((k) => (
                                         <li key={k.nomor} className="flex items-baseline gap-3 text-sm">
                                             <span className="w-5 shrink-0 text-xs font-semibold tabular-nums text-gray-400">
                                                 {k.nomor}
@@ -321,6 +388,11 @@ export default function Denah({ acara, mejas, letak: letakAwal, kolom, baris, me
                                             </span>
                                         </li>
                                     ))}
+                                    {meja.kursi.length === 0 && (
+                                        <li className="text-sm text-gray-400">
+                                            Meja ini tidak punya kursi.
+                                        </li>
+                                    )}
                                 </ol>
                             </div>
                         )}

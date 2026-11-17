@@ -48,7 +48,7 @@ function Kosong() {
     );
 }
 
-function KepalaLembar({ acara, judul, terisi }) {
+function KepalaLembar({ acara, judul, terisi, belumDuduk }) {
     return (
         <header className="mb-4 flex items-end justify-between gap-6 border-b-2 border-gray-900 pb-2">
             <div className="min-w-0">
@@ -62,17 +62,21 @@ function KepalaLembar({ acara, judul, terisi }) {
             <p className="shrink-0 text-right text-sm text-gray-700">
                 <span className="font-bold tabular-nums">{terisi}</span> dari{" "}
                 <span className="tabular-nums">{acara.jumlah_kursi}</span> kursi terisi
-                <span className="block tabular-nums">{acara.jumlah_meja} meja</span>
+                <span className="block tabular-nums">
+                    {acara.jumlah_meja} meja
+                    {belumDuduk > 0 && ` · ${belumDuduk} orang belum duduk`}
+                </span>
             </p>
         </header>
     );
 }
 
-export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, indeks }) {
+export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, indeks, belum }) {
     if (!acara) return <Kosong />;
 
     const terisi = mejas.reduce((n, m) => n + m.terisi, 0);
-    const berpenghuni = mejas.filter((m) => m.terisi > 0);
+    const belumDuduk = belum.reduce((n, t) => n + t.sisa, 0);
+    const kepala = { acara, terisi, belumDuduk };
 
     return (
         <>
@@ -99,8 +103,8 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
                     <div>
                         <h1 className="text-xl font-bold">Cetak Penempatan</h1>
                         <p className="text-sm text-gray-600">
-                            Tiga lembar: denah, daftar per meja, lalu indeks nama. Atur kertas ke
-                            A4 melintang.
+                            Empat lembar: denah, daftar per meja, indeks nama, lalu yang belum
+                            dapat kursi. Atur kertas ke A4 melintang.
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -116,7 +120,7 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
                 <div className="mx-auto max-w-[1100px] space-y-8 px-4 print:max-w-none print:space-y-0 print:px-0">
                     {/* Lembar 1: denah ruangan */}
                     <section className="lembar rounded-lg bg-white p-6 shadow-sm print:rounded-none print:p-0 print:shadow-none">
-                        <KepalaLembar acara={acara} judul="Denah Meja" terisi={terisi} />
+                        <KepalaLembar {...kepala} judul="Denah Meja" />
 
                         <Ruangan
                             mejas={mejas}
@@ -136,15 +140,19 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
 
                     {/* Lembar 2: siapa duduk di meja mana */}
                     <section className="lembar rounded-lg bg-white p-6 shadow-sm print:rounded-none print:p-0 print:shadow-none">
-                        <KepalaLembar acara={acara} judul="Daftar Tamu per Meja" terisi={terisi} />
+                        <KepalaLembar {...kepala} judul="Daftar Tamu per Meja" />
 
-                        {berpenghuni.length === 0 ? (
+                        {/* Seluruh meja dicetak, termasuk yang masih kosong:
+                            kertas ini dibawa keliling ruangan dan dicocokkan
+                            meja demi meja, jadi meja yang hilang dari daftar
+                            berarti meja yang tidak pernah diperiksa. */}
+                        {mejas.length === 0 ? (
                             <p className="py-8 text-center text-sm text-gray-600">
-                                Belum ada tamu yang ditempatkan.
+                                Tata letak kursi belum diatur, jadi belum ada meja.
                             </p>
                         ) : (
                             <div className="grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-3 print:grid-cols-4">
-                                {berpenghuni.map((m) => (
+                                {mejas.map((m) => (
                                     <div key={m.nomor} className="utuh border border-gray-400">
                                         <h3 className="flex items-baseline justify-between gap-2 border-b border-gray-400 bg-gray-900 px-2 py-1 text-xs font-bold text-white">
                                             <span>MEJA {m.nomor}</span>
@@ -174,6 +182,11 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
                                                     )}
                                                 </li>
                                             ))}
+                                            {m.kursi.length === 0 && (
+                                                <li className="px-2 py-1 text-[0.7rem] text-gray-400">
+                                                    tanpa kursi
+                                                </li>
+                                            )}
                                         </ol>
                                     </div>
                                 ))}
@@ -184,11 +197,7 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
                     {/* Lembar 3: dari nama ke tempat duduk - arah yang dipakai
                         petugas penerima tamu. */}
                     <section className="lembar rounded-lg bg-white p-6 shadow-sm print:rounded-none print:p-0 print:shadow-none">
-                        <KepalaLembar
-                            acara={acara}
-                            judul={`Indeks Nama (${indeks.length} tamu)`}
-                            terisi={terisi}
-                        />
+                        <KepalaLembar {...kepala} judul={`Indeks Nama (${indeks.length} tamu)`} />
 
                         <p className="-mt-2 mb-3 text-[0.7rem] text-gray-600">
                             Urut abjad. <strong>M</strong> = nomor meja, <strong>K</strong> = nomor
@@ -218,6 +227,54 @@ export default function Cetak({ acara, mejas, letak, kolom, baris, orientasi, in
                                     </div>
                                 ))}
                             </div>
+                        )}
+                    </section>
+
+                    {/* Lembar 4: siapa yang masih berdiri. Panitia memegang ini
+                        saat acara mulai, dan rombongan yang baru separuh duduk
+                        ikut di sini - bukan "sudah ditempatkan" hanya karena
+                        satu orangnya sudah dapat kursi. */}
+                    <section className="lembar rounded-lg bg-white p-6 shadow-sm print:rounded-none print:p-0 print:shadow-none">
+                        <KepalaLembar
+                            {...kepala}
+                            judul={`Belum Dapat Kursi (${belumDuduk} orang)`}
+                        />
+
+                        {belum.length === 0 ? (
+                            <p className="py-8 text-center text-sm text-gray-700">
+                                Semua tamu sudah dapat kursi.
+                            </p>
+                        ) : (
+                            <>
+                                <p className="-mt-2 mb-3 text-[0.7rem] text-gray-600">
+                                    {belum.length} undangan, {belumDuduk} orang. Urut abjad.
+                                    Rombongan yang sebagiannya sudah duduk ikut tercantum dengan
+                                    sisanya saja.
+                                </p>
+
+                                <div className="grid gap-x-8 sm:grid-cols-2 print:grid-cols-3">
+                                    {belum.map((t) => (
+                                        <div
+                                            key={t.id}
+                                            className="utuh flex items-baseline justify-between gap-3 border-b border-gray-200 py-1 text-[0.72rem] leading-tight"
+                                        >
+                                            <span className="min-w-0">
+                                                <span className="block font-semibold">{t.nama}</span>
+                                                {t.lembaga && (
+                                                    <span className="block text-gray-600">
+                                                        {t.lembaga}
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className="shrink-0 text-right font-semibold tabular-nums">
+                                                {t.sudah > 0
+                                                    ? `sisa ${t.sisa} dari ${t.jumlah_orang}`
+                                                    : `${t.sisa} org`}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </section>
                 </div>
