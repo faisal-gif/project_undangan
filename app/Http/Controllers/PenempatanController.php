@@ -158,18 +158,22 @@ class PenempatanController extends Controller
     }
 
     /**
-     * Atur berapa kursi tambahan di satu meja.
+     * Geser jumlah kursi di satu meja, naik maupun turun.
      *
      * Diatur dari sini, bukan dari formulir acara: yang tahu meja mana yang
-     * masih muat kursi ketujuh adalah orang yang sedang melihat papan ini -
-     * meja mana yang penuh, siapa yang masih berdiri - bukan orang yang
-     * sedang mengisi tanggal dan tempat acara.
+     * masih muat kursi ketujuh - dan meja mana yang di dekat pintu sehingga
+     * cuma muat lima - adalah orang yang sedang melihat papan ini, bukan
+     * orang yang sedang mengisi tanggal dan tempat acara.
+     *
+     * Kursi yang dicabut di satu meja tidak pindah sendiri: admin memasangnya
+     * di meja lain lewat panggilan kedua. Begitu dua meja saling meniadakan,
+     * jumlah kursi seluruhnya kembali seperti semula.
      */
     public function aturKursiTambahan(Request $request)
     {
         $data = $request->validate([
             'meja' => 'required|integer|min:1',
-            'jumlah' => 'required|integer|min:0|max:20',
+            'jumlah' => 'required|integer|min:-50|max:50',
         ]);
 
         $acara = Acara::aktif();
@@ -185,9 +189,9 @@ class PenempatanController extends Controller
             ]);
         }
 
-        // Mengurangi kursi tambahan membuang kursi yang nomornya sudah
-        // terlanjur dikirim di undangan. Ditolak, bukan diperingatkan.
-        $kapasitas = $acara->kursiPerMeja() + $jumlah;
+        // Mengurangi kursi membuang tempat duduk yang nomornya sudah terlanjur
+        // dikirim di undangan. Ditolak, bukan diperingatkan.
+        $kapasitas = max(0, $acara->kursiPerMeja() + $jumlah);
         $tertinggi = $this->kursiTertinggiDi($acara, $meja);
 
         if ($tertinggi > $kapasitas) {
@@ -198,9 +202,9 @@ class PenempatanController extends Controller
             ]);
         }
 
-        $peta = $acara->kursiTambahanMeja();
+        $peta = $acara->ubahanKursiMeja();
 
-        if ($jumlah > 0) {
+        if ($jumlah !== 0) {
             $peta[(string) $meja] = $jumlah;
         } else {
             unset($peta[(string) $meja]);
@@ -208,12 +212,7 @@ class PenempatanController extends Controller
 
         $acara->update(['kursi_tambahan_meja' => $peta ?: null]);
 
-        return back()->with(
-            'success',
-            $jumlah > 0
-                ? 'Meja '.$meja.' sekarang berisi '.$kapasitas.' kursi.'
-                : 'Kursi tambahan di meja '.$meja.' dihapus.'
-        );
+        return back()->with('success', 'Meja '.$meja.' sekarang berisi '.$kapasitas.' kursi.');
     }
 
     /**
@@ -364,7 +363,7 @@ class PenempatanController extends Controller
             $papan[] = [
                 'nomor' => $nomor,
                 'kapasitas' => $kapasitas,
-                'tambahan' => $acara->kursiTambahanDi($nomor),
+                'ubahan' => $acara->ubahanKursiDi($nomor),
                 'terisi' => count(array_filter($kursi)),
                 'kursi' => array_map(
                     fn ($n) => ['nomor' => $n, 'tamu' => $kursi[$n]],

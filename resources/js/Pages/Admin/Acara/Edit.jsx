@@ -38,13 +38,15 @@ function bacaWib(nilai) {
 }
 
 /**
- * "27 meja, 6 per meja, 1 tambahan di meja 12" -> "27 x 6 + 1 = 163 kursi."
+ * "27 meja, 6 per meja, 1 kursi disisipkan" -> "27 x 6 + 1 = 163 kursi."
  *
- * Tambahannya tidak diketik di sini - ia diatur per meja lewat halaman
+ * Selisihnya tidak diketik di sini - ia diatur per meja lewat halaman
  * Penempatan Kursi - tapi tetap ikut dihitung, supaya angka di layar ini
- * tidak pernah berbeda dari jumlah kursi yang sebenarnya.
+ * tidak pernah berbeda dari jumlah kursi yang sebenarnya. Boleh negatif:
+ * kursi yang dicabut dari satu meja dan tidak dipasang di meja lain
+ * mengurangi totalnya.
  */
-function hitungKursi({ jumlah_meja, kursi_per_meja }, tambahan = 0) {
+function hitungKursi({ jumlah_meja, kursi_per_meja }, selisih = 0) {
     const meja = Number(jumlah_meja);
     const per = Number(kursi_per_meja);
 
@@ -52,11 +54,17 @@ function hitungKursi({ jumlah_meja, kursi_per_meja }, tambahan = 0) {
         return "Belum diatur. Penempatan tamu baru bisa dilakukan setelah ini diisi.";
     }
 
-    const total = meja * per + tambahan;
+    const dasar = meja * per;
+    const total = dasar + selisih;
 
-    return tambahan > 0
-        ? `${meja} meja \u00d7 ${per} kursi + ${tambahan} kursi tambahan = ${total} kursi.`
-        : `${meja} meja \u00d7 ${per} kursi = ${total} kursi.`;
+    if (selisih === 0) {
+        return `${meja} meja \u00d7 ${per} kursi = ${total} kursi.`;
+    }
+
+    return (
+        `${meja} meja \u00d7 ${per} kursi ${selisih > 0 ? "+" : "\u2212"} ` +
+        `${Math.abs(selisih)} kursi = ${total} kursi.`
+    );
 }
 
 /**
@@ -87,8 +95,8 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
     // Hanya dibaca, tidak ikut dikirim: kursi tambahan punya halamannya
     // sendiri, dan menyimpannya dari dua tempat adalah cara paling pasti
     // untuk membuat keduanya berselisih.
-    const tambahan = membuatBaru || !acara ? 0 : acara.kursi_tambahan || 0;
-    const mejaBertambah = (membuatBaru || !acara ? [] : acara.meja_bertambah) ?? [];
+    const selisih = membuatBaru || !acara ? 0 : acara.selisih_kursi || 0;
+    const mejaKhusus = (membuatBaru || !acara ? [] : acara.meja_khusus) ?? [];
 
     // Batas bawah berasal dari tempat duduk yang sudah dipakai. Edisi baru
     // belum punya tamu, jadi batasnya nol.
@@ -234,7 +242,8 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                 <InputLabel value="Tata letak kursi" />
                 <p className="mt-1 text-xs text-gray-500">
                     Isi banyaknya meja dan isi tiap meja; jumlah kursi dihitung sendiri.
-                    Meja tertentu boleh ditambahi kursi lewat Penempatan Kursi.
+                    Meja tertentu boleh ditambah atau dikurangi kursinya lewat
+                    Penempatan Kursi.
                 </p>
 
                 <div className="mt-3 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -280,11 +289,13 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                         papan penempatan, bukan orang yang sedang mengisi tanggal
                         dan tempat acara. */}
                     <div>
-                        <InputLabel value="Kursi tambahan" />
+                        <InputLabel value="Meja yang isinya beda" />
                         <p className="mt-1 text-sm text-gray-700">
-                            {tambahan > 0
-                                ? `${tambahan} kursi di meja ${mejaBertambah.join(", ")}.`
-                                : "Belum ada."}
+                            {mejaKhusus.length > 0
+                                ? mejaKhusus
+                                      .map((m) => `Meja ${m.meja}: ${m.kursi} kursi`)
+                                      .join(" · ")
+                                : "Tidak ada; semua meja sama."}
                         </p>
                         <p className="mt-1 text-xs text-gray-500">
                             Diatur per meja lewat{" "}
@@ -299,7 +310,7 @@ function FormAcara({ acara, membuatBaru, onBatalBaru }) {
                     </div>
                 </div>
 
-                <p className="mt-3 text-sm text-gray-700">{hitungKursi(data, tambahan)}</p>
+                <p className="mt-3 text-sm text-gray-700">{hitungKursi(data, selisih)}</p>
 
                 {menyusut && (
                     <div className="mt-3 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">

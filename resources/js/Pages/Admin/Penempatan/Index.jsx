@@ -65,7 +65,7 @@ export default function Index({ acara, mejas, belum }) {
         setSibuk(true);
         router.post(
             route("admin.penempatan.kursi-tambahan"),
-            { meja, jumlah: Math.max(0, jumlah) },
+            { meja, jumlah },
             { preserveScroll: true, onFinish: () => setSibuk(false) }
         );
     };
@@ -120,6 +120,13 @@ export default function Index({ acara, mejas, belum }) {
 
     const totalTerisi = mejas.reduce((n, m) => n + m.terisi, 0);
 
+    // Yang dihitung orangnya, bukan undangannya. Satu baris "belum
+    // ditempatkan" bisa berarti empat kursi, jadi jumlah undangan tidak
+    // memberi tahu apa pun tentang cukup-tidaknya kursi yang tersisa.
+    const orangBelumDuduk = belum.reduce((n, t) => n + t.sisa, 0);
+    const kursiKosong = acara.jumlah_kursi - totalTerisi;
+    const kurang = orangBelumDuduk - kursiKosong;
+
     // Pengatur "berapa orang di meja ini". Hanya muncul kalau memang ada
     // yang bisa dibagi - undangan satu orang tidak punya pilihan apa pun.
     const kontrolJumlah = sisa > 1 && (
@@ -170,7 +177,14 @@ export default function Index({ acara, mejas, belum }) {
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                                 <p className="text-sm text-gray-600">
                                     {acara.jumlah_meja} meja &middot; {acara.jumlah_kursi} kursi &middot;{" "}
-                                    <strong>{totalTerisi}</strong> terisi, {acara.jumlah_kursi - totalTerisi} kosong
+                                    <strong>{totalTerisi}</strong> terisi, {kursiKosong} kosong &middot;{" "}
+                                    <strong>{orangBelumDuduk}</strong> orang belum duduk
+                                    {kurang > 0 && (
+                                        <span className="font-semibold text-red-700">
+                                            {" "}
+                                            &mdash; kursi kurang {kurang}
+                                        </span>
+                                    )}
                                 </p>
                                 <Link
                                     href={route("admin.penempatan.cetak")}
@@ -199,7 +213,10 @@ export default function Index({ acara, mejas, belum }) {
                             {/* Tamu yang belum duduk */}
                             <div className="min-w-0">
                                 <h2 className="font-semibold">
-                                    Belum ditempatkan ({belum.length})
+                                    Belum ditempatkan{" "}
+                                    <span className="font-normal text-gray-500">
+                                        {belum.length} undangan &middot; {orangBelumDuduk} orang
+                                    </span>
                                 </h2>
 
                                 <input
@@ -296,9 +313,16 @@ export default function Index({ acara, mejas, belum }) {
                                             <div className="flex items-baseline justify-between">
                                                 <h3 className="font-semibold">
                                                     Meja {m.nomor}
-                                                    {m.tambahan > 0 && (
-                                                        <span className="ml-2 align-middle text-[0.65rem] font-semibold uppercase tracking-wide text-amber-700">
-                                                            +{m.tambahan} kursi
+                                                    {m.ubahan !== 0 && (
+                                                        <span
+                                                            className={`ml-2 align-middle text-[0.65rem] font-semibold uppercase tracking-wide ${
+                                                                m.ubahan > 0
+                                                                    ? "text-amber-700"
+                                                                    : "text-gray-500"
+                                                            }`}
+                                                        >
+                                                            {m.ubahan > 0 ? "+" : "−"}
+                                                            {Math.abs(m.ubahan)} kursi
                                                         </span>
                                                     )}
                                                 </h3>
@@ -396,28 +420,35 @@ export default function Index({ acara, mejas, belum }) {
                                                     </ul>
                                                 )}
 
-                                                {/* Kursi tambahan diatur di sini, bukan di
-                                                    formulir acara: yang tahu meja mana yang
-                                                    masih muat kursi ketujuh adalah orang yang
-                                                    sedang melihat papan ini. */}
+                                                {/* Jumlah kursi tiap meja diatur di sini, bukan
+                                                    di formulir acara: yang tahu meja mana yang
+                                                    masih muat kursi ketujuh - dan meja mana yang
+                                                    di dekat pintu sehingga cuma muat lima -
+                                                    adalah orang yang sedang melihat papan ini.
+                                                    Yang ditampilkan jumlah kursinya, bukan
+                                                    selisihnya: itu yang dilihat admin di
+                                                    ruangan, dan selisih sudah terbaca di
+                                                    judul kartunya. */}
                                                 <div className="mt-3 flex items-center justify-between gap-2 border-t pt-2 text-xs text-gray-500">
-                                                    <span>Kursi tambahan</span>
+                                                    <span>
+                                                        Jumlah kursi
+                                                        <span className="ml-1 font-semibold tabular-nums text-gray-700">
+                                                            {m.kapasitas}
+                                                        </span>
+                                                    </span>
                                                     <div className="join">
                                                         <button
                                                             type="button"
-                                                            onClick={() => aturTambahan(m.nomor, m.tambahan - 1)}
-                                                            disabled={sibuk || m.tambahan <= 0}
+                                                            onClick={() => aturTambahan(m.nomor, m.ubahan - 1)}
+                                                            disabled={sibuk || m.kapasitas <= 0}
                                                             className="btn btn-xs join-item"
-                                                            aria-label={`Kurangi kursi tambahan meja ${m.nomor}`}
+                                                            aria-label={`Kurangi kursi di meja ${m.nomor}`}
                                                         >
                                                             &minus;
                                                         </button>
-                                                        <span className="join-item border-y border-base-300 bg-white px-2 font-semibold leading-6 tabular-nums text-gray-700">
-                                                            {m.tambahan}
-                                                        </span>
                                                         <button
                                                             type="button"
-                                                            onClick={() => aturTambahan(m.nomor, m.tambahan + 1)}
+                                                            onClick={() => aturTambahan(m.nomor, m.ubahan + 1)}
                                                             disabled={sibuk}
                                                             className="btn btn-xs join-item"
                                                             aria-label={`Tambah kursi di meja ${m.nomor}`}

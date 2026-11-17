@@ -154,16 +154,18 @@ class Acara extends Model
      * setelahnya, dan tambahan di meja yang sudah tidak ada harus berhenti
      * dihitung tanpa perlu ada yang membereskannya lebih dulu.
      */
-    public function kursiTambahanMeja(): array
+    public function ubahanKursiMeja(): array
     {
         $peta = [];
 
         foreach ((array) ($this->kursi_tambahan_meja ?? []) as $meja => $jumlah) {
             $nomor = (int) $meja;
-            $isi = (int) $jumlah;
+            $selisih = (int) $jumlah;
 
-            if ($nomor >= 1 && $nomor <= $this->jumlahMeja() && $isi > 0) {
-                $peta[(string) $nomor] = $isi;
+            // Nol tidak disimpan: meja yang kembali ke isi bakunya tidak punya
+            // keterangan apa pun untuk dibawa-bawa.
+            if ($nomor >= 1 && $nomor <= $this->jumlahMeja() && $selisih !== 0) {
+                $peta[(string) $nomor] = $selisih;
             }
         }
 
@@ -172,30 +174,46 @@ class Acara extends Model
         return $peta;
     }
 
-    public function kursiTambahanDi(int $meja): int
+    public function ubahanKursiDi(int $meja): int
     {
-        return $this->kursiTambahanMeja()[(string) $meja] ?? 0;
+        return $this->ubahanKursiMeja()[(string) $meja] ?? 0;
     }
 
     /**
-     * Seluruh kursi tambahan, dijumlahkan dari semua meja.
+     * Selisih bersih seluruh meja. Boleh negatif: kursi yang dicabut dari satu
+     * meja dan dipindah ke meja lain saling meniadakan dan menghasilkan nol.
      */
-    public function kursiTambahan(): int
+    public function selisihKursi(): int
     {
-        return array_sum($this->kursiTambahanMeja());
+        return $this->jumlahKursi() - $this->jumlahMeja() * $this->kursiPerMeja();
     }
 
     /**
      * Jumlah kursi diturunkan, tidak disimpan - dengan begitu ia tidak pernah
      * berselisih dengan jumlah meja.
+     *
+     * Dijumlahkan dari tiap meja, bukan dari rumus plus selisih bersih:
+     * kursiDiMeja() menjepit di nol, jadi meja yang dikurangi lebih banyak
+     * daripada isinya tidak boleh menyumbang angka negatif ke totalnya.
      */
     public function jumlahKursi(): int
     {
-        return $this->jumlahMeja() * $this->kursiPerMeja() + $this->kursiTambahan();
+        $jumlah = 0;
+
+        for ($meja = 1; $meja <= $this->jumlahMeja(); $meja++) {
+            $jumlah += $this->kursiDiMeja($meja);
+        }
+
+        return $jumlah;
     }
 
     /**
-     * Kursi di meja tertentu: isi bakunya ditambah sisipan khusus meja itu.
+     * Kursi di meja tertentu: isi bakunya digeser oleh ubahan khusus meja itu.
+     *
+     * Ubahannya boleh negatif - meja di dekat pintu kerap cuma muat lima -
+     * dan kursi yang dicabut di situ bisa dipasang di meja lain. Dijepit di
+     * nol: meja tanpa kursi masih masuk akal (meja hadiah, meja panitia),
+     * kursi berjumlah minus tidak.
      *
      * Yang di luar jangkauan mengembalikan nol supaya pemanggilnya tidak
      * perlu memeriksa sendiri.
@@ -206,19 +224,19 @@ class Acara extends Model
             return 0;
         }
 
-        return $this->kursiPerMeja() + $this->kursiTambahanDi($meja);
+        return max(0, $this->kursiPerMeja() + $this->ubahanKursiDi($meja));
     }
 
     /**
-     * Meja mana saja yang kebagian kursi tambahan, untuk ditampilkan di
-     * formulir. Mis. [5, 12].
+     * Meja yang isinya tidak sama dengan meja lain, untuk dilaporkan di
+     * formulir acara. Mis. [['meja' => 3, 'kursi' => 5], ...].
      */
-    public function mejaBerkursiTambahan(): array
+    public function mejaKhusus(): array
     {
         $daftar = [];
 
-        foreach (array_keys($this->kursiTambahanMeja()) as $meja) {
-            $daftar[] = (int) $meja;
+        foreach (array_keys($this->ubahanKursiMeja()) as $meja) {
+            $daftar[] = ['meja' => (int) $meja, 'kursi' => $this->kursiDiMeja((int) $meja)];
         }
 
         return $daftar;

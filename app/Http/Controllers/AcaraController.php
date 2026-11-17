@@ -30,8 +30,8 @@ class AcaraController extends Controller
                 'kursi_per_meja' => $acara->kursi_per_meja,
                 // Hanya untuk diberitahukan, bukan diubah di sini - kursi
                 // tambahan diatur per meja lewat halaman Penempatan Kursi.
-                'kursi_tambahan' => $acara->kursiTambahan(),
-                'meja_bertambah' => $acara->mejaBerkursiTambahan(),
+                'selisih_kursi' => $acara->selisihKursi(),
+                'meja_khusus' => $acara->mejaKhusus(),
                 // Dipakai formulir untuk memperingatkan sebelum tata letaknya
                 // disusutkan, bukan untuk ditampilkan apa adanya.
                 'meja_terpakai' => $acara->mejaTerpakai(),
