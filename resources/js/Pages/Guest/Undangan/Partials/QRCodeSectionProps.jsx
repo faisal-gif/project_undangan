@@ -82,12 +82,12 @@ export const QRCodeSection = ({ guestName, guestCode }) => {
           </a>{" "}
           <span className="text-ati-cream/35">|</span>{" "}
           <a
-            href="https://wa.me/6285735084947"
+            href="https://wa.me/6287850211269"
             target="_blank"
             rel="noopener noreferrer"
             className="text-ati-gold-light underline decoration-ati-gold/50 underline-offset-[5px] transition-colors hover:text-ati-cream"
           >
-            +62 857-3508-4947
+           +62 878-5021-1269
           </a>
         </p>
       </div>
