@@ -138,10 +138,18 @@ export default function Index({ acara, mejas, belum }) {
                                     {acara.label}
                                 </span>
                             </h1>
-                            <p className="text-sm text-gray-600">
-                                {acara.jumlah_meja} meja &middot; {acara.jumlah_kursi} kursi &middot;{" "}
-                                <strong>{totalTerisi}</strong> terisi, {acara.jumlah_kursi - totalTerisi} kosong
-                            </p>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <p className="text-sm text-gray-600">
+                                    {acara.jumlah_meja} meja &middot; {acara.jumlah_kursi} kursi &middot;{" "}
+                                    <strong>{totalTerisi}</strong> terisi, {acara.jumlah_kursi - totalTerisi} kosong
+                                </p>
+                                <Link
+                                    href={route("admin.penempatan.cetak")}
+                                    className="btn btn-sm btn-ghost"
+                                >
+                                    Cetak
+                                </Link>
+                            </div>
                         </div>
 
                         {(errors.meja || errors.tamu_id) && (

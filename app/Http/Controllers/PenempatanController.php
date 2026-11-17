@@ -90,6 +90,74 @@ class PenempatanController extends Controller
     }
 
     /**
+     * Lembar cetak: denah ruangan, daftar penghuni tiap meja, dan indeks nama.
+     *
+     * Ketiganya dari papan() yang sama dengan halaman penempatan dan denah -
+     * satu sumber, jadi kertas yang dibawa panitia keliling ruangan tidak
+     * pernah menyebut susunan yang berbeda dari layarnya.
+     *
+     * Indeks namanya disusun di sini, bukan di peramban: urutan abjad Indonesia
+     * ikut aturan basis data yang sama dengan daftar tamu di tempat lain, dan
+     * petugas penerima tamu mencari nama di situ - bukan nomor meja.
+     */
+    public function cetak()
+    {
+        $acara = Acara::aktif();
+
+        if (! $acara) {
+            return Inertia::render('Admin/Penempatan/Cetak', [
+                'acara' => null,
+                'mejas' => [],
+                'indeks' => [],
+            ]);
+        }
+
+        $tamus = $acara->tamus()->orderBy('nama')->get();
+
+        return Inertia::render('Admin/Penempatan/Cetak', [
+            'acara' => [
+                'label' => $acara->label(),
+                'nama' => $acara->nama,
+                'tempat' => $acara->tempat,
+                'waktu' => $acara->mulai?->timezone(Acara::ZONA)->format('d/m/Y H:i'),
+                'jumlah_kursi' => $acara->jumlahKursi(),
+                'jumlah_meja' => $acara->jumlahMeja(),
+            ],
+            'mejas' => $this->papan($acara, $tamus),
+            'letak' => $acara->letakMeja(),
+            'kolom' => $acara->kolomGrid(),
+            'baris' => $acara->barisGrid(),
+            'orientasi' => $acara->orientasiDenah(),
+            'indeks' => $tamus->filter(fn (Tamu $t) => $t->kursiTerisi() > 0)
+                ->map(fn (Tamu $t) => [
+                    'id' => $t->id,
+                    'nama' => $t->nama,
+                    'lembaga' => $t->lembaga,
+                    'tempat_duduk' => $this->tempatRingkas($t),
+                ])->values(),
+        ]);
+    }
+
+    /**
+     * Tempat duduk sependek mungkin untuk indeks di kertas: "M12 K3,4".
+     *
+     * Bukan tempatDuduk() yang panjang itu. Indeksnya tiga kolom dan ratusan
+     * baris; "Meja 12 - Kursi 3, 4" memaksa tiap baris jadi dua baris, dan
+     * undangan yang terbelah ke dua meja jadi tiga. Kuncinya ditulis sekali
+     * di kepala lembarnya.
+     */
+    private function tempatRingkas(Tamu $tamu): string
+    {
+        $bagian = [];
+
+        foreach ($tamu->dudukPerMeja() as $meja => $nomor) {
+            $bagian[] = 'M'.$meja.($nomor ? ' K'.implode(',', $nomor) : '');
+        }
+
+        return implode(' · ', $bagian);
+    }
+
+    /**
      * Simpan letak meja hasil geseran admin.
      *
      * Hanya meja yang benar-benar ada yang disimpan, dan nilainya dijepit ke

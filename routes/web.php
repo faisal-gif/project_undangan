@@ -44,6 +44,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/tamu/data/{id}', [TamuController::class, 'getTamu'])->name('tamu.data');
     Route::get('/penempatan', [PenempatanController::class, 'index'])->name('penempatan.index');
     Route::get('/penempatan/denah', [PenempatanController::class, 'denah'])->name('penempatan.denah');
+    Route::get('/penempatan/cetak', [PenempatanController::class, 'cetak'])->name('penempatan.cetak');
     Route::post('/penempatan/denah', [PenempatanController::class, 'simpanDenah'])->name('penempatan.denah.simpan');
     Route::post('/penempatan/denah/reset', [PenempatanController::class, 'resetDenah'])->name('penempatan.denah.reset');
     Route::post('/penempatan/denah/grid', [PenempatanController::class, 'aturGrid'])->name('penempatan.denah.grid');

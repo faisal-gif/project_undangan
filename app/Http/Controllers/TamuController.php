@@ -70,8 +70,15 @@ class TamuController extends Controller
             ->groupBy('jenis')
             ->pluck('jumlah', 'jenis');
 
+        // Yang terbaru di atas. Diurutkan dari id, bukan created_at: tamu
+        // ditambahkan berombongan lewat perintah impor, jadi puluhan baris
+        // berbagi detik yang sama - dan urutan yang seri membuat halaman 2
+        // mengulang baris yang sudah muncul di halaman 1, atau melewatkannya.
+        // Sebelumnya tidak ada urutan sama sekali; yang tampak rapi cuma
+        // kebetulan basis datanya mengembalikan baris sesuai urutan sisip.
         $tamus = $dasar()
             ->when($jenis, fn ($query, $j) => $query->where('jenis', $j))
+            ->latest('id')
             ->paginate(10)
             ->withQueryString();
 
